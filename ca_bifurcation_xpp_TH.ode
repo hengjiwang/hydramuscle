@@ -1,0 +1,117 @@
+# XPP code to recreate bifurcation diagrams
+# Copyright: Marsa Taheri and Gregory Handy, 2016
+
+# ODEs
+c' = (j_ip3r(c)-j_serca(c)+j_leak(c)+(j_in-j_out-j_pmca+j_soc(c,c_t))*delta)
+c_t' = ((j_in-j_out-j_pmca+j_soc(c,c_t))*delta)
+h'=((h_inf(c)-h)/tau_h(c))
+
+aux ca_er=(c_t-c)*gamma
+aux j_serca=j_serca(c)
+aux j_leak=j_leak(c)
+aux j_ip3r=j_ip3r(c)
+aux j_soc=j_soc(c,c_t)
+aux j_pmca1=j_pmca
+aux j_in1=j_in
+aux j_out1=j_out
+
+# Terms on ER
+m_inf = ip(t)/(ip(t)+d_1)
+n_inf(c) = c/(c+d_5)
+h_inf(c) = q_2/(q_2+c)
+
+q_2 = d_2 *(ip(t)+d_1)/(ip(t)+d_3)
+tau_h(c) = 1/(a_2*(q_2+c))
+
+j_ip3r(c) = v_ip3r*m_inf^3*n_inf(c)^3*h^3*((c_t-c)*gamma-c)
+
+j_leak(c) = v_leak*((c_t-c)*gamma-c)
+
+j_serca(c) = v_serca*c^1.75/(c^1.75+k_serca^1.75)
+
+# Terms on plasma membrane
+j_in = v_in
+j_out = k_out*c
+
+j_pmca=v_pmca*c^2/(k_pmca^2 + c^2)
+
+j_soc(c,c_t) = v_soc*k_soc^4/(k_soc^4+((c_t-c)*gamma)^4)
+
+# Initial Conditions
+init c=0.0865415,h=0.6255124
+init c_t=36.49084
+
+# IP3 Dynamics
+# param ip=0
+
+# param amp=0.2, d_rise=10, r_rise=0.2, d_decay=97
+param amp=0.04, d_rise=3, r_rise=0.2, d_decay=10
+param stim_time=20, stim_time2=24, stim_time3=32, stim_time4=41, stim_time5=50, stim_time6=60, stim_time7=69, stim_time8=77.5
+
+s_0=amp/(1-exp(-r_rise*(d_rise)))
+r_deg=-1/d_decay*log(0.005/amp)
+
+ip_rise(t)=s_0*(1-exp(-r_rise*(t)))
+ip_decay(t)=amp*exp(-r_deg*(t))
+
+ip1(t)=0*heav(-t+stim_time) + \
+ip_rise(t-stim_time)*(heav(t-stim_time)-heav(t-stim_time-d_rise)) + \
+ip_decay(t-stim_time-d_rise)*(heav(t-stim_time-d_rise)-heav(t-stim_time2))
+
+ip2(t)=(ip_rise(t-stim_time2)+ip1(stim_time2-0.005))*(heav(t-stim_time2)-heav(t-stim_time2-d_rise))+ \
+(amp+ip1(stim_time2-0.005))/amp*ip_decay(t-stim_time2-d_rise)*(heav(t-stim_time2-d_rise)-heav(t-stim_time3))
+
+ip3(t)=(ip_rise(t-stim_time3)+ip2(stim_time3-0.005))*(heav(t-stim_time3)-heav(t-stim_time3-d_rise))+ \
+(amp+ip2(stim_time3-0.005))/amp*ip_decay(t-stim_time3-d_rise)*(heav(t-stim_time3-d_rise)-heav(t-stim_time4))
+
+ip4(t)=(ip_rise(t-stim_time4)+ip3(stim_time4-0.005))*(heav(t-stim_time4)-heav(t-stim_time4-d_rise))+ \
+(amp+ip3(stim_time4-0.005))/amp*ip_decay(t-stim_time4-d_rise)*(heav(t-stim_time4-d_rise)-heav(t-stim_time5))
+
+ip5(t)=(ip_rise(t-stim_time5)+ip4(stim_time5-0.005))*(heav(t-stim_time5)-heav(t-stim_time5-d_rise))+ \
+(amp+ip4(stim_time5-0.005))/amp*ip_decay(t-stim_time5-d_rise)*(heav(t-stim_time5-d_rise)-heav(t-stim_time6))
+
+ip6(t)=(ip_rise(t-stim_time6)+ip5(stim_time6-0.005))*(heav(t-stim_time6)-heav(t-stim_time6-d_rise))+ \
+(amp+ip5(stim_time6-0.005))/amp*ip_decay(t-stim_time6-d_rise)*(heav(t-stim_time6-d_rise)-heav(t-stim_time7))
+
+ip7(t)=(ip_rise(t-stim_time7)+ip6(stim_time7-0.005))*(heav(t-stim_time7)-heav(t-stim_time7-d_rise))+ \
+(amp+ip6(stim_time7-0.005))/amp*ip_decay(t-stim_time7-d_rise)*(heav(t-stim_time7-d_rise)-heav(t-stim_time8))
+
+ip8(t)=(ip_rise(t-stim_time8)+ip7(stim_time8-0.005))*(heav(t-stim_time8)-heav(t-stim_time8-d_rise))+ \
+(amp+ip7(stim_time8-0.005))/amp*ip_decay(t-stim_time8-d_rise)*(heav(t-stim_time8-d_rise))
+
+ip(t)=ip1(t)+ip2(t)+ip3(t)+ip4(t)+ip5(t)+ip6(t)+ip7(t)+ip8(t)
+
+aux ip=ip(t)
+
+param gamma=5.4054
+
+# Leak for ER
+param v_leak=0.002
+
+# Leak across plasma membrane
+param v_in=0.05, k_out=1.2
+
+# IP3R Parameters
+param v_ip3r=0.222
+param d_1=.13,d_2=1.049,d_3=.9434,d_5=.08234
+param a_2=0.04
+
+# PMCA Terms
+param v_pmca=10,k_pmca=2.5
+
+# SOC Terms
+param v_soc=1.57,k_soc=90
+
+# SERCA Terms
+param v_serca=0.9, k_serca=0.1
+
+# Sneyd Parameter
+param delta=0.2
+
+@ ylo=0,ds=0.005,dsmin=0.001,dsmax=0.01,nmax=700,npr=700
+@ autoymin=0,autoymax=.708,parmax=100,autoxmin=0,autoxmax=.5
+@ total=1000,xhi=100,ylo=0,yhi=1.5,nmesh=100
+
+@ bounds=1000
+
+done
