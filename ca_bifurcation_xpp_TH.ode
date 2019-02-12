@@ -45,8 +45,8 @@ init c_t=36.49084
 # param ip=0
 
 # param amp=0.2, d_rise=10, r_rise=0.2, d_decay=97
-param amp=0.04, d_rise=3, r_rise=0.2, d_decay=10
-param stim_time=20, stim_time2=24, stim_time3=32, stim_time4=41, stim_time5=50, stim_time6=60, stim_time7=69, stim_time8=77.5
+param amp=0.2, d_rise=1, r_rise=0.2, d_decay=30
+param stim_time=20, stim_time2=28, stim_time3=34, stim_time4=38.5, stim_time5=42, stim_time6=46, stim_time7=50, stim_time8=58
 
 s_0=amp/(1-exp(-r_rise*(d_rise)))
 r_deg=-1/d_decay*log(0.005/amp)
@@ -92,7 +92,7 @@ param v_leak=0.002
 param v_in=0.05, k_out=1.2
 
 # IP3R Parameters
-param v_ip3r=0.222
+param v_ip3r=0.1
 param d_1=.13,d_2=1.049,d_3=.9434,d_5=.08234
 param a_2=0.04
 
