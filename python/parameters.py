@@ -21,11 +21,11 @@ gamma=5.4054
 v_leak = 0.002
 
 # Leak across plasma membrane
-v_in = 0.05
+v_in = 0.05 -0.04762511540896227
 k_out = 1.2
 
 # IP3R parameters
-v_ip3r = 0.4
+v_ip3r = 0.4 # 0.4
 d_1 = 0.13; d_2 = 1.049; d_3 = 0.9434; d_5= 0.08234; 
 a_2 = 0.04
 
@@ -45,15 +45,15 @@ k_serca = 0.1
 delta = 0.2
 
 # IP3 parameters
-d_rise = 0.005 #0.5
+d_rise = 0.1 #0.5
 r_rise = 0.5 #0.025 
 r_decay = 0.2
 
 # Initial condition
 v0 = -64.99973395350574
 
-# j_stim terms
-v_st = 50
+# j_hynac terms
+v_st = 30 #50
 
 # j_k terms
 g_k = 36
@@ -65,10 +65,20 @@ e_na = 50
 
 # Voltage leak terms
 v_l = 0.3
-e_l = -54.4
+e_l = -54.4 -0.3175007693930818
 
-# Voltage-dependent IP3 terms
-r_vip2 = 0.2 #0.006
+# # Voltage-dependent IP3 terms
+# r_vip2 = 0.2 #0.006
+
+# VGCC terms
+g_ca = 0.036195
+v_ca1 = 100
+v_ca2 = -24
+r_ca = 8.5
+
+# PLCd terms
+v_7 = 0 # 0.05
+k_ca = 0.3
 
 # Stimulation times
 st1 = 20.0

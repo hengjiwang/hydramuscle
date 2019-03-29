@@ -116,20 +116,30 @@ def j_l(v):
     '''voltage leak'''
     return v_l*(v-e_l)
 
+def j_vgcc(v):
+    '''current through voltage-gated calcium channel'''
+    return g_ca * (v-v_ca1) / (1 + np.exp(-(v-v_ca2) / r_ca))
+
+def j_plcd(c):
+    '''PLC-delta activity for IP3'''
+    return v_7 * c**2 / (k_ca**2 + c**2)
+
 def rhs22(y, t):
     '''right-hand side for integration in hypothesis 2'''
     c, c_t, h, ip, v, n, m, hh = y
     
     dcdt = j_ip3r(c, c_t, h, ip) - j_serca(c) + j_leak(c, c_t) + \
-    (j_in() - j_out(c) - j_pmca(c) + j_soc(c,c_t))*delta
+    (j_in() - j_out(c) - j_pmca(c) + j_soc(c,c_t) - j_vgcc(v))*delta
     
-    dctdt =  (j_in() - j_out(c) - j_pmca(c) + j_soc(c,c_t))*delta
+    dctdt =  (j_in() - j_out(c) - j_pmca(c) + j_soc(c,c_t) - \
+        j_vgcc(v))*delta
     
     dhdt = (h_inf(c, ip)-h)/tau_h(c, ip)
     
-    dipdt = r_vip2 * (v-v0) - r_decay * ip
+    dipdt = - r_decay * ip + j_plcd(c) - j_plcd(c0)# + r_vip2 * (v-v0)
     
-    dvdt = 1000*(j_hynac(stim(t)) - j_k(v, n)- j_na(v, m, hh) - j_l(v)) 
+    dvdt = 200*(j_hynac(stim(t)) - j_k(v, n) - j_na(v, m, hh) \
+        - 2*j_vgcc(v) - j_l(v)) 
 
     dndt = alpha_n(v) * (1 - n) - beta_n(v) * n
 

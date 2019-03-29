@@ -34,6 +34,7 @@ def plot(TIME, c, c_t, ip, h, v):
     plt.plot(TIME[0:-1], -j_out(c), 'r-', label = 'j_out')
     plt.plot(TIME[0:-1], -j_pmca(c), 'g-', label = 'j_pmca')
     plt.plot(TIME[0:-1], j_soc(c,c_t), 'b-', label = 'j_soc')
+    plt.plot(TIME[0:-1], -j_vgcc(v), 'b-', label = 'j_vgcc')
     plt.xlabel('time/s')
     # plt.ylabel('current/uM')
     plt.legend(loc='upper right')
