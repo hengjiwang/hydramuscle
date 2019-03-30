@@ -9,8 +9,10 @@ def j_ip3r(c, c_t, h, ip):
     m_inf = ip/(ip+d_1)
     n_inf = c/(c+d_5)
 
-    return v_ip3r * m_inf**2 * n_inf**2 * h**0.5 * \
-    ((c_t-c)*gamma - c)**0.5
+    # return v_ip3r * m_inf**2 * n_inf**2 * h**0.5 * \
+    # ((c_t-c)*gamma - c)**0.5
+    return v_ip3r * m_inf**3 * n_inf**3 * h * \
+        ((c_t-c)*gamma - c)
 
 def j_leak(c, c_t):
     '''leak current, ER -> cytosol'''
@@ -123,31 +125,68 @@ def j_vgcc(v):
 def j_plcd(c):
     '''PLC-delta activity for IP3'''
     return v_7 * c**2 / (k_ca**2 + c**2)
+    # return v_7 * c**4 / (k_ca**4 + c**4)
 
-def rhs22(y, t):
-    '''right-hand side for integration in hypothesis 2'''
+### single cell 
+def rhs1(y, t):
+    '''right-hand side for integration for single cell'''
     c, c_t, h, ip, v, n, m, hh = y
     
-    dcdt = j_ip3r(c, c_t, h, ip) - j_serca(c) + j_leak(c, c_t) + \
-    (j_in() - j_out(c) - j_pmca(c) + j_soc(c,c_t) - j_vgcc(v))*delta
+    dcdt = 4*(j_ip3r(c, c_t, h, ip) - j_serca(c) + j_leak(c, c_t) + \
+    (j_in() - j_out(c) - j_pmca(c) + j_soc(c,c_t) - j_vgcc(v))*delta)
     
-    dctdt =  (j_in() - j_out(c) - j_pmca(c) + j_soc(c,c_t) - \
-        j_vgcc(v))*delta
+    dctdt =  4*((j_in() - j_out(c) - j_pmca(c) + j_soc(c,c_t) - \
+        j_vgcc(v))*delta)
     
     dhdt = (h_inf(c, ip)-h)/tau_h(c, ip)
     
-    dipdt = - r_decay * ip + j_plcd(c) - j_plcd(c0)# + r_vip2 * (v-v0)
+    dipdt = 0.005 - r_decay * ip # + j_plcd(c) # - j_plcd(c0)# + r_vip2 * (v-v0)
     
-    dvdt = 200*(j_hynac(stim(t)) - j_k(v, n) - j_na(v, m, hh) \
-        - 2*j_vgcc(v) - j_l(v)) 
+    dvdt = 10 * (j_hynac(stim(t)) - j_k(v, n) - j_na(v, m, hh) \
+        - 2*j_vgcc(v) - j_l(v))
 
-    dndt = alpha_n(v) * (1 - n) - beta_n(v) * n
+    dndt = 10 * (alpha_n(v) * (1 - n) - beta_n(v) * n) * phi
 
-    dmdt = alpha_m(v) * (1 - m) - beta_m(v) * m
+    dmdt = 10 * (alpha_m(v) * (1 - m) - beta_m(v) * m) * phi
 
-    dhhdt = alpha_hh(v) * (1 - hh) - beta_hh(v) * hh
+    dhhdt = 10 * (alpha_hh(v) * (1 - hh) - beta_hh(v) * hh) * phi
     
     return [dcdt, dctdt, dhdt, dipdt, dvdt, dndt, dmdt, dhhdt]
+### multiple cells
+def rhs2(y,t):
+    '''right-hand side for integration for multiple cells'''
+    c, c_t, h, ip, v, n, m, hh = \
+        y[0:N], y[N:2*N], y[2*N:3*N], y[3*N:4*N], y[4*N:5*N], \
+        y[5*N:6*N], y[6*N:7*N], y[7*N:8*N]
+    
+    dcdt = 4*(j_ip3r(c, c_t, h, ip) - j_serca(c) + j_leak(c, c_t) + \
+    (j_in() - j_out(c) - j_pmca(c) + j_soc(c,c_t) - j_vgcc(v))*delta)
+    
+    dctdt =  4*((j_in() - j_out(c) - j_pmca(c) + j_soc(c,c_t) - \
+        j_vgcc(v))*delta)
+    
+    dhdt = (h_inf(c, ip)-h)/tau_h(c, ip)
+    
+    dipdt = 0.005 - r_decay * ip 
+    
+    dvdt = 10 * (- j_k(v, n) - j_na(v, m, hh) \
+        - 2*j_vgcc(v) - j_l(v)) + gc * Dx@v
+    
+    dvdt[0:3] += 10 * j_hynac(stim(t))
+
+    dndt = 10 * (alpha_n(v) * (1 - n) - beta_n(v) * n) * phi
+
+    dmdt = 10 * (alpha_m(v) * (1 - m) - beta_m(v) * m) * phi
+
+    dhhdt = 10 * (alpha_hh(v) * (1 - hh) - beta_hh(v) * hh) * phi
+
+    deriv = np.array([dcdt, dctdt, dhdt, dipdt, dvdt, dndt, dmdt, \
+        dhhdt])
+
+    dydt = np.reshape(deriv, 8*N)  
+    
+    return dydt
+
 
 def stim(t):
     '''returns the stimulation status at time t'''
