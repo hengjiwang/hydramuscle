@@ -152,7 +152,7 @@ def rhs1(y, t):
     dhhdt = 10 * (alpha_hh(v) * (1 - hh) - beta_hh(v) * hh) * phi
     
     return [dcdt, dctdt, dhdt, dipdt, dvdt, dndt, dmdt, dhhdt]
-### multiple cells
+### 1D multicells
 def rhs2(y,t):
     '''right-hand side for integration for multiple cells'''
     c, c_t, h, ip, v, n, m, hh = \
@@ -187,7 +187,7 @@ def rhs2(y,t):
     
     return dydt
 
-### no voltage
+### 1D multicells no voltage
 def rhs3(y,t):
     '''right-hand side for integration for multiple cells'''
     c, c_t, h, ip, v, n, m, hh = \
@@ -223,6 +223,79 @@ def rhs3(y,t):
     dydt = np.reshape(deriv, 8*N)  
     
     return dydt
+
+### 2D multicells
+def rhs21(y,t):
+    '''right-hand side for integration for multiple cells'''
+    c, c_t, h, ip, v, n, m, hh = \
+        y[0:N*N], y[N*N:2*N*N], y[2*N*N:3*N*N], y[3*N*N:4*N*N], y[4*N*N:5*N*N], \
+        y[5*N*N:6*N*N], y[6*N*N:7*N*N], y[7*N*N:8*N*N]
+    
+    dcdt = 2*(j_ip3r(c, c_t, h, ip) - j_serca(c) + j_leak(c, c_t) + \
+    (j_in() - j_out(c) - j_pmca(c) + j_soc(c,c_t) - j_vgcc(v))*delta)
+    
+    dctdt =  2*((j_in() - j_out(c) - j_pmca(c) + j_soc(c,c_t) - \
+        j_vgcc(v))*delta)
+    
+    dhdt = 2*((h_inf(c, ip)-h)/tau_h(c, ip))
+    
+    dipdt = 0.005 - r_decay * ip 
+    
+    dvdt = 10 * (- j_k(v, n) - j_na(v, m, hh) \
+        - 2*j_vgcc(v) - j_l(v)) + gc * L@v
+    
+    dvdt[0:3*N] += 10 * j_hynac(stim(t))
+
+    dndt = 10 * (alpha_n(v) * (1 - n) - beta_n(v) * n) * phi
+
+    dmdt = 10 * (alpha_m(v) * (1 - m) - beta_m(v) * m) * phi
+
+    dhhdt = 10 * (alpha_hh(v) * (1 - hh) - beta_hh(v) * hh) * phi
+
+    deriv = np.array([dcdt, dctdt, dhdt, dipdt, dvdt, dndt, dmdt, \
+        dhhdt])
+
+    dydt = np.reshape(deriv, 8*N*N)  
+    
+    return dydt
+
+### 2D multicells no voltage
+def rhs22(y,t):
+    '''right-hand side for integration for multiple cells'''
+    c, c_t, h, ip, v, n, m, hh = \
+        y[0:N*N], y[N*N:2*N*N], y[2*N*N:3*N*N], y[3*N*N:4*N*N], y[4*N*N:5*N*N], \
+        y[5*N*N:6*N*N], y[6*N*N:7*N*N], y[7*N*N:8*N*N]
+    
+    dcdt = 2*(j_ip3r(c, c_t, h, ip) - j_serca(c) + j_leak(c, c_t) + \
+    (j_in() - j_out(c) - j_pmca(c) + j_soc(c,c_t) - j_vgcc(v))*delta)
+    
+    dctdt =  2*((j_in() - j_out(c) - j_pmca(c) + j_soc(c,c_t) - \
+        j_vgcc(v))*delta)
+    
+    dhdt = 2*((h_inf(c, ip)-h)/tau_h(c, ip))
+    
+    dipdt_ = 0.005 - r_decay * ip + L@ip
+
+    dipdt_ = np.reshape(dipdt_, (N,N))
+    dipdt_[0:3, N/2-1:N/2+1] += 0.5*stim(t)
+    dipdt = np.reshape(dipdt_, (-1,N*N))
+    
+    dvdt = 10 * (- j_k(v, n) - j_na(v, m, hh) \
+        - 2*j_vgcc(v) - j_l(v)) 
+
+    dndt = 10 * (alpha_n(v) * (1 - n) - beta_n(v) * n) * phi
+
+    dmdt = 10 * (alpha_m(v) * (1 - m) - beta_m(v) * m) * phi
+
+    dhhdt = 10 * (alpha_hh(v) * (1 - hh) - beta_hh(v) * hh) * phi
+
+    deriv = np.array([dcdt, dctdt, dhdt, dipdt, dvdt, dndt, dmdt, \
+        dhhdt])
+
+    dydt = np.reshape(deriv, 8*N*N)  
+    
+    return dydt
+
 
 
 

@@ -97,7 +97,7 @@ st5 = 31.5
 #### parameters for multicellular model
 
 # Number of cells
-N = 50
+N = 10
 
 # Electrical coupling coefficient
 gc = 1000
@@ -114,7 +114,14 @@ vec_v = np.zeros(N)
 
 # coupling matrix
 onex = np.ones(N)
+oney = np.ones(N)
 Dx = spdiags(np.array([onex,-2*onex,onex]),\
         np.array([-1,0,1]),N,N).toarray()
 Dx[0,0] = -1; Dx[N-1,N-1] = -1
+Ix = np.eye(N)
+Dy = spdiags(np.array([oney,-2*oney,oney]),\
+        np.array([-1,0,1]),N,N).toarray()
+Dy[0,0] = -1; Dy[N-1,N-1] = -1
+Iy = np.eye(N)
+L = np.kron(Dx, Iy) + np.kron(Ix, Dy)
 
