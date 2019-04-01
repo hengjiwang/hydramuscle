@@ -11,8 +11,8 @@ def j_ip3r(c, c_t, h, ip):
 
     # return v_ip3r * m_inf**2 * n_inf**2 * h**0.5 * \
     # ((c_t-c)*gamma - c)**0.5
-    return v_ip3r * m_inf**3 * n_inf**3 * h * \
-        ((c_t-c)*gamma - c)
+    return v_ip3r * m_inf**3 * n_inf**3 * h0 * \
+        ((c_t-c)*gamma - c)**0.5
 
 def j_leak(c, c_t):
     '''leak current, ER -> cytosol'''
@@ -132,13 +132,13 @@ def rhs1(y, t):
     '''right-hand side for integration for single cell'''
     c, c_t, h, ip, v, n, m, hh = y
     
-    dcdt = 4*(j_ip3r(c, c_t, h, ip) - j_serca(c) + j_leak(c, c_t) + \
+    dcdt = 2*(j_ip3r(c, c_t, h, ip) - j_serca(c) + j_leak(c, c_t) + \
     (j_in() - j_out(c) - j_pmca(c) + j_soc(c,c_t) - j_vgcc(v))*delta)
     
-    dctdt =  4*((j_in() - j_out(c) - j_pmca(c) + j_soc(c,c_t) - \
+    dctdt =  2*((j_in() - j_out(c) - j_pmca(c) + j_soc(c,c_t) - \
         j_vgcc(v))*delta)
     
-    dhdt = (h_inf(c, ip)-h)/tau_h(c, ip)
+    dhdt = 2 * (h_inf(c, ip)-h)/tau_h(c, ip)
     
     dipdt = 0.005 - r_decay * ip # + j_plcd(c) # - j_plcd(c0)# + r_vip2 * (v-v0)
     
@@ -159,13 +159,13 @@ def rhs2(y,t):
         y[0:N], y[N:2*N], y[2*N:3*N], y[3*N:4*N], y[4*N:5*N], \
         y[5*N:6*N], y[6*N:7*N], y[7*N:8*N]
     
-    dcdt = 4*(j_ip3r(c, c_t, h, ip) - j_serca(c) + j_leak(c, c_t) + \
+    dcdt = 2*(j_ip3r(c, c_t, h, ip) - j_serca(c) + j_leak(c, c_t) + \
     (j_in() - j_out(c) - j_pmca(c) + j_soc(c,c_t) - j_vgcc(v))*delta)
     
-    dctdt =  4*((j_in() - j_out(c) - j_pmca(c) + j_soc(c,c_t) - \
+    dctdt =  2*((j_in() - j_out(c) - j_pmca(c) + j_soc(c,c_t) - \
         j_vgcc(v))*delta)
     
-    dhdt = (h_inf(c, ip)-h)/tau_h(c, ip)
+    dhdt = 2*((h_inf(c, ip)-h)/tau_h(c, ip))
     
     dipdt = 0.005 - r_decay * ip 
     
@@ -187,6 +187,44 @@ def rhs2(y,t):
     
     return dydt
 
+### no voltage
+def rhs3(y,t):
+    '''right-hand side for integration for multiple cells'''
+    c, c_t, h, ip, v, n, m, hh = \
+        y[0:N], y[N:2*N], y[2*N:3*N], y[3*N:4*N], y[4*N:5*N], \
+        y[5*N:6*N], y[6*N:7*N], y[7*N:8*N]
+    
+    dcdt = 2*(j_ip3r(c, c_t, h, ip) - j_serca(c) + j_leak(c, c_t) + \
+    (j_in() - j_out(c) - j_pmca(c) + j_soc(c,c_t) - j_vgcc(v))*delta)
+    
+    dctdt =  2*((j_in() - j_out(c) - j_pmca(c) + j_soc(c,c_t) - \
+        j_vgcc(v))*delta)
+    
+    dhdt = 2*((h_inf(c, ip)-h)/tau_h(c, ip))
+    
+    dipdt = 0.005 - r_decay * ip + gip * Dx@ip
+
+    dipdt[0:3] += 0.5*stim(t)
+    
+    dvdt = 10 * (- j_k(v, n) - j_na(v, m, hh) \
+        - 2*j_vgcc(v) - j_l(v)) + gc * Dx@v
+    
+    # dvdt[0:3] += 10 * j_hynac(stim(t))
+
+    dndt = 10 * (alpha_n(v) * (1 - n) - beta_n(v) * n) * phi
+
+    dmdt = 10 * (alpha_m(v) * (1 - m) - beta_m(v) * m) * phi
+
+    dhhdt = 10 * (alpha_hh(v) * (1 - hh) - beta_hh(v) * hh) * phi
+
+    deriv = np.array([dcdt, dctdt, dhdt, dipdt, dvdt, dndt, dmdt, \
+        dhhdt])
+
+    dydt = np.reshape(deriv, 8*N)  
+    
+    return dydt
+
+
 
 def stim(t):
     '''returns the stimulation status at time t'''
@@ -197,6 +235,8 @@ def stim(t):
     elif t >= st3 and t < st3+d_rise:
         return 0
     elif t >= st4 and t < st4+d_rise:
+        return 0
+    elif t >= st5 and t < st5+d_rise:
         return 0
     else:
         return 0

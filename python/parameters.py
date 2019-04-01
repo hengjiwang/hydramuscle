@@ -22,11 +22,11 @@ gamma=5.4054
 v_leak = 0.002
 
 # Leak across plasma membrane
-v_in = 0.05 -0.39473779866524883 #-0.04762511540896227
+v_in =  0.05 -0.39473779866524883 #-0.04762511540896227
 k_out = 1.2
 
 # IP3R parameters
-v_ip3r = 0.6 # 0.4
+v_ip3r = 5 # 0.4
 d_1 = 0.01 # 0.13 
 d_2 = 1.049; d_3 = 0.9434; d_5= 0.08234; 
 a_2 = 0.04
@@ -40,7 +40,7 @@ v_soc = 1.57
 k_soc = 90
 
 # SERCA terms
-v_serca = 1.8206604887397753# 1.5137717346418553 # 0.9
+v_serca = 1.44705290611436 # 1.8206604887397753# 1.5137717346418553 # 0.9
 k_serca = 0.1
 
 # Sneyd Parameter
@@ -55,7 +55,7 @@ r_decay = 0.5 # 0.2
 v0 = -64.99973395350574
 
 # j_hynac terms
-v_st = 50 #50
+v_st = 80 #50
 
 # j_k terms
 g_k = 36
@@ -67,7 +67,7 @@ e_na = 50
 
 # Voltage leak terms
 v_l = 0.3
-e_l = -54.4 -2.6315853244349925 #-0.3175007693930818
+e_l = -57.03158532907785 # -54.4 -2.6315853244349925 #-0.3175007693930818
 
 # Temperature parameter
 Temp = 18
@@ -88,18 +88,22 @@ k_ca = 0.2 # 0.3
 
 # Stimulation times
 st1 = 20.0
-st2 = 25.0
-st3 = 29.0
-st4 = 33.0
+st2 = 23.0
+st3 = 26.0
+st4 = 29.0
+st5 = 31.5
 
 
 #### parameters for multicellular model
 
 # Number of cells
-N = 10
+N = 50
 
 # Electrical coupling coefficient
-gc = 200
+gc = 1000
+
+# IP3 diffusion coeffcient
+gip = 100
 
 # Grid initialization
 vec_c = np.zeros(N)
