@@ -153,7 +153,7 @@ def rhs1(y, t):
     
     return [dcdt, dctdt, dhdt, dipdt, dvdt, dndt, dmdt, dhhdt]
 ### 1D multicells
-def rhs2(y,t):
+def rhs2(y,t, gc):
     '''right-hand side for integration for multiple cells'''
     c, c_t, h, ip, v, n, m, hh = \
         y[0:N], y[N:2*N], y[2*N:3*N], y[3*N:4*N], y[4*N:5*N], \

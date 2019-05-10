@@ -40,7 +40,7 @@ v_soc = 1.57
 k_soc = 90
 
 # SERCA terms
-v_serca = 1.44705290611436 # 1.8206604887397753# 1.5137717346418553 # 0.9
+v_serca = 1.44705290611436 # 0.9
 k_serca = 0.1
 
 # Sneyd Parameter
@@ -97,10 +97,12 @@ st5 = 31.5
 #### parameters for multicellular model
 
 # Number of cells
-N = 10
+N = 30
 
 # Electrical coupling coefficient
 gc = 1000
+
+gcs = [0, 50, 100, 200, 300, 500, 1000]
 
 # IP3 diffusion coeffcient
 gip = 100
