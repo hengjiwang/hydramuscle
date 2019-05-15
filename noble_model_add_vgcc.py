@@ -17,7 +17,7 @@ class ModifiedNobleModel:
     def __init__(self):
         self.g_bk = 60 # +8.647058998212065
         self.e_bk = -91
-        self.c_m = 0.001
+        self.c_m = 0.001 # 0.001
         self.time = np.linspace(0, T, int(T/dt))
         self.c0 = 0.05
         self.tau_ex = 0.1
@@ -26,7 +26,7 @@ class ModifiedNobleModel:
         self.h0 = 0.7717018647717805 # 0.953
         self.n0 = 0.09710046626504293 # 0.036
         
-        self.g_ca = 0.036
+        self.g_ca = 0.036 # 0.036
         self.v_ca1 = 100
         self.v_ca2 = -24
         self.r_ca = 8.5

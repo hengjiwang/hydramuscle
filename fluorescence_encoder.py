@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
-T = 15
+T = 20
 dt = 0.001
 
 class FluorescenceEncoder:
@@ -87,15 +87,15 @@ class FluorescenceEncoder:
 
         g, c1g, c2g, c3g, c4g = y
         
-        dgdt = -self.r_1(c, g, c1g)
+        dgdt = -0.2 * self.r_1(c, g, c1g)
         
-        dc1gdt = self.r_1(c, g, c1g) - self.r_2(c, c1g, c2g)
+        dc1gdt = 0.2 * (self.r_1(c, g, c1g) - self.r_2(c, c1g, c2g))
         
-        dc2gdt = self.r_2(c, c1g, c2g) - self.r_3(c, c2g, c3g) 
+        dc2gdt = 0.2 * (self.r_2(c, c1g, c2g) - self.r_3(c, c2g, c3g))
         
-        dc3gdt = self.r_3(c, c2g, c3g) - self.r_4(c, c3g, c4g)
+        dc3gdt = 0.2 * (self.r_3(c, c2g, c3g) - self.r_4(c, c3g, c4g))
         
-        dc4gdt = self.r_4(c, c3g, c4g)
+        dc4gdt = 0.2 * self.r_4(c, c3g, c4g)
         
         return [dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt]
 
