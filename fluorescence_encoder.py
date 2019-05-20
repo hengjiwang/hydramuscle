@@ -2,13 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
-T = 20
-dt = 0.001
-
 class FluorescenceEncoder:
     
     # Init
-    def __init__(self, c):
+    def __init__(self, c, T, dt):
         self.r_inc = 200
         self.tau_ex = 1.0
         self.k1p = 2.5
@@ -30,7 +27,9 @@ class FluorescenceEncoder:
         self.phi2 = 1
         self.phi3 = 1
         self.phi4 = 81
-        self.time = np.linspace(0, T, int(T/dt))
+        self.T = T
+        self.dt = dt
+        self.time = np.linspace(0, self.T, int(self.T/self.dt))
         
     
     # Fluorescence
@@ -82,20 +81,20 @@ class FluorescenceEncoder:
     # right-hand side 
     def rhs(self, y, t):      
 
-        if t < 15.0: c = self.c[int(t/dt)]
+        if t < self.T: c = self.c[int(t/self.dt)]
         else: c = 0.05
 
         g, c1g, c2g, c3g, c4g = y
         
-        dgdt = -0.2 * self.r_1(c, g, c1g)
+        dgdt = -0.5 * self.r_1(c, g, c1g)
         
-        dc1gdt = 0.2 * (self.r_1(c, g, c1g) - self.r_2(c, c1g, c2g))
+        dc1gdt = 0.5 * (self.r_1(c, g, c1g) - self.r_2(c, c1g, c2g))
         
-        dc2gdt = 0.2 * (self.r_2(c, c1g, c2g) - self.r_3(c, c2g, c3g))
+        dc2gdt = 0.5 * (self.r_2(c, c1g, c2g) - self.r_3(c, c2g, c3g))
         
-        dc3gdt = 0.2 * (self.r_3(c, c2g, c3g) - self.r_4(c, c3g, c4g))
+        dc3gdt = 0.5 * (self.r_3(c, c2g, c3g) - self.r_4(c, c3g, c4g))
         
-        dc4gdt = 0.2 * self.r_4(c, c3g, c4g)
+        dc4gdt = 0.5 * self.r_4(c, c3g, c4g)
         
         return [dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt]
 
@@ -124,7 +123,7 @@ class FluorescenceEncoder:
         
         plt.figure(figsize=(15,4))
         plt.subplot(121)
-        plt.plot(self.time[int(tmin/dt):int(tmax/dt)], a[int(tmin/dt):int(tmax/dt)])
+        plt.plot(self.time[int(tmin/self.dt):int(tmax/self.dt)], a[int(tmin/self.dt):int(tmax/self.dt)])
         plt.subplot(122)
-        plt.plot(self.time[int(tmin/dt):int(tmax/dt)], b[int(tmin/dt):int(tmax/dt)])
+        plt.plot(self.time[int(tmin/self.dt):int(tmax/self.dt)], b[int(tmin/self.dt):int(tmax/self.dt)])
         plt.show()
