@@ -8,7 +8,7 @@ class KatoForceEncoder:
     
     def __init__(self, c):
         self.c = c
-        self.dt = 0.0001
+        self.dt = 0.001
         self.T = len(c)*self.dt
 #         print(self.T)
         self.cm0 = 1e-5
@@ -68,7 +68,7 @@ class KatoForceEncoder:
         p0 = m20 / self.m2max
         
         y0 = [m10, m20, p0]
-        sol = odeint(self.rhs, y0, self.time, hmax = 0.0001)
+        sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
         return sol
 
 def calcium_trace(t):

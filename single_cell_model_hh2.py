@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 from scipy.integrate import odeint 
 
 T = 20
-dt = 0.0001
+dt = 0.001
 
-class SingleCellCalciumModelCaL2(ModifiedNobleModelCaL2):
+class SingleCellCalciumModelHH2(ModifiedNobleModelCaL2):
     def __init__(self):
         super().__init__()
         self.ct0 = 35
