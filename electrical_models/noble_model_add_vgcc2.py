@@ -25,7 +25,7 @@ class ModifiedNobleModelCaL2:
 #         self.v_ca2 = -24
 #         self.r_ca = 8.5
         self.g_cal = 0.1 
-        self.ratio = 1
+        self.ratio = 1 # 1
         self.g_cal *= self.ratio
         self.c_m = self.c_m/self.ratio
         self.v_cal = 60
@@ -45,7 +45,7 @@ class ModifiedNobleModelCaL2:
     def i_k(self, v, n):
         g_k1 = 1.2 * np.exp((-v-90)/50) + 0.015*np.exp((v+90)/60)
         g_k2 = (1.2 + 1.0) * n**4
-        # return self.ratio * (g_k1 + 5 * g_k2) * (v+100)
+#         return self.ratio * (g_k1 + 5 * g_k2) * (v+100)
         return self.ratio * (g_k1 + g_k2) * (v+100)
     
     # Background current
