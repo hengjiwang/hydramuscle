@@ -35,8 +35,12 @@ class SingleCellCalciumModelVIP3R(ModifiedNobleModelCaL2):
         mm_inf = ip/(ip + self.d_1)
         nn_inf = c/(c + self.d_5)
 
-        return self.v_ip3r * (0.1 * (mm_inf**3 * (ip > 0.02) + (0.02/(0.02 + self.d_1))**3 * (ip <= 0.02)) + 0.5 ** 3 * (nn_inf**3 * hh**3 * (2 * self.ip0 / (ip + self.ip0)) ** 3 )) * \
+#         return self.v_ip3r * (0.1 * (mm_inf**3 * (ip > 0.02) + (0.02/(0.02 + self.d_1))**3 * (ip <= 0.02)) + 0.5 ** 3 * (nn_inf**3 * hh**3 * (2 * self.ip0 / (ip + self.ip0)) ** 3 )) * \
+#             ((c_t-c)*self.gamma - c)
+
+        return self.v_ip3r * (0.09 * mm_inf**3 + 0.5 ** 3 * (nn_inf**3 * hh**3 * (2 * self.ip0 / (ip + self.ip0)) ** 3 )) * \
             ((c_t-c)*self.gamma - c)
+
     
     def i_serca(self, c):
         v_serca = 14 # 14.5
@@ -110,13 +114,10 @@ class SingleCellCalciumModelVIP3R(ModifiedNobleModelCaL2):
         dhhdt = (self.hh_inf(c, ip) - hh) / self.tau_hh(c, ip)
 
         dipdt = 0.05 * self.stim_ip3(t) - self.ip_decay * (ip - self.ip0) + (ip > 0.02) * 0.01 * c**2 / (c**2 + 0.3 ** 2)
-        
-#         dipdt = 0
 
         dvdt = - (self.i_na(v,m,h) \
                   + self.i_k(v,n) \
                   + self.i_bk(v) \
-#                   + 2*self.i_cal(v, m_cal, h_cal))/self.c_m  
                   + 2*self.i_cal(v, m_cal, h_cal) \
                   - self.stim_v(t))/self.c_m  
         
