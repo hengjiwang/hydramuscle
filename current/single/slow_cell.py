@@ -10,14 +10,14 @@ class SlowCell:
     # This is a intracellular model without L-type calcium channel
     def __init__(self, T = 20, dt = 0.001):
         # Parameters
-        self.ct0 = 36.49084
-        self.c0 = 0.0865415
+        self.ct0 = 35
+        self.c0 = 0.05
         self.hh0 = None
-        self.ip0 = 0
+        self.ip0 = 0.01
         self.gamma = 5.4054 
         self.delta = 0.2 
         self.v_ip3r = 0.222
-        self.v_in = 0.05
+        self.v_in = 0.5 # 0.05
         self.d_1 = 0.13
         self.d_2 = 1.049
         self.d_3 = 0.9434
@@ -42,9 +42,8 @@ class SlowCell:
 
     def i_leak(self, c, c_t):
         # Leak from ER to cytosol [uM/s]
-        # v_leak = (- self.i_ip3r(self.c0, self.ct0, self.hh0, self.ip0) 
-        # + self.i_serca(self.c0)) / ((self.ct0-self.c0)*self.gamma - self.c0)
-        v_leak = 0.002
+        v_leak = (- self.i_ip3r(self.c0, self.ct0, self.hh0, self.ip0) 
+        + self.i_serca(self.c0)) / ((self.ct0-self.c0)*self.gamma - self.c0)
         return v_leak * ((c_t-c)*self.gamma - c)
 
     def i_pmca(self, c):
@@ -55,15 +54,8 @@ class SlowCell:
 
     def i_add(self, c, c_t):
         # Additional fluxes from the extracellular space [uM/s]
-        # k_out = (self.v_in - self.i_pmca(self.c0) + self.i_soc(self.c0, self.ct0)) / self.c0
-        k_out = 1.2
+        k_out = (self.v_in - self.i_pmca(self.c0)) / self.c0
         return self.v_in - k_out * c
-
-    def i_soc(self, c, c_t):
-        # SOCC [uM/s]
-        v_soc = 1.57
-        k_soc = 90
-        return v_soc * k_soc**4 / (k_soc**4 + ((c_t-c)*self.gamma)**4)
 
     def hh_inf(self, c, ip):
         q_2 = self.d_2 * (ip + self.d_1)/(ip + self.d_3)
@@ -73,18 +65,12 @@ class SlowCell:
         q_2 = self.d_2 * (ip + self.d_1)/(ip + self.d_3)
         return 1 / (self.a_2 * (q_2 + c))
 
-    # def ip(self, t):
-    #     if t < 20:  return 0
-    #     elif 20 <= t <= 30: return 0.2 / (1 - np.exp(-0.2*(10))) * (1 - np.exp(-0.2*(t-20)))
-    #     else:  return 0.2 * np.exp(1/97*np.log(0.005/0.375)*(t-30))
-
-
     def stim(self, t):
         # Stimulation
         if 20 <= t < 30:
             return 0.03
         else:
-            return 0 #self.ip_decay * self.ip0
+            return self.ip_decay * self.ip0
 
     def rhs(self, y, t):
         # Right-hand side formulation
@@ -94,9 +80,9 @@ class SlowCell:
              - self.i_serca(c) \
              + self.i_leak(c, c_t)) \
              + (- self.i_pmca(c) \
-                + self.i_add(c, c_t) + self.i_soc(c, c_t)) * self.delta
+                + self.i_add(c, c_t)) * self.delta
 
-        dctdt = (- self.i_pmca(c) + self.i_add(c, c_t) + self.i_soc(c, c_t)) * self.delta
+        dctdt = (- self.i_pmca(c) + self.i_add(c, c_t)) * self.delta
         dhhdt = (self.hh_inf(c, ip) - hh) / self.tau_hh(c, ip)
         dipdt = self.stim(t) - self.ip_decay * ip
 
