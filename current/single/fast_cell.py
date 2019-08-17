@@ -115,7 +115,7 @@ class FastCell:
     def rhs(self, y, t):
         # Right-hand side function
         c, v, n, hv, hc, x, z = y
-        dcdt = - self.r_ex(c) - self.i_cal(v, n, hv, hc) * self.A_cyt / (2 * self.F * self.V_cyt)
+        dcdt = - self.r_ex(c) - 1e9 * self.i_cal(v, n, hv, hc) * self.A_cyt / (2 * self.F * self.V_cyt)
         dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_kcnq(v, x, z) + self.i_bk(v) - 0.0005 * self.stim(t))
         dndt = (self.n_inf(v) - n)/self.tau_n(v)
         dhvdt = (self.hv_inf(v) - hv)/self.tau_hv(v)
