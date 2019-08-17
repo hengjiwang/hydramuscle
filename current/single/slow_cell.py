@@ -7,7 +7,7 @@ from scipy.integrate import odeint
 
 
 class SlowCell:
-    # This is a intracellular model without L-type calcium channel
+    '''An intracellular model without L-type calcium channel'''
     def __init__(self, T = 20, dt = 0.001):
         # Parameters
         self.ct0 = 35
@@ -17,7 +17,7 @@ class SlowCell:
         self.gamma = 5.4054 
         self.delta = 0.2 
         self.v_ip3r = 0.222
-        self.v_in = 0.5 # 0.05
+        self.v_in = 0.5
         self.d_1 = 0.13
         self.d_2 = 1.049
         self.d_3 = 0.9434
@@ -68,7 +68,7 @@ class SlowCell:
     def stim(self, t):
         # Stimulation
         if 20 <= t < 30:
-            return 0.03
+            return 0.04
         else:
             return self.ip_decay * self.ip0
 
@@ -96,13 +96,13 @@ class SlowCell:
         sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
         return sol
 
-    def plot(self, a, tmin=0, tmax=120, xlabel = 'time[s]', ylabel = None):
+    def plot(self, a, tmin=0, tmax=100, xlabel = 'time[s]', ylabel = None):
         plt.plot(self.time[int(tmin/self.dt):int(tmax/self.dt)], a[int(tmin/self.dt):int(tmax/self.dt)])
         if xlabel:  plt.xlabel(xlabel)
         if ylabel:  plt.ylabel(ylabel)
 
 if __name__ == '__main__':
-    model = SlowCell(T=120)
+    model = SlowCell(T=100)
     sol = model.step()
     c = sol[:,0]
     c_t = sol[:,1]
