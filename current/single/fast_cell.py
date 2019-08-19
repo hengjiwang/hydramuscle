@@ -12,6 +12,7 @@ class FastCell:
         self.c_m = 1e-6 # [F/cm^2]
         self.A_cyt = 4e-5 # [cm^2]
         self.V_cyt = 6e-9 # [cm^3]
+        self.d = 0.5e-4 # [cm]
         self.F = 96485332.9 # [mA*s/mol]
         self.c0 = 0.05
         self.v0 = -50 # (-40 to -60)
@@ -22,7 +23,7 @@ class FastCell:
         self.z0 = 0.65052
 
         # Calcium leak
-        self.tau_ex = 1.8 # [s]
+        self.tau_ex = 0.1 # [s]
         
         # CaL parameters
         self.g_cal = 0.0006 # [S/cm^2] 
@@ -115,7 +116,7 @@ class FastCell:
     def rhs(self, y, t):
         # Right-hand side function
         c, v, n, hv, hc, x, z = y
-        dcdt = - self.r_ex(c) - 1e9 * self.i_cal(v, n, hv, hc) * self.A_cyt / (2 * self.F * self.V_cyt)
+        dcdt = - self.r_ex(c) - 1e9 * self.i_cal(v, n, hv, hc) / (2 * self.F * self.d)
         dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_kcnq(v, x, z) + self.i_bk(v) - 0.0005 * self.stim(t))
         dndt = (self.n_inf(v) - n)/self.tau_n(v)
         dhvdt = (self.hv_inf(v) - hv)/self.tau_hv(v)
@@ -159,7 +160,6 @@ if __name__ == '__main__':
     plt.subplot(224)
     model.plot(model.i_kcnq(v, x, z), ylabel='i_kncq[mA/cm^2]')
     plt.show()
-
     
     
 
