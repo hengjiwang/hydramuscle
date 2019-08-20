@@ -7,7 +7,7 @@ from scipy.integrate import odeint
 
 
 class SlowCell:
-    '''An intracellular model without L-type calcium channel'''
+    '''An intracellular model without L-type calcium channel, Modified from Handy 2017'''
     def __init__(self, T = 20, dt = 0.001):
         # Parameters
         self.ct0 = 35

@@ -89,6 +89,6 @@ if __name__ == '__main__':
     plt.subplot(223)
     model.plot(hh, ylabel = 'Inactivation ratio of IP3R')
     plt.subplot(224)
-    model.plot(ip, ylabel = 'IP3[uM]')
+    model.plot(ip, ylabel = 'IP3[uM]', color = 'r--')
     plt.show()
 
