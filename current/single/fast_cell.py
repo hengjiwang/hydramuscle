@@ -21,8 +21,8 @@ class FastCell:
         self.hc0 = 0.95238
         self.x0 = 0.05416670048123607
         self.z0 = 0.65052
-        self.pf0 = 0.98444
-        self.ps0 = 0.98444
+        self.p0 = 0.011595733688999755
+        self.q0 = 0.3697397770822487
 
         # Calcium leak
         self.tau_ex = 0.1 # [s]
@@ -36,8 +36,8 @@ class FastCell:
         self.g_kcnq = 0.0001 # [S/cm^2]
         self.e_k = -75 
 
-        # BK parameters
-        self.g_kca = 0.0000 # [S/cm^2]
+        # Kv parameters
+        self.g_kv = 0.0004
 
         # Background parameters
         self.g_bk = None
@@ -98,27 +98,28 @@ class FastCell:
         # [s]
         return 0.01 * (200 + 10 / (1 + 2 * ((v+56)/120)**5))
 
-    '''BK terms (J.Yang 2004)'''
-    def i_kca(self, v, c, pf, ps):
-        # Calcium dependent postassium channle [mA/cm^2]
-        return self.g_kca * (0.65*pf + 0.35*ps) * (v - self.e_k)
+    '''Kv channels'''
+    def i_kv(self, v, p, q):
+        return self.g_kv * p * q * (v - self.e_k)
+    
+    def p_inf(self, v):
+        return 1 / (1 + np.exp(-(v+1.1)/11))
 
-    def p_inf(self, v, c):
-        v_kca = -45 * np.log10(c) - 198.55
-        return 1.0 / (1 + np.exp(-(v - v_kca)/21.7))
+    def q_inf(self, v):
+        return 1 / (1 + np.exp((v+58)/15))
 
-    def tau_pf(self):
-        return 0.0005
+    def tau_p(self, v):
+        return 0.001 / (1 + np.exp((v+15)/20))
 
-    def tau_ps(self):
-        return 0.0115
+    def tau_q(self, v):
+        return 0.4 * (200 + 10 / (1 + 2*((v+54.18)/120)**5))
 
     '''Background terms'''
     def i_bk(self, v):
         # Background voltage leak [mA/cm^2]
         g_bk = - (self.i_cal(self.v0, self.n0, self.hv0, self.hc0) \
         + self.i_kcnq(self.v0, self.x0, self.z0) \
-        + self.i_kca(self.v0, self.c0, self.pf0, self.ps0))/(self.v0 - self.e_bk)
+        + self.i_kv(self.v0, self.p0, self.q0))/(self.v0 - self.e_bk)
         return  g_bk * (v - self.e_bk)
 
     '''Calcium terms'''
@@ -136,22 +137,22 @@ class FastCell:
     '''Numerical terms'''
     def rhs(self, y, t):
         # Right-hand side function
-        c, v, n, hv, hc, x, z, pf, ps = y
+        c, v, n, hv, hc, x, z, p, q = y
         dcdt = - self.r_ex(c) - 1e9 * self.i_cal(v, n, hv, hc) / (2 * self.F * self.d) - 0.171997
-        dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_kcnq(v, x, z) + self.i_kca(v, c, pf, ps) + self.i_bk(v) - 0.0025 * self.stim(t))
+        dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_kcnq(v, x, z) + self.i_kv(v, p, q) + self.i_bk(v) - 0.004 * self.stim(t))
         dndt = (self.n_inf(v) - n)/self.tau_n(v)
         dhvdt = (self.hv_inf(v) - hv)/self.tau_hv(v)
         dhcdt = (self.hc_inf(c) - hc)/self.tau_hc()
         dxdt = (self.x_inf(v) - x)/self.tau_x(v)
         dzdt = (self.z_inf(v) - z)/self.tau_z(v)
-        dpfdt = (self.p_inf(v, c) - pf)/self.tau_pf()
-        dpsdt = (self.p_inf(v, c) - ps)/self.tau_ps()
+        dpdt = (self.p_inf(v) - p)/self.tau_p(v)
+        dqdt = (self.q_inf(v) - q)/self.tau_q(v)
 
-        return [dcdt, dvdt, dndt, dhvdt, dhcdt, dxdt, dzdt, dpfdt, dpsdt]
+        return [dcdt, dvdt, dndt, dhvdt, dhcdt, dxdt, dzdt, dpdt, dqdt]
 
     def step(self):
         # Time stepping
-        y0 = [self.c0, self.v0, self.n0, self.hv0, self.hc0, self.x0, self.z0, self.pf0, self.ps0]
+        y0 = [self.c0, self.v0, self.n0, self.hv0, self.hc0, self.x0, self.z0, self.p0, self.q0]
         sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
         return sol
 
@@ -171,8 +172,8 @@ if __name__ == '__main__':
     hc = sol[:, 4]
     x = sol[:, 5]
     z = sol[:, 6]
-    pf = sol[:, 7]
-    ps = sol[:, 8]
+    p = sol[:, 7]
+    q = sol[:, 8]
 
     # Plot the results
     plt.figure()
@@ -185,7 +186,7 @@ if __name__ == '__main__':
     plt.subplot(324)
     model.plot(model.i_kcnq(v, x, z), ylabel='i_kncq[mA/cm^2]')
     plt.subplot(325)
-    model.plot(model.i_kca(v, c, pf, ps), ylabel='i_kca[mA/cm^2]')
+    model.plot(model.i_kv(v, p, q), ylabel='i_kv[mA/cm^2]')
     plt.subplot(326)
     model.plot([0.0025 * model.stim(t) for t in model.time], ylabel='i_stim[mA/cm^2]', color = 'r')
     plt.show()
