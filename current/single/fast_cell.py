@@ -12,7 +12,7 @@ class FastCell:
         self.c_m = 1e-6 # [F/cm^2]
         self.A_cyt = 4e-5 # [cm^2]
         self.V_cyt = 6e-9 # [cm^3]
-        self.d = 0.5e-4 # [cm]
+        self.d = 10e-4 # [cm]
         self.F = 96485332.9 # [mA*s/mol]
         self.c0 = 0.05
         self.v0 = -50 # (-40 to -60)
@@ -28,7 +28,7 @@ class FastCell:
         self.tau_ex = 0.1 # [s]
         
         # CaL parameters
-        self.g_cal = 0.0006 # [S/cm^2] 
+        self.g_cal = 0.0005 # [S/cm^2] 
         self.e_cal = 51
         self.ki = 1 # [uM]
 
@@ -98,7 +98,7 @@ class FastCell:
         # [s]
         return 0.01 * (200 + 10 / (1 + 2 * ((v+56)/120)**5))
 
-    '''Kv channels'''
+    '''Kv channels (Mahapatra 2018)'''
     def i_kv(self, v, p, q):
         return self.g_kv * p * q * (v - self.e_k)
     
@@ -138,7 +138,7 @@ class FastCell:
     def rhs(self, y, t):
         # Right-hand side function
         c, v, n, hv, hc, x, z, p, q = y
-        dcdt = - self.r_ex(c) - 1e9 * self.i_cal(v, n, hv, hc) / (2 * self.F * self.d) - 0.171997
+        dcdt = - self.r_ex(c) - 1e9 * self.i_cal(v, n, hv, hc) / (2 * self.F * self.d) + 1e9 * self.i_cal(self.v0, self.n0, self.hv0, self.hc0) / (2 * self.F * self.d)
         dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_kcnq(v, x, z) + self.i_kv(v, p, q) + self.i_bk(v) - 0.004 * self.stim(t))
         dndt = (self.n_inf(v) - n)/self.tau_n(v)
         dhvdt = (self.hv_inf(v) - hv)/self.tau_hv(v)
