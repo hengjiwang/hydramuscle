@@ -14,7 +14,7 @@ class FastCell:
         self.V_cyt = 6e-9 # [cm^3]
         self.d = 10e-4 # [cm]
         self.F = 96485332.9 # [mA*s/mol]
-        self.c0 = 0.1
+        self.c0 = 0.05
         self.v0 = -50 # (-40 to -60)
         self.n0 = 0.005911068856243796
         self.hv0 = 0.82324
@@ -30,7 +30,7 @@ class FastCell:
         # CaL parameters
         self.g_cal = 0.0005 # [S/cm^2] 
         self.e_cal = 51
-        self.ki = 1 # [uM]
+        self.k_cal = 1 # [uM]
 
         # KCNQ parameters
         self.g_kcnq = 0.0001 # [S/cm^2]
@@ -63,7 +63,7 @@ class FastCell:
 
     def hc_inf(self, c):
         # [-]
-        return self.ki / (self.ki + c)
+        return self.k_cal / (self.k_cal + c)
 
     def tau_n(self, v):
         # [s]

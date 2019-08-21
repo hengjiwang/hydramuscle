@@ -28,10 +28,10 @@ class HoferCell:
         self.k9 = 0.08
         self.beta = 20
 
-        self.c0 = 0.05012593547210207
-        self.s0 = 60.36821123384473
-        self.r0 = 0.9408973139498169
-        self.ip0 = 0.01774648796378213
+        self.c0 = 0.05
+        self.s0 = 60
+        self.r0 = 0.94
+        self.ip0 = 0.01
 
         self.T = T
         self.dt = dt
@@ -44,7 +44,7 @@ class HoferCell:
 
     def i_serca(self, c):
         # SERCA [uM/s]
-        # v_serca = 0.5
+        # v_serca = 2
         # k_serca = 0.1
         # return v_serca * c / (c + k_serca)
         return self.k3 * c
@@ -61,7 +61,7 @@ class HoferCell:
         # PMCA [uM/s]
         k_pmca = 2.5
         v_pmca = 4
-        return v_pmca * c**2 / (c**2 + k_pmca**2)
+        return 0 * v_pmca * c**2 / (c**2 + k_pmca**2)
 
     def i_out(self, c):
         # Additional eflux [uM/s]
@@ -84,7 +84,8 @@ class HoferCell:
 
     def i_deg(self, ip):
         # IP3 degradion [uM/s]
-        return self.k9 * ip
+        k9 = (self.i_plcb(self.v8) + self.i_plcd(self.c0)) / self.ip0
+        return k9 * ip
 
     '''Stimulation'''
     def stim(self, t):
@@ -107,7 +108,7 @@ class HoferCell:
         return [dcdt, dsdt, drdt, dipdt]
 
     def step(self):
-        # Time stepping     
+        # Time stepping    
         y0 = [self.c0, self.s0, self.r0, self.ip0]
         sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
         return sol
