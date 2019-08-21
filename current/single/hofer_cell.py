@@ -40,19 +40,33 @@ class HoferCell:
     '''Calcium terms'''
     def i_rel(self, c, s, ip, r):
         # Release from ER, including IP3R and leak term [uM/s]
-        return (self.k1 + self.k2 * r * c**2 * ip**2 / (self.ka**2 + c**2) / (self.kip**2 + ip**2)) * (s - c)
+        return (self.k2 * r * c**2 * ip**2 / (self.ka**2 + c**2) / (self.kip**2 + ip**2)) * (s - c)
 
     def i_serca(self, c):
         # SERCA [uM/s]
+        # v_serca = 0.5
+        # k_serca = 0.1
+        # return v_serca * c / (c + k_serca)
         return self.k3 * c
+
+    def i_leak(self, c, s):
+        k1 = (self.i_serca(self.c0) - self.i_rel(self.c0, self.s0, self.ip0, self.r0)) / (self.s0 - self.c0)
+        return k1 * (s - c)
 
     def i_in(self, c, ip):
         # Calcium entry rate [uM/s]
         return self.v40 + self.v41 * ip**2 / (self.kr**2 + ip**2)
 
-    def i_out(self, c):
+    def i_pmca(self, c):
         # PMCA [uM/s]
-        return self.k5 * c
+        k_pmca = 2.5
+        v_pmca = 4
+        return v_pmca * c**2 / (c**2 + k_pmca**2)
+
+    def i_out(self, c):
+        # Additional eflux [uM/s]
+        k5 = (self.i_in(self.c0, self.ip0) - self.i_pmca(self.c0)) / self.c0
+        return k5 * c
 
     '''IP3R terms'''
     def v_r(self, c, r):
@@ -85,8 +99,8 @@ class HoferCell:
         # Right-hand side formulation
         c, s, r, ip = y
 
-        dcdt = self.i_rel(c, s, ip, r) - self.i_serca(c) + self.i_in(c, ip) - self.i_out(c)
-        dsdt = self.beta * (self.i_serca(c) - self.i_rel(c, s, ip, r))
+        dcdt = self.i_rel(c, s, ip, r) + self.i_leak(c, s) - self.i_serca(c) + self.i_in(c, ip) - self.i_pmca(c) - self.i_out(c)
+        dsdt = self.beta * (self.i_serca(c) - self.i_rel(c, s, ip, r) - self.i_leak(c, s))
         drdt = self.v_r(c, r)
         dipdt = self.i_plcb(self.stim(t)) + self.i_plcd(c) - self.i_deg(ip)
 

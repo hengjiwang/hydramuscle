@@ -36,7 +36,7 @@ class SlowCell:
 
     def i_serca(self, c):
         # SERCA [uM/s]
-        v_serca = 0.9 
+        v_serca = 0.9
         k_serca = 0.1
         return v_serca * c**1.75 / (c**1.75 + k_serca**1.75)
 

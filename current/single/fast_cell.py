@@ -14,7 +14,7 @@ class FastCell:
         self.V_cyt = 6e-9 # [cm^3]
         self.d = 10e-4 # [cm]
         self.F = 96485332.9 # [mA*s/mol]
-        self.c0 = 0.05
+        self.c0 = 0.1
         self.v0 = -50 # (-40 to -60)
         self.n0 = 0.005911068856243796
         self.hv0 = 0.82324
