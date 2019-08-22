@@ -152,6 +152,9 @@ class FastCell:
 
     def step(self):
         # Time stepping
+
+        self.n0 = self.n_inf(self.v0)
+
         y0 = [self.c0, self.v0, self.n0, self.hv0, self.hc0, self.x0, self.z0, self.p0, self.q0]
         sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
         return sol
@@ -188,7 +191,7 @@ if __name__ == '__main__':
     plt.subplot(325)
     model.plot(model.i_kv(v, p, q), ylabel='i_kv[mA/cm^2]')
     plt.subplot(326)
-    model.plot([0.0025 * model.stim(t) for t in model.time], ylabel='i_stim[mA/cm^2]', color = 'r')
+    model.plot([0.004 * model.stim(t) for t in model.time], ylabel='i_stim[mA/cm^2]', color = 'r')
     plt.show()
     
     
