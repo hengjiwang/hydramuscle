@@ -9,33 +9,30 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 from fast_cell import FastCell
-from hofer_cell import HoferCell
+from atri_cell import AtriCell
 from fluo_encoder import FluoEncoder
 from force_encoder import KatoForceEncoder
 
-
-class Cell(HoferCell, FastCell):
+class Cell(AtriCell, FastCell):
     # This is a intracellular model without L-type calcium channel
     def __init__(self, T = 100, dt = 0.001):
         # Parameters
         FastCell.__init__(self, T, dt)
-        HoferCell.__init__(self, T, dt)
+        AtriCell.__init__(self, T, dt)
         self.d = 20e-4
 
-    def i_out(self, c):
-        # Additional eflux [uM/s]
-        return self.k5 * c
-
-    def i_in(self):
-        return 1e9 * self.i_cal(self.v0, self.n0, self.hv0, self.hc0) / (2 * self.F * self.d) + self.i_out(self.c0) + self.i_pmca(self.c0)
+    def i_add(self, c, c_t):
+        # Additional fluxes from the extracellular space [uM/s]
+        k_out = (self.v_in - self.i_pmca(self.c0) - 1e9 * self.i_cal(self.v0, self.n0, self.hv0, self.hc0) / (2 * self.F * self.d)) / self.c0
+        return self.v_in - k_out * c
 
     '''Stimulation'''
     def stim(self, t):
         # Stimulation
-        if 20 <= t < 24:
-            return 1
+        if 20 <= t < 40:
+            return 0.05
         else:
-            return self.v8
+            return self.ip_decay * self.ip0
 
     def stim_v(self, t):
         # Stimulation
@@ -46,13 +43,17 @@ class Cell(HoferCell, FastCell):
 
     def rhs(self, y, t):
         # Right-hand side formulation
-        c, s, r, ip, v, n, hv, hc, x, z, p, q = y
+        c, c_t, r, ip, v, n, hv, hc, x, z, p, q = y
 
-        dcdt = self.i_rel(c, s, ip, r) + self.i_leak(c, s) - self.i_serca(c) + self.i_in() - self.i_pmca(c) - self.i_out(c)\
+        dcdt = dcdt = (self.i_ip3r(c, c_t, r, ip) \
+             - self.i_serca(c) \
+             + self.i_leak(c, c_t)) \
+             + (- self.i_pmca(c) \
+                + self.i_add(c, c_t)) * self.delta \
             - 1e9 * self.i_cal(v, n, hv, hc) / (2 * self.F * self.d)
-        dsdt = self.beta * (self.i_serca(c) - self.i_rel(c, s, ip, r) - self.i_leak(c, s))
+        dctdt = (- self.i_pmca(c) + self.i_add(c, c_t)) * self.delta - 1e9 * self.i_cal(v, n, hv, hc) / (2 * self.F * self.d)
         drdt = self.v_r(c, r)
-        dipdt = self.i_plcb(self.stim(t)) + self.i_plcd(c) - self.i_deg(ip)
+        dipdt = self.stim(t) - self.ip_decay * ip
         dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_kcnq(v, x, z) + self.i_kv(v, p, q) + self.i_bk(v) - 0.004 * self.stim_v(t))
         dndt = (self.n_inf(v) - n)/self.tau_n(v)
         dhvdt = (self.hv_inf(v) - hv)/self.tau_hv(v)
@@ -62,14 +63,13 @@ class Cell(HoferCell, FastCell):
         dpdt = (self.p_inf(v) - p)/self.tau_p(v)
         dqdt = (self.q_inf(v) - q)/self.tau_q(v)
 
-        return [dcdt, dsdt, drdt, dipdt, dvdt, dndt, dhvdt, dhcdt, dxdt, dzdt, dpdt, dqdt]
+        return [dcdt, dctdt, drdt, dipdt, dvdt, dndt, dhvdt, dhcdt, dxdt, dzdt, dpdt, dqdt]
 
     def step(self):
         # Time stepping
         # self.hh0 = self.hh_inf(self.c0, self.ip0)
         
-        self.r0 =  self.ki**2 / (self.ki**2 + self.c0**2)
-        y0 = [self.c0, self.s0, self.r0, self.ip0, self.v0, self.n0, self.hv0, self.hc0, self.x0, self.z0, self.p0, self.q0]
+        y0 = [self.c0, self.ct0, self.r0, self.ip0, self.v0, self.n0, self.hv0, self.hc0, self.x0, self.z0, self.p0, self.q0]
         sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
         return sol
 
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     model = Cell(T=100)
     sol = model.step()
     c = sol[:,0]
-    s = sol[:,1]
+    c_t = sol[:,1]
     r = sol[:,2]
     ip = sol[:,3]
     v = sol[:,4]
@@ -92,7 +92,7 @@ if __name__ == '__main__':
     plt.subplot(221)
     model.plot(c, ylabel = 'c[uM]')
     plt.subplot(222)
-    model.plot(s, ylabel = 'c_ER[uM]')
+    model.plot((c_t - c) * model.gamma, ylabel = 'c_ER[uM]')
     plt.subplot(223)
     model.plot(v, ylabel = 'v[mV]')
     plt.subplot(224)
@@ -112,5 +112,3 @@ if __name__ == '__main__':
     force = force_encoder.step()
     model.plot(force, ylabel='Active Force', color='k')
     plt.show()
-
-

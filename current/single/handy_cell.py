@@ -6,16 +6,21 @@ import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
 
-class SlowCell:
+class HandyCell:
     '''An intracellular model without L-type calcium channel, Modified from Handy 2017'''
     def __init__(self, T = 20, dt = 0.001):
-        # Parameters
+
+        # Initial Values
         self.ct0 = 35
         self.c0 = 0.05
         self.hh0 = None
         self.ip0 = 0.01
+
+        # General Parameters
         self.gamma = 5.4054 
         self.delta = 0.2 
+
+        # IP3R
         self.v_ip3r = 0.222
         self.v_in = 0.5
         self.d_1 = 0.13
@@ -23,7 +28,19 @@ class SlowCell:
         self.d_3 = 0.9434
         self.d_5 = 0.08234
         self.a_2 = 0.04
+
+        # SERCA
+        self.v_serca = 0.9
+        self.k_serca = 0.1
+
+        # PMCA
+        self.v_pmca = 10
+        self.k_pmca = 2.5
+
+        # IP3
         self.ip_decay = 0.04
+
+        # Time constants
         self.T = T
         self.dt = dt
         self.time = np.linspace(0, T, int(T/dt))
@@ -36,9 +53,7 @@ class SlowCell:
 
     def i_serca(self, c):
         # SERCA [uM/s]
-        v_serca = 0.9
-        k_serca = 0.1
-        return v_serca * c**1.75 / (c**1.75 + k_serca**1.75)
+        return self.v_serca * c**1.75 / (c**1.75 + self.k_serca**1.75)
 
     def i_leak(self, c, c_t):
         # Leak from ER to cytosol [uM/s]
@@ -48,9 +63,7 @@ class SlowCell:
 
     def i_pmca(self, c):
         # PMCA [uM/s]
-        k_pmca = 2.5
-        v_pmca = 10
-        return v_pmca * c**2 / (c**2 + k_pmca**2)
+        return self.v_pmca * c**2 / (c**2 + self.k_pmca**2)
 
     def i_add(self, c, c_t):
         # Additional fluxes from the extracellular space [uM/s]
@@ -96,13 +109,13 @@ class SlowCell:
         sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
         return sol
 
-    def plot(self, a, tmin=0, tmax=100, xlabel = 'time[s]', ylabel = None):
-        plt.plot(self.time[int(tmin/self.dt):int(tmax/self.dt)], a[int(tmin/self.dt):int(tmax/self.dt)])
+    def plot(self, a, tmin=0, tmax=1000, xlabel = 'time[s]', ylabel = None, color = 'b'):
+        plt.plot(self.time[int(tmin/self.dt):int(tmax/self.dt)], a[int(tmin/self.dt):int(tmax/self.dt)], color)
         if xlabel:  plt.xlabel(xlabel)
         if ylabel:  plt.ylabel(ylabel)
 
 if __name__ == '__main__':
-    model = SlowCell(T=100)
+    model = HandyCell(T=100)
     sol = model.step()
     c = sol[:,0]
     c_t = sol[:,1]
@@ -119,5 +132,15 @@ if __name__ == '__main__':
     model.plot(hh, ylabel = 'Inactivation ratio of IP3R')
     plt.subplot(224)
     model.plot(ip, ylabel = 'IP3[uM]')
+    plt.show()
+
+    # Plot the currents
+    plt.figure()
+    model.plot(model.i_ip3r(c, c_t, hh, ip), color='b')
+    model.plot(model.i_serca(c), color = 'r')
+    model.plot(model.i_pmca(c), color = 'g')
+    model.plot(model.i_leak(c, c_t), color = 'y')
+    model.plot(model.i_add(c, c_t), color = 'k')
+    plt.legend(['i_ip3r', 'i_serca', 'i_pmca', 'i_leak', 'i_add'])
     plt.show()
 

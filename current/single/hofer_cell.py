@@ -114,8 +114,8 @@ class HoferCell:
         return sol
 
     '''Plot'''
-    def plot(self, a, tmin=0, tmax=100, xlabel = 'time[s]', ylabel = None):
-        plt.plot(self.time[int(tmin/self.dt):int(tmax/self.dt)], a[int(tmin/self.dt):int(tmax/self.dt)])
+    def plot(self, a, tmin=0, tmax=100, xlabel = 'time[s]', ylabel = None, color = 'b'):
+        plt.plot(self.time[int(tmin/self.dt):int(tmax/self.dt)], a[int(tmin/self.dt):int(tmax/self.dt)], color)
         if xlabel:  plt.xlabel(xlabel)
         if ylabel:  plt.ylabel(ylabel)
 
@@ -137,6 +137,16 @@ if __name__ == "__main__":
     model.plot(r, ylabel = 'Inactivation ratio of IP3R')
     plt.subplot(224)
     model.plot(ip, ylabel = 'IP3[uM]')
+    plt.show()
+
+    # Plot the currents
+    plt.figure()
+    model.plot(model.i_rel(c, s, ip, r), color='b')
+    model.plot(model.i_serca(c), color = 'r')
+    model.plot(model.i_pmca(c), color = 'g')
+    model.plot(model.i_leak(c, s), color = 'y')
+    model.plot(model.i_out(c), color='k')
+    plt.legend(['i_ip3r', 'i_serca', 'i_pmca', 'i_leak', 'i_out'])
     plt.show()
 
     
