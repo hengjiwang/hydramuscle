@@ -14,11 +14,11 @@ class KatoForceEncoder:
         self.cm0 = 1e-5
         self.mlck0 = 1e-6
         self.K1 = 1e-5
-        self.K2 = 5e-10 # Dissociation constant for the CM*-MLCK* complex (default: 1e-9)
+        self.K2 = 1e-9 # 5e-10 # Dissociation constant for the CM*-MLCK* complex (default: 1e-9)
         self.k1 = 25.0
         self.k2 = 5.0
         self.k3 = 2.5
-        self.k4 = 0.2 # Rate constant of M~P2 -> M~P (default: 0.5)
+        self.k4 = 0.5 # 0.2 # Rate constant of M~P2 -> M~P (default: 0.5)
         self.a = 0.2
         self.b = 0.05
         self.f = 0.01

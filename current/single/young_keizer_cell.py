@@ -15,7 +15,7 @@ class DeYoungKeizerCell:
         # IPR
 
         '''DeYoungKeizer'''
-        self.v_ip3r = 1.11
+        self.v_ip3r = 0.5 # 1.11
         self.k_p = 0.13
         self.k_c = 0.082
 

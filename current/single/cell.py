@@ -9,33 +9,29 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 from fast_cell import FastCell
-from hofer_cell import HoferCell
+from young_keizer_cell import DeYoungKeizerCell
 from fluo_encoder import FluoEncoder
 from force_encoder import KatoForceEncoder
 
 
-class Cell(HoferCell, FastCell):
+class Cell(DeYoungKeizerCell, FastCell):
     # This is a intracellular model without L-type calcium channel
     def __init__(self, T = 100, dt = 0.001):
         # Parameters
         FastCell.__init__(self, T, dt)
-        HoferCell.__init__(self, T, dt)
-        self.d = 20e-4
-
-    def i_out(self, c):
-        # Additional eflux [uM/s]
-        return self.k5 * c
+        DeYoungKeizerCell.__init__(self, T, dt)
+        self.d = 10e-4
 
     def i_in(self):
-        return 1e9 * self.i_cal(self.v0, self.n0, self.hv0, self.hc0) / (2 * self.F * self.d) + self.i_out(self.c0) + self.i_pmca(self.c0)
+        return 1/self.delta * \
+            1e9 * self.i_cal(self.v0, self.n0, self.hv0, self.hc0) / (2 * self.F * self.d) \
+            + self.i_pmca(self.c0)
 
-    '''Stimulation'''
     def stim(self, t):
-        # Stimulation
         if 20 <= t < 24:
-            return 1
+            return 0.1
         else:
-            return self.v8
+            return self.ip_decay * self.ip0
 
     def stim_v(self, t):
         # Stimulation
@@ -48,11 +44,14 @@ class Cell(HoferCell, FastCell):
         # Right-hand side formulation
         c, s, r, ip, v, n, hv, hc, x, z, p, q = y
 
-        dcdt = self.i_rel(c, s, ip, r) + self.i_leak(c, s) - self.i_serca(c) + self.i_in() - self.i_pmca(c) - self.i_out(c)\
-            - 1e9 * self.i_cal(v, n, hv, hc) / (2 * self.F * self.d)
-        dsdt = self.beta * (self.i_serca(c) - self.i_rel(c, s, ip, r) - self.i_leak(c, s))
+        dcdt = self.i_ip3r(c, s, r, ip) \
+            + self.i_leak(c, s) \
+            - self.i_serca(c) \
+            + (self.i_in() - self.i_pmca(c)) * self.delta \
+            - 1e9 * self.i_cal(v, n, hv, hc) / (2 * self.F * self.d) 
+        dsdt = self.gamma * (self.i_serca(c) - self.i_ip3r(c, s, r, ip) - self.i_leak(c, s))
         drdt = self.v_r(c, r)
-        dipdt = self.i_plcb(self.stim(t)) + self.i_plcd(c) - self.i_deg(ip)
+        dipdt = self.stim(t) - self.ip_decay * ip
         dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_kcnq(v, x, z) + self.i_kv(v, p, q) + self.i_bk(v) - 0.004 * self.stim_v(t))
         dndt = (self.n_inf(v) - n)/self.tau_n(v)
         dhvdt = (self.hv_inf(v) - hv)/self.tau_hv(v)
