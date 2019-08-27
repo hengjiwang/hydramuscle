@@ -43,7 +43,7 @@ class DeYoungKeizerCell:
         self.k_pmca = 0.3
 
         # IP3
-        self.ip_decay = 0.04
+        self.ip_decay = 0.1 # 0.04
 
         # Initial values
         self.c0 = 0.05
@@ -101,7 +101,7 @@ class DeYoungKeizerCell:
     '''Stimulation'''
     def stim(self, t):
         if 20 <= t < 24:
-            return 0.1
+            return 0.5 # 0.1
         else:
             return self.ip_decay * self.ip0
 

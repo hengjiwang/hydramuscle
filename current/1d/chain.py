@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-sys.path.insert(0, '/Users/hengjiwang/Documents/hydra_calcium_model/current/single/')
+sys.path.insert(0, '/home/hengji/Documents/hydra_calcium_model/current/single/')
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -18,7 +18,7 @@ class Chain(Cell):
         # Parameters
         super().__init__(T)
         self.gc = 2e4
-        self.g_ip3 = 10
+        self.g_ip3 = 2
         self.num = num
         onex = np.ones(self.num)
         self.Dx = spdiags(np.array([onex,-2*onex,onex]),np.array([-1,0,1]),self.num,self.num).toarray()
@@ -41,16 +41,22 @@ class Chain(Cell):
     def rhs(self, y, t):
         # Right-hand side formulation
         num = self.num
-        c, s, r, ip, v, n, hv, hc, x, z, p, q = (y[0:num], y[num:2*num], y[2*num:3*num], y[3*num:4*num], y[4*num:5*num], 
+
+        c, c_t, hh, ip, v, n, hv, hc, x, z, p, q = (y[0:num], y[num:2*num], y[2*num:3*num], y[3*num:4*num], y[4*num:5*num], 
         y[5*num:6*num], y[6*num:7*num], y[7*num:8*num], y[8*num:9*num], y[9*num:10*num], y[10*num:11*num], y[11*num:12*num])
-        dcdt = self.i_ip3r(c, s, r, ip) + self.i_leak(c, s) - self.i_serca(c) + (self.i_in() - self.i_pmca(c)) * self.delta \
-            - 1e9 * self.i_cal(v, n, hv, hc) / (2 * self.F * self.d)
-        dsdt = self.gamma * (self.i_serca(c) - self.i_ip3r(c, s, r, ip) - self.i_leak(c, s))
-        drdt = self.v_r(c, r)
+
+        dcdt = (self.i_ip3r(c, c_t, hh, ip) \
+             - self.i_serca(c) \
+             + self.i_leak(c, c_t)) \
+             + (- self.i_pmca(c) \
+                + self.i_add(c, c_t)) * self.delta \
+             - 1e9 * self.i_cal(v, n, hv, hc) / (2 * self.F * self.d)
+
+        dctdt = (- self.i_pmca(c) + self.i_add(c, c_t)) * self.delta - 1e9 * self.i_cal(v, n, hv, hc) / (2 * self.F * self.d)
+        dhhdt = (self.hh_inf(c, ip) - hh) / self.tau_hh(c, ip)
         dipdt = self.ip_decay * self.ip0 - self.ip_decay * ip + self.g_ip3 * self.Dx@ip
         dipdt[0:3] += self.stim(t) - self.ip_decay * self.ip0
-        dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_kcnq(v, x, z) + self.i_kv(v, p, q) + self.i_bk(v)) + self.gc * self.Dx@v
-        dvdt[0:3] += 0.04 * self.stim_v(t) / self.c_m
+        dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_kcnq(v, x, z) + self.i_kv(v, p, q) + self.i_bk(v) - 0.004 * self.stim_v(t))
         dndt = (self.n_inf(v) - n)/self.tau_n(v)
         dhvdt = (self.hv_inf(v) - hv)/self.tau_hv(v)
         dhcdt = (self.hc_inf(c) - hc)/self.tau_hc()
@@ -59,16 +65,20 @@ class Chain(Cell):
         dpdt = (self.p_inf(v) - p)/self.tau_p(v)
         dqdt = (self.q_inf(v) - q)/self.tau_q(v)
 
-        deriv = np.array([dcdt, dsdt, drdt, dipdt, dvdt, dndt, dhvdt, dhcdt, dxdt, dzdt, dpdt, dqdt])
+        deriv = np.array([dcdt, dctdt, dhhdt, dipdt, dvdt, dndt, dhvdt, dhcdt, dxdt, dzdt, dpdt, dqdt])
+
         dydt = np.reshape(deriv, 12*num)
 
         return dydt
 
     def step(self):
         # Time stepping
+
+        self.hh0 = self.hh_inf(self.c0, self.ip0)
+
         y0 = np.array([[self.c0]*self.num, 
-                       [self.s0]*self.num, 
-                       [self.r0]*self.num, 
+                       [self.ct0]*self.num, 
+                       [self.hh0]*self.num, 
                        [self.ip0]*self.num,
                        [self.v0]*self.num,
                        [self.n0]*self.num,
@@ -92,13 +102,13 @@ class Chain(Cell):
 
 if __name__ == "__main__":
 
-    n_cel = 5
+    n_cel = 20
 
     model = Chain(n_cel, 100)
     sol = model.step()
     c = sol[:,0:n_cel]
-    s = sol[:,n_cel:2*n_cel]
-    r = sol[:,2*n_cel:3*n_cel]
+    c_t = sol[:,n_cel:2*n_cel]
+    hh = sol[:,2*n_cel:3*n_cel]
     ip = sol[:,3*n_cel:4*n_cel]
     v= sol[:, 4*n_cel:5*n_cel]
 
@@ -107,7 +117,7 @@ if __name__ == "__main__":
     plt.subplot(221)
     model.plot(c, ylabel = 'c[uM]')
     plt.subplot(222)
-    model.plot(s, ylabel = 'c_ER[uM]')
+    model.plot((c_t - c) * model.gamma, ylabel = 'c_ER[uM]')
     plt.subplot(223)
     model.plot(v, ylabel = 'v[mV]')
     plt.subplot(224)
