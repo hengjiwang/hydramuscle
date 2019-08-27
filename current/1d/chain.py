@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-sys.path.insert(0, '/home/hengji/Documents/hydra_calcium_model/current/single/')
+sys.path.insert(0, '/Users/hengjiwang/Documents/hydra_calcium_model/current/single/')
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -17,13 +17,14 @@ class Chain(Cell):
     def __init__(self, num=20, T=20):
         # Parameters
         super().__init__(T)
-        self.gc = 2e4
-        self.g_ip3 = 2
+        self.gc = 5e4
+        self.g_ip3 = 5
         self.num = num
         onex = np.ones(self.num)
         self.Dx = spdiags(np.array([onex,-2*onex,onex]),np.array([-1,0,1]),self.num,self.num).toarray()
         self.Dx[0,0] = -1
         self.Dx[self.num-1,self.num-1] = -1 
+        self.ip_decay = 0.02
 
     def stim_v(self, t):
         # Stimulation 
@@ -34,7 +35,7 @@ class Chain(Cell):
 
     def stim(self, t):
         if 20 <= t < 24:
-            return 0.1
+            return 0.5 # 0.1
         else:
             return self.ip_decay * self.ip0
     
@@ -55,8 +56,9 @@ class Chain(Cell):
         dctdt = (- self.i_pmca(c) + self.i_add(c, c_t)) * self.delta - 1e9 * self.i_cal(v, n, hv, hc) / (2 * self.F * self.d)
         dhhdt = (self.hh_inf(c, ip) - hh) / self.tau_hh(c, ip)
         dipdt = self.ip_decay * self.ip0 - self.ip_decay * ip + self.g_ip3 * self.Dx@ip
-        dipdt[0:3] += self.stim(t) - self.ip_decay * self.ip0
-        dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_kcnq(v, x, z) + self.i_kv(v, p, q) + self.i_bk(v) - 0.004 * self.stim_v(t))
+        dipdt[0:6] += self.stim(t) - self.ip_decay * self.ip0
+        dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_kcnq(v, x, z) + self.i_kv(v, p, q) + self.i_bk(v)) + self.gc*self.Dx@v
+        dvdt[0:3] += 1 / self.c_m * 0.1 * self.stim_v(t)
         dndt = (self.n_inf(v) - n)/self.tau_n(v)
         dhvdt = (self.hv_inf(v) - hv)/self.tau_hv(v)
         dhcdt = (self.hc_inf(c) - hc)/self.tau_hc()
@@ -102,7 +104,7 @@ class Chain(Cell):
 
 if __name__ == "__main__":
 
-    n_cel = 20
+    n_cel = 50
 
     model = Chain(n_cel, 100)
     sol = model.step()
