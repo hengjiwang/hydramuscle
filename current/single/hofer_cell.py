@@ -80,7 +80,7 @@ class HoferCell:
 
     def i_plcd(self, c):
         # PLC-delta activity [uM/s]
-        return 0 * self.v7 * c**2 / (self.kca**2 + c**2)
+        return self.v7 * c**2 / (self.kca**2 + c**2)
 
     def i_deg(self, ip):
         # IP3 degradion [uM/s]
