@@ -30,7 +30,8 @@ class HardCell:
 
     '''IP3R'''
     def i_ip3r(self, ip, r):
-        return ((ip > 0.0101)*r + self.i_ca_deg(self.c0))
+        # return ((ip > 0.0101)*r + self.i_ca_deg(self.c0))
+        return ip**10 / (ip**10 + 0.02**10) * r + self.i_ca_deg(self.c0) - self.ip0**10 / (self.ip0**10 + 0.02**10)*self.r0
 
     def v_r(self, c, r):
         return self.k6 * (self.ki**2 / (self.ki**2 + c**2) - r)
@@ -56,7 +57,7 @@ class HardCell:
 
         dcdt = self.i_ip3r(ip, r) - self.i_ca_deg(c)
         drdt = self.v_r(c, r)
-        dipdt = self.stim(t) - self.i_ip_deg(ip)
+        dipdt = self.stim(t) - self.i_ip_deg(ip) + 0.02 * c**2 / (c**2 + 0.1**2) - 0.02 * self.c0**2 / (self.c0**2 + 0.1**2)
 
 
         return [dcdt, dipdt, drdt]

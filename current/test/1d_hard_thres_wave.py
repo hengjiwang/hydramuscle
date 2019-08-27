@@ -18,6 +18,7 @@ class Chain(HardCell):
         self.Dx = spdiags(np.array([onex,-2*onex,onex]),np.array([-1,0,1]),self.num,self.num).toarray()
         self.Dx[0,0] = -1
         self.Dx[self.num-1,self.num-1] = -1 
+        self.ip_decay = 0.1
     
     def rhs(self, y, t):
         # Right-hand side formulation
@@ -27,7 +28,7 @@ class Chain(HardCell):
 
         dcdt = self.i_ip3r(ip, r) - self.i_ca_deg(c)
         drdt = self.v_r(c, r)
-        dipdt = self.i_ip_deg(self.ip0) - self.i_ip_deg(ip) + self.g_ip3 * self.Dx@ip
+        dipdt = self.i_ip_deg(self.ip0) - self.i_ip_deg(ip) + self.g_ip3 * self.Dx@ip + 0.01 * c**2 / (c**2 + 0.3**2) - 0.01 * self.c0**2 / (self.c0**2 + 0.3**2)
         dipdt[0:3] += self.stim(t)
 
         deriv = [dcdt, dipdt, drdt]
@@ -44,7 +45,7 @@ class Chain(HardCell):
         sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
         return sol
 
-    def plot(self, a, tmin=0, tmax=100, xlabel = 'time[s]', ylabel = None):
+    def plot(self, a, tmin=0, tmax=1000, xlabel = 'time[s]', ylabel = None):
         # Plot function
         plt.plot(self.time[int(tmin/self.dt):int(tmax/self.dt)], a[int(tmin/self.dt):int(tmax/self.dt)])
         if xlabel:  plt.xlabel(xlabel)
