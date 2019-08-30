@@ -15,10 +15,16 @@ class Cell(HandyCell, FastCell):
         HandyCell.__init__(self, T, dt)
         FastCell.__init__(self, T, dt)
 
+        self.v_plcd = 0.06
+        self.k_plcd = 0.3
+
     def i_add(self, c, c_t):
         # Additional fluxes from the extracellular space [uM/s]
         k_out = (self.v_in - self.i_pmca(self.c0) - 1e9 * self.i_cal(self.v0, self.n0, self.hv0, self.hc0) / (2 * self.F * self.d) / self.delta ) / self.c0
         return self.v_in - k_out * c
+
+    def i_plcd(self, c):
+        return self.v_plcd * c**2 / (c**2 + self.k_plcd**2)
 
     def stim_ip(self, t):
         # Stimulation
@@ -50,7 +56,7 @@ class Cell(HandyCell, FastCell):
 
         dctdt = (- self.i_pmca(c) + self.i_add(c, c_t)) * self.delta - 1e9 * self.i_cal(v, n, hv, hc) / (2 * self.F * self.d)
         dhhdt = (self.hh_inf(c, ip) - hh) / self.tau_hh(c, ip)
-        dipdt = self.stim_ip(t) - self.ip_decay * ip
+        dipdt = self.stim_ip(t) - self.ip_decay * ip + self.i_plcd(c)
         dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_kcnq(v, x, z) + self.i_kv(v, p, q) + self.i_bk(v) - 0.004 * self.stim_v(t))
         dndt = (self.n_inf(v) - n)/self.tau_n(v)
         dhvdt = (self.hv_inf(v) - hv)/self.tau_hv(v)

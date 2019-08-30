@@ -18,13 +18,13 @@ class Chain(Cell):
         # Parameters
         super().__init__(T)
         self.gc = 5e4
-        self.g_ip3 = 5
+        self.g_ip3 = 1 # 2 
         self.num = num
         onex = np.ones(self.num)
         self.Dx = spdiags(np.array([onex,-2*onex,onex]),np.array([-1,0,1]),self.num,self.num).toarray()
         self.Dx[0,0] = -1
         self.Dx[self.num-1,self.num-1] = -1 
-        self.ip_decay = 0.02
+        self.ip_decay = 0.04
 
     def stim_v(self, t):
         # Stimulation 
@@ -34,10 +34,10 @@ class Chain(Cell):
             return 0
 
     def stim(self, t):
-        if 20 <= t < 24:
+        if 25 <= t < 29:
             return 0.5 # 0.1
         else:
-            return self.ip_decay * self.ip0
+            return 0
     
     def rhs(self, y, t):
         # Right-hand side formulation
@@ -55,8 +55,10 @@ class Chain(Cell):
 
         dctdt = (- self.i_pmca(c) + self.i_add(c, c_t)) * self.delta - 1e9 * self.i_cal(v, n, hv, hc) / (2 * self.F * self.d)
         dhhdt = (self.hh_inf(c, ip) - hh) / self.tau_hh(c, ip)
-        dipdt = self.ip_decay * self.ip0 - self.ip_decay * ip + self.g_ip3 * self.Dx@ip
-        dipdt[0:6] += self.stim(t) - self.ip_decay * self.ip0
+        dipdt = (self.ip_decay * self.ip0 - self.ip_decay * ip) \
+             + (self.i_plcd(c) - self.i_plcd(self.c0)) \
+             + self.g_ip3 * self.Dx@ip
+        dipdt[0:3] += self.stim(t)
         dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_kcnq(v, x, z) + self.i_kv(v, p, q) + self.i_bk(v)) + self.gc*self.Dx@v
         dvdt[0:3] += 1 / self.c_m * 0.1 * self.stim_v(t)
         dndt = (self.n_inf(v) - n)/self.tau_n(v)
