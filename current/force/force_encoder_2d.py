@@ -8,7 +8,7 @@ import pandas as pd
 from force_encoder import KatoForceEncoder
 
 class ForceEncoder2D(KatoForceEncoder):
-    # 2D model for converting [Ca2+] into force
+    '''2D model for converting [Ca2+] into force'''
     def __init__(self, c):
         super().__init__(c)
         self.num = len(c[0])

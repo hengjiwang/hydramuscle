@@ -30,3 +30,17 @@ def save_anim(x, interval, filename, canvas = 'flat', show = True):
     ani.save(filename, writer="ffmpeg")
     if show: plt.show()
 
+def save_pattern(x, filename, show = True):
+    # Save the 2D data as a spatiotemporal pattern
+    fig = plt.figure()
+    x = x.T
+    im = plt.imshow(x, aspect = 'auto')
+    plt.ylabel('Cell #')
+    plt.xlabel('t [ms]')
+    fig.savefig(filename)
+    if show:    plt.show()
+
+if __name__ == '__main__':
+    
+    x = pd.read_csv('../save/data/c_50x1_100s.csv')
+    save_pattern(x, '../save/figures/chain_pattern.png')

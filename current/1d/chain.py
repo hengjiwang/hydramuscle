@@ -5,6 +5,7 @@ import sys
 sys.path.insert(0, '/Users/hengjiwang/Documents/hydra_calcium_model/current/single/')
 
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 from scipy.sparse import spdiags
@@ -127,6 +128,10 @@ if __name__ == "__main__":
     plt.subplot(224)
     model.plot(ip, ylabel = 'IP3[uM]')
     plt.show()
+
+    # Save the [Ca2+]
+    df = pd.DataFrame(sol[:,0:n_cel])
+    df.to_csv('../save/data/c_50x1_100s.csv', index = False)
 
     
 

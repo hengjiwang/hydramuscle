@@ -94,7 +94,7 @@ class Grid(Cell):
             + self.gc * self.L@v
         
         # Voltage of stimulated cells
-        dvdt[0:3*self.num] += 1 / self.c_m * 0.1 * self.stim_v(t)
+        dvdt[0:3*self.num] += 1 / self.c_m * 0.04 * self.stim_v(t)
 
         # CaL and K channel factors
         dndt = (self.n_inf(v) - n)/self.tau_n(v)
@@ -133,12 +133,13 @@ class Grid(Cell):
         return sol
 
 if __name__ == '__main__':
-    n_cel = 20
-    model = Grid(n_cel)
+    n_cel = 5
+    model = Grid(n_cel, 10)
     sol = model.step()
-    c = np.reshape(sol[:,0:n_cel*n_cel], (-1,n_cel,n_cel))
-    df = pd.DataFrame(np.reshape(c,(20000,n_cel**2)))
-    df.to_csv('save/data/calcium_concentration_20x20.csv', index = False)
+    # c = np.reshape(sol[:,0:n_cel*n_cel], (-1,n_cel,n_cel))
+    # df = pd.DataFrame(np.reshape(c,(-1,n_cel**2)))
+    df = pd.DataFrame(sol[:,0:n_cel*n_cel])
+    df.to_csv('../save/data/c_5x5_10s.csv', index = False)
 
 
     
