@@ -1,11 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
+sys.path.insert(0, '/home/hengji/Documents/hydra_calcium_model/current/fluorescence/')
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 from handy_cell import HandyCell
 from fast_cell import FastCell
+from fluo_encoder import FluoEncoder
+
 
 
 class Cell(HandyCell, FastCell):
@@ -15,8 +20,9 @@ class Cell(HandyCell, FastCell):
         HandyCell.__init__(self, T, dt)
         FastCell.__init__(self, T, dt)
 
-        self.v_plcd = 0.06
+        self.v_plcd = 0.03 # 0.06
         self.k_plcd = 0.3
+        # self.v_ip3r = 0.1
 
     def i_add(self, c, c_t):
         # Additional fluxes from the extracellular space [uM/s]
@@ -28,14 +34,19 @@ class Cell(HandyCell, FastCell):
 
     def stim_ip(self, t):
         # Stimulation
-        if 20 <= t < 30:
-            return 0.04
+        if 70 <= t < 80:
+            return 0.04 * 1.5
         else:
-            return self.ip_decay * self.ip0
+            return self.ip_decay * self.ip0 - self.i_plcd(self.c0)
 
     def stim_v(self, t):
         # Stimulation
-        if 1 <= t < 1.01:
+        if 1 <= t < 1.01 or 3 <= t < 3.0 or 5 <= t < 5.01 or 6.5 <= t < 6.51 \
+            or 8 <= t < 8.01 or 9.5 <= t < 9.51 or 11 <= t < 11.01 or 12.5 <= t < 12.51 \
+            or 14 <= t < 14.01 or 15.5 <= t < 15.51 \
+            or 17 <= t < 17.01 or 19.5 <= t < 19.51:
+            # or 15.6 <= t < 15.61 or 17 <= t < 17.01 or 18.5 <= t < 18.51 or 20.1 <= t < 20.11 or 21.8 <= t < 21.81:
+            # or 39 <= t < 39.01 or 41 <= t < 41.01 or 43 <= t < 43.01 or 45 <= t < 45.01:
             return 1
         else:
             return 0
@@ -76,27 +87,37 @@ class Cell(HandyCell, FastCell):
         sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
         return sol
 
-    def plot(self, a, tmin=0, tmax=50, xlabel = 'time[s]', ylabel = None, color = 'b'):
+    def plot(self, a, tmin=0, tmax=100, xlabel = 'time[s]', ylabel = None, color = 'b'):
         plt.plot(self.time[int(tmin/self.dt):int(tmax/self.dt)], a[int(tmin/self.dt):int(tmax/self.dt)], color)
         if xlabel:  plt.xlabel(xlabel)
         if ylabel:  plt.ylabel(ylabel)
 
 if __name__ == '__main__':
-    model = Cell(T=50)
+    model = Cell(T=100)
     sol = model.step()
     c = sol[:,0]
     c_t = sol[:,1]
     hh = sol[:,2]
     ip = sol[:,3]
+    v = sol[:,4]
+
+    # Encode to fluorescence
+
+    fluo_encoder = FluoEncoder(c, model.T)
+    fluo = fluo_encoder.step()
 
     # Plot the results
     plt.figure()
-    plt.subplot(221)
+    plt.subplot(231)
     model.plot(c, ylabel = 'c[uM]')
-    plt.subplot(222)
+    plt.subplot(232)
     model.plot((c_t - c) * model.gamma, ylabel = 'c_ER[uM]')
-    plt.subplot(223)
+    plt.subplot(233)
     model.plot(hh, ylabel = 'Inactivation ratio of IP3R')
-    plt.subplot(224)
+    plt.subplot(234)
     model.plot(ip, ylabel = 'IP3[uM]')
+    plt.subplot(235)
+    model.plot(fluo, ylabel = 'Fluorescence')
+    plt.subplot(236)
+    model.plot(v, ylabel = 'v[mV]')
     plt.show()

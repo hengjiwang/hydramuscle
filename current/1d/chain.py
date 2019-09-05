@@ -2,15 +2,15 @@
 # -*- coding: utf-8 -*-
 
 import sys
-sys.path.insert(0, '/Users/hengjiwang/Documents/hydra_calcium_model/current/single/')
+sys.path.insert(0, '/home/hengji/Documents/hydra_calcium_model/current/single/')
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 from scipy.sparse import spdiags
-from young_keizer_cell import DeYoungKeizerCell
-from fast_cell import FastCell
+# from young_keizer_cell import DeYoungKeizerCell
+# from fast_cell import FastCell
 from cell import Cell
 
 class Chain(Cell):
@@ -19,7 +19,7 @@ class Chain(Cell):
         # Parameters
         super().__init__(T)
         self.gc = 5e4
-        self.g_ip3 = 1 # 2 
+        self.g_ip3 = 3 # 2 
         self.num = num
         onex = np.ones(self.num)
         self.Dx = spdiags(np.array([onex,-2*onex,onex]),np.array([-1,0,1]),self.num,self.num).toarray()
@@ -27,18 +27,24 @@ class Chain(Cell):
         self.Dx[self.num-1,self.num-1] = -1 
         self.ip_decay = 0.04
 
-    def stim_v(self, t):
-        # Stimulation 
-        if 1 <= t < 1.01 or 3 <= t < 3.01 or 5 <= t < 5.01:
-            return 1
+    def stim_ip(self, t):
+        # Stimulation
+        if 10 <= t < 20:
+            return 0.2 # 0.5
         else:
             return 0
 
-    def stim(self, t):
-        if 25 <= t < 29:
-            return 0.5 # 0.1
-        else:
-            return 0
+    def stim_v(self, t):
+        # Stimulation
+        # if 1 <= t < 1.01 or 2 <= t < 2.01 or 3 <= t < 3.01 or 4 <= t < 4.01 or 5 <= t < 5.01 or 6 <= t < 6.01 \
+        #     or 7 <= t < 7.01 or 8 <= t < 8.01 or 9 <= t < 9.01 or 10 <= t < 10.01 \
+        #     or 11 <= t < 11.01 or 12 <= t < 12.01 \
+        #     or 13.1 <= t < 13.11 or 14.3 <= t < 14.31:
+        #     # or 15.6 <= t < 15.61 or 17 <= t < 17.01 or 18.5 <= t < 18.51 or 20.1 <= t < 20.11 or 21.8 <= t < 21.81:
+        #     # or 39 <= t < 39.01 or 41 <= t < 41.01 or 43 <= t < 43.01 or 45 <= t < 45.01:
+        #     return 1
+        # else:
+        return 0
     
     def rhs(self, y, t):
         # Right-hand side formulation
@@ -59,7 +65,7 @@ class Chain(Cell):
         dipdt = (self.ip_decay * self.ip0 - self.ip_decay * ip) \
              + (self.i_plcd(c) - self.i_plcd(self.c0)) \
              + self.g_ip3 * self.Dx@ip
-        dipdt[0:3] += self.stim(t)
+        dipdt[0:3] += self.stim_ip(t)
         dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_kcnq(v, x, z) + self.i_kv(v, p, q) + self.i_bk(v)) + self.gc*self.Dx@v
         dvdt[0:3] += 1 / self.c_m * 0.1 * self.stim_v(t)
         dndt = (self.n_inf(v) - n)/self.tau_n(v)
@@ -107,7 +113,7 @@ class Chain(Cell):
 
 if __name__ == "__main__":
 
-    n_cel = 50
+    n_cel = 30
 
     model = Chain(n_cel, 100)
     sol = model.step()
