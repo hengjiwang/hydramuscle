@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import matplotlib.pyplot as plt
-from tqdm import tnrange
+from tqdm import tqdm
 import matplotlib.animation as anim
 import numpy as np
 import pandas as pd
@@ -19,7 +19,7 @@ def save_anim(x, interval, filename, canvas = 'flat', show = True):
     x = np.reshape(values, (time_len, space_len, space_len))
 
     if canvas == "flat":
-        for j in tnrange(np.int(len(x)/interval)):
+        for j in tqdm(range(np.int(len(x)/interval))):
             im = plt.imshow(x[interval * j], cmap = 'Greens', animated = True, vmin=1, vmax=2.5)
             ims.append([im])
 
@@ -31,7 +31,7 @@ def save_anim(x, interval, filename, canvas = 'flat', show = True):
     if show: plt.show()
 
 def save_pattern(x, filename, show = True):
-    # Save the 2D data as a spatiotemporal pattern
+    # Save the 2D/1D data as a spatiotemporal pattern
     fig = plt.figure()
     x = x.T
     im = plt.imshow(x, aspect = 'auto')
@@ -40,7 +40,25 @@ def save_pattern(x, filename, show = True):
     fig.savefig(filename)
     if show:    plt.show()
 
+def save_curve(x, filename, show = True):
+    # Save the data as curve figure
+    fig = plt.figure()
+    x = x.values.T
+    plt.plot(x[10])
+    plt.xlabel('t [ms]')
+    plt.ylabel('Fluorescence [A.U.]')
+    plt.title('Fluorescence of Cell 10')
+    fig.savefig(filename)
+    if show:    plt.show()
+
+
 if __name__ == '__main__':
     
-    x = pd.read_csv('../save/data/c_50x1_100s.csv')
-    save_pattern(x, '../save/figures/chain_pattern.png')
+    # x = pd.read_csv('../save/data/c_20x20_100s.csv')
+    # # save_pattern(x, '../save/figures/grid_pattern.png')
+    # save_anim(x, 1, '../save/animations/grid_movie.mp4')
+
+    x = pd.read_csv('../save/data/fluo_50x1_100s.csv')
+    # save_pattern(x, '../save/figures/chain_fluo_pattern.png')
+    # save_anim(x, 1, '../save/animations/grid_fluo_movie.mp4')
+    save_curve(x, '../save/figures/chain_fluo_curve_cell10.png')

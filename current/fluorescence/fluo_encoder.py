@@ -69,16 +69,16 @@ class FluoEncoder:
     def stim(self, t):
         if t >= 10 and t < 10.01:
             return self.r_inc
-        elif t >= 15 and t < 15.01:
-            return self.r_inc
-        elif t >= 20 and t < 20.01:
-            return self.r_inc
-        elif t >= 25 and t < 25.01:
-            return self.r_inc
-        elif t >= 30 and t < 30.01:
-            return self.r_inc
-        elif t >= 35 and t < 35.01:
-            return self.r_inc
+        # elif t >= 15 and t < 15.01:
+        #     return self.r_inc
+        # elif t >= 20 and t < 20.01:
+        #     return self.r_inc
+        # elif t >= 25 and t < 25.01:
+        #     return self.r_inc
+        # elif t >= 30 and t < 30.01:
+        #     return self.r_inc
+        # elif t >= 35 and t < 35.01:
+        #     return self.r_inc
         else:
             return 0
     
