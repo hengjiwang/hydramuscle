@@ -13,12 +13,13 @@ from fluo_encoder import FluoEncoder
 
 
 
-class Cell(HandyCell, FastCell):
+class Cell(HandyCell, FastCell, FluoEncoder):
     # This is a intracellular model without L-type calcium channel
-    def __init__(self, T = 20, dt = 0.001):
+    def __init__(self, T = 100, dt = 0.001):
         # Parameters
         HandyCell.__init__(self, T, dt)
         FastCell.__init__(self, T, dt)
+        FluoEncoder.__init__(self, None, T, dt)
 
         self.v_plcd = 0.03 # 0.06
         self.k_plcd = 0.3
@@ -34,7 +35,7 @@ class Cell(HandyCell, FastCell):
 
     def stim_ip(self, t):
         # Stimulation
-        if 70 <= t < 80:
+        if 50 <= t < 60:
             return 0.04 * 1.5
         else:
             return self.ip_decay * self.ip0 - self.i_plcd(self.c0)
@@ -56,16 +57,24 @@ class Cell(HandyCell, FastCell):
 
         self.hh0 = self.hh_inf(self.c0, self.ip0)
 
-        c, c_t, hh, ip, v, n, hv, hc, x, z, p, q = y
+        c, c_t, hh, ip, v, n, hv, hc, x, z, p, q, g, c1g, c2g, c3g, c4g = y
 
         dcdt = (self.i_ip3r(c, c_t, hh, ip) \
              - self.i_serca(c) \
              + self.i_leak(c, c_t)) \
              + (- self.i_pmca(c) \
                 + self.i_add(c, c_t)) * self.delta \
-             - 1e9 * self.i_cal(v, n, hv, hc) / (2 * self.F * self.d)
+             - 1e9 * self.i_cal(v, n, hv, hc) / (2 * self.F * self.d) \
+             - self.r_1(c, g, c1g) - self.r_2(c, c1g, c2g) \
+             - self.r_3(c, c2g, c3g) - self.r_4(c, c3g, c4g)
+            #  + self.r_1(self.c0, self.g0, self.c1g0) + self.r_2(self.c0, self.c1g0, self.c2g0) \
+            #  + self.r_3(self.c0, self.c2g0, self.c3g0) + self.r_4(self.c0, self.c3g0, self.c4g0)
 
-        dctdt = (- self.i_pmca(c) + self.i_add(c, c_t)) * self.delta - 1e9 * self.i_cal(v, n, hv, hc) / (2 * self.F * self.d)
+        dctdt = (- self.i_pmca(c) + self.i_add(c, c_t)) * self.delta - 1e9 * self.i_cal(v, n, hv, hc) / (2 * self.F * self.d) \
+             - self.r_1(c, g, c1g) - self.r_2(c, c1g, c2g) \
+             - self.r_3(c, c2g, c3g) - self.r_4(c, c3g, c4g)
+            #  + self.r_1(self.c0, self.g0, self.c1g0) + self.r_2(self.c0, self.c1g0, self.c2g0) \
+            #  + self.r_3(self.c0, self.c2g0, self.c3g0) + self.r_4(self.c0, self.c3g0, self.c4g0)
         dhhdt = (self.hh_inf(c, ip) - hh) / self.tau_hh(c, ip)
         dipdt = self.stim_ip(t) - self.ip_decay * ip + self.i_plcd(c)
         dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_kcnq(v, x, z) + self.i_kv(v, p, q) + self.i_bk(v) - 0.004 * self.stim_v(t))
@@ -76,14 +85,20 @@ class Cell(HandyCell, FastCell):
         dzdt = (self.z_inf(v) - z)/self.tau_z(v)
         dpdt = (self.p_inf(v) - p)/self.tau_p(v)
         dqdt = (self.q_inf(v) - q)/self.tau_q(v)
+        dgdt = - self.r_1(c, g, c1g)
+        dc1gdt = (self.r_1(c, g, c1g) - self.r_2(c, c1g, c2g))
+        dc2gdt = (self.r_2(c, c1g, c2g) - self.r_3(c, c2g, c3g))
+        dc3gdt = (self.r_3(c, c2g, c3g) - self.r_4(c, c3g, c4g))
+        dc4gdt = self.r_4(c, c3g, c4g)
 
-        return [dcdt, dctdt, dhhdt, dipdt, dvdt, dndt, dhvdt, dhcdt, dxdt, dzdt, dpdt, dqdt]
+        return [dcdt, dctdt, dhhdt, dipdt, dvdt, dndt, dhvdt, dhcdt, dxdt, dzdt, dpdt, dqdt, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt]
 
     def step(self):
         # Time stepping
         self.hh0 = self.hh_inf(self.c0, self.ip0)
         
-        y0 = [self.c0, self.ct0, self.hh0, self.ip0, self.v0, self.n0, self.hv0, self.hc0, self.x0, self.z0, self.p0, self.q0]
+        y0 = [self.c0, self.ct0, self.hh0, self.ip0, self.v0, self.n0, self.hv0, self.hc0, 
+        self.x0, self.z0, self.p0, self.q0, self.g0, self.c1g0, self.c2g0, self.c3g0, self.c4g0]
         sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
         return sol
 
@@ -100,11 +115,12 @@ if __name__ == '__main__':
     hh = sol[:,2]
     ip = sol[:,3]
     v = sol[:,4]
-
-    # Encode to fluorescence
-
-    fluo_encoder = FluoEncoder(c, model.T)
-    fluo = fluo_encoder.step()
+    g = sol[:, 12]
+    c1g = sol[:, 13]
+    c2g = sol[:, 14]
+    c3g = sol[:, 15]
+    c4g = sol[:, 16]
+    fluo = model.f_total(g, c1g, c2g, c3g, c4g)
 
     # Plot the results
     plt.figure()
