@@ -58,7 +58,7 @@ if __name__ == '__main__':
     # # save_pattern(x, '../save/figures/grid_pattern.png')
     # save_anim(x, 1, '../save/animations/grid_movie.mp4')
 
-    x = pd.read_csv('../save/data/fluo_50x1_100s.csv')
+    x = pd.read_csv('../save/data/c_20x1_200s.csv')
     # save_pattern(x, '../save/figures/chain_fluo_pattern.png')
     # save_anim(x, 1, '../save/animations/grid_fluo_movie.mp4')
-    save_curve(x, '../save/figures/chain_fluo_curve_cell10.png')
+    save_pattern(x, '../save/figures/chain_c_20x1_200s.png')

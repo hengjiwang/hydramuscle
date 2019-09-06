@@ -29,7 +29,7 @@ class HoferCell:
         self.beta = 20
 
         self.c0 = 0.05
-        self.s0 = 100 # 60
+        self.s0 = 60
         self.r0 = 0.94
         self.ip0 = 0.01
 
@@ -84,8 +84,7 @@ class HoferCell:
 
     def i_deg(self, ip):
         # IP3 degradion [uM/s]
-        k9 = (self.i_plcb(self.v8) + self.i_plcd(self.c0)) / self.ip0
-        return k9 * ip
+        return self.k9 * ip
 
     '''Stimulation'''
     def stim(self, t):
@@ -109,6 +108,8 @@ class HoferCell:
 
     def step(self):
         # Time stepping    
+
+        self.v8 = (self.i_deg(self.ip0) - self.i_plcd(self.c0)) / (1 / ((1 + self.kg)*(self.kg/(1+self.kg) + self.a0)) * self.a0)
         y0 = [self.c0, self.s0, self.r0, self.ip0]
         sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
         return sol
