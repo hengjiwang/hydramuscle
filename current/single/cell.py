@@ -21,9 +21,9 @@ class Cell(HandyCell, FastCell, FluoEncoder):
         FastCell.__init__(self, T, dt)
         FluoEncoder.__init__(self, None, T, dt)
 
-        self.v_plcd = 0.03 # 0.06
+        self.v_plcd = 0.06 # 0.06
         self.k_plcd = 0.3
-        # self.v_ip3r = 0.1
+        self.v_ip3r = 0.1
 
     def i_add(self, c, c_t):
         # Additional fluxes from the extracellular space [uM/s]
@@ -85,6 +85,7 @@ class Cell(HandyCell, FastCell, FluoEncoder):
         dzdt = (self.z_inf(v) - z)/self.tau_z(v)
         dpdt = (self.p_inf(v) - p)/self.tau_p(v)
         dqdt = (self.q_inf(v) - q)/self.tau_q(v)
+
         dgdt = - self.r_1(c, g, c1g)
         dc1gdt = (self.r_1(c, g, c1g) - self.r_2(c, c1g, c2g))
         dc2gdt = (self.r_2(c, c1g, c2g) - self.r_3(c, c2g, c3g))

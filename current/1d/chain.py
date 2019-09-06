@@ -25,7 +25,7 @@ class Chain(Cell):
         self.Dx = spdiags(np.array([onex,-2*onex,onex]),np.array([-1,0,1]),self.num,self.num).toarray()
         self.Dx[0,0] = -1
         self.Dx[self.num-1,self.num-1] = -1 
-        self.ip_decay = 0.04
+        self.ip_decay = 0.02 # 0.04
 
     def stim_ip(self, t):
         # Stimulation
