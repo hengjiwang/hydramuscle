@@ -64,7 +64,7 @@ class Chain(Cell):
         dipdt = self.i_plcb(self.v8) + self.i_plcd(c) - self.i_deg(ip) + self.g_ip3 * self.Dx@ip
         dipdt[0:3] += self.i_plcb(self.stim(t)) - self.i_plcb(self.v8)
         dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_kcnq(v, x, z) + self.i_kv(v, p, q) + self.i_bk(v)) + self.gc * self.Dx@v
-        dvdt[0:3] += 1 / self.c_m * 0.1 * self.stim_v(t)
+        dvdt[0:3] += 1 / self.c_m * 0.01 * self.stim_v(t)
         dndt = (self.n_inf(v) - n)/self.tau_n(v)
         dhvdt = (self.hv_inf(v) - hv)/self.tau_hv(v)
         dhcdt = (self.hc_inf(c) - hc)/self.tau_hc()
@@ -134,7 +134,7 @@ if __name__ == "__main__":
 
     # Save the [Ca2+]
     df = pd.DataFrame(sol[:,0:n_cel])
-    df.to_csv('../save/data/c_20x1_200s.csv', index = False)
+    df.to_csv('../save/data/c_20x1_200s_vstim005.csv', index = False)
 
     
 

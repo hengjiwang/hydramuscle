@@ -7,12 +7,14 @@ import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 from fluo_encoder import FluoEncoder
 
-class FluoEncoder2D(FluoEncoder):
+class FluoEncoder1D(FluoEncoder):
     '''An encoder that converts 2D data of [Ca2+] into fluorescence'''
     def __init__(self, c):
         # Parameters
         super().__init__(c)
         self.num = len(c[0])
+        self.T = int(self.dt * len(c))
+        self.time = np.linspace(0, self.T, int(self.T/self.dt))
     
     def rhs(self, y, t):      
         # Right-hand side formulation
@@ -55,8 +57,8 @@ class FluoEncoder2D(FluoEncoder):
 
 if __name__ == '__main__':
 
-    c = pd.read_csv('../save/data/c_50x1_100s.csv').values
-    encoder = FluoEncoder2D(c)
+    c = pd.read_csv('../save/data/c_20x1_200s.csv').values
+    encoder = FluoEncoder1D(c)
     fluo = encoder.step()
     df = pd.DataFrame(fluo)
-    df.to_csv('../save/data/fluo_50x1_100s.csv', index = False)
+    df.to_csv('../save/data/fluo_20x1_200s.csv', index = False)
