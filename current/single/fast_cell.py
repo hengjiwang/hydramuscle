@@ -17,33 +17,33 @@ class FastCell:
         self.c0 = 0.05
         self.v0 = -50 # (-40 to -60)
         self.n0 = 0.005911068856243796
-        self.hv0 = 0.82324
-        self.hc0 = 0.95238
-        self.x0 = 0.05416670048123607
-        self.z0 = 0.65052
-        self.p0 = 0.011595733688999755
+        self.hv0 = 0.8232409668812207
+        self.hc0 = 0.9523809523809523
+        self.x0 = 0.021739041606824133
+        self.z0 = 0.65764736783898
+        self.p0 = 0.009513781267396779
         self.q0 = 0.3697397770822487
-        self.bx0 = 0.06951244510501192
-        self.cx0 = 0.06889595335007676
+        self.bx0 = 0.12080293483113944
+        self.cx0 = 0.378481143072389
 
         # Calcium leak
         self.tau_ex = 0.1 # [s]
         
         # CaL parameters
-        self.g_cal = 0.0005 # [S/cm^2] 
+        self.g_cal = 0.0004 # [S/cm^2] 
         self.e_cal = 51
         self.k_cal = 1 # [uM]
 
         # CaT parameters
-        self.g_cat = 0.0003
+        self.g_cat = 0.0002
         self.e_cat = 51
 
         # KCNQ parameters
-        self.g_kcnq = 0.0001 # [S/cm^2]
+        self.g_kcnq = 0.009 # 0.0001 # [S/cm^2]
         self.e_k = -75 
 
         # Kv parameters
-        self.g_kv = 0.0004
+        self.g_kv = 0.006 # 0.0004
 
         # Background parameters
         self.g_bk = None
@@ -57,7 +57,7 @@ class FastCell:
     '''CaL channel terms (Mahapatra 2018)'''
     def i_cal(self, v, n, hv, hc):
         # L-type calcium channel [mA/cm^2]
-        return self.g_cal * n**2 * hv * hc * (v - self.e_cal)
+        return self.g_cal * n**1 * hv * hc * (v - self.e_cal)
 
     def n_inf(self, v):
         # [-]
@@ -73,11 +73,11 @@ class FastCell:
 
     def tau_n(self, v):
         # [s]
-        return 0.000001 / (1 + np.exp(-(v+22)/308))
+        return 0.000001 / (1 + np.exp(-(v+22)/30))
 
     def tau_hv(self, v):
         # [s]
-        return 0.09 * (1 - 1 / ((1 + np.exp((v+14)/45)) * (1 + np.exp(-(v+9.8)/3.39))))
+        return 0.09 * (1.0-(1.0/(1.0+np.exp((v+14)/45)))*(1.0/(1.0+np.exp(-(v+9.8)/8.89))))
 
     def tau_hc(self):
         # [s]
@@ -88,16 +88,16 @@ class FastCell:
         return self.g_cat * bx**2 * cx * (v - self.e_cat)
 
     def bx_inf(self, v):
-        return 1 / (1 + np.exp(-(v+32.1)/6.9))
+        return 1 / (1 + np.exp(-(v+36.9)/6.6))
 
     def cx_inf(self, v):
-        return 1 / (1 + np.exp((v+63.8)/5.3))
+        return 1 / (1 + np.exp((v+74.8)/50))
 
     def tau_bx(self, v):
-        return 0.00045 + 0.0039 / (1 + ((v+66)/26)**2)
+        return 0.1 * (0.00045 + 0.0039 / (1 + ((v+66)/26)**2))
 
     def tau_cx(self, v):
-        return 0.15 - 0.15 / ((1 + np.exp((v-417.43)/203.18))*(1 + np.exp(-(v+61.11)/8.07)))
+        return 0.5 * (0.15 - (0.15/((1+ np.exp((v-417.43)/203.18))*(1+np.exp(-(v+61.11)/8.07)))))
     
     '''KCNQ1 channel terms (Mahapatra 2018)'''
     def i_kcnq(self, v, x, z):
@@ -106,35 +106,35 @@ class FastCell:
 
     def x_inf(self, v):
         # [-]
-        return 1 / (1 + np.exp(-(v+7.1)/15))
+        return 1 / (1 + np.exp(-(v-7.1)/15))
 
     def z_inf(self, v):
         # [-]
-        return 0.55 / (1 + np.exp((v+55)/9)) + 0.45
+        return 0.55 / (1 + np.exp((v+54.5)/9)) + 0.45
 
     def tau_x(self, v):
         # [s]
-        return 0.001 / (1 + np.exp((v+15)/20))
+        return 0.001 * (1/(1+(((v+15)/20)**2)))
 
     def tau_z(self, v):
         # [s]
-        return 0.01 * (200 + 10 / (1 + 2 * ((v+56)/120)**5))
+        return 0.01 * (200+ (10/(1+(((v+54.18)/120)**5))))
 
     '''Kv channels (Mahapatra 2018)'''
     def i_kv(self, v, p, q):
-        return self.g_kv * p * q * (v - self.e_k)
+        return self.g_kv * p**2 * q * (v - self.e_k)
     
     def p_inf(self, v):
-        return 1 / (1 + np.exp(-(v+1.1)/11))
+        return 1 / (1 + np.exp(-(v-1.1)/11))
 
     def q_inf(self, v):
         return 1 / (1 + np.exp((v+58)/15))
 
     def tau_p(self, v):
-        return 0.001 / (1 + np.exp((v+15)/20))
+        return 0.001 * (1/(1+(((v+15)/20)**2)))
 
     def tau_q(self, v):
-        return 0.4 * (200 + 10 / (1 + 2*((v+54.18)/120)**5))
+        return 0.001 * (200+ (10/(1+(((v+54.18)/120)**5))))
 
     '''Background terms'''
     def i_bk(self, v):
@@ -143,9 +143,6 @@ class FastCell:
         + self.i_cat(self.v0, self.bx0, self.cx0) \
         + self.i_kcnq(self.v0, self.x0, self.z0) \
         + self.i_kv(self.v0, self.p0, self.q0))/(self.v0 - self.e_bk)
-
-        print(g_bk)
-
         return  g_bk * (v - self.e_bk)
 
     '''Calcium terms'''
@@ -169,7 +166,7 @@ class FastCell:
             + 1e9 * self.i_cal(self.v0, self.n0, self.hv0, self.hc0) / (2 * self.F * self.d) \
             - 1e9 * self.i_cat(v, bx, cx) / (2 * self.F * self.d) \
             + 1e9 * self.i_cat(self.v0, self.bx0, self.cx0) / (2 * self.F * self.d)
-        dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_cat(v, bx, cx) + self.i_kcnq(v, x, z) + self.i_kv(v, p, q) + self.i_bk(v) - 0.004 * self.stim(t))
+        dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_cat(v, bx, cx) + self.i_kcnq(v, x, z) + self.i_kv(v, p, q) + self.i_bk(v) - 0.001 * self.stim(t))
         dndt = (self.n_inf(v) - n)/self.tau_n(v)
         dhvdt = (self.hv_inf(v) - hv)/self.tau_hv(v)
         dhcdt = (self.hc_inf(c) - hc)/self.tau_hc()
@@ -185,14 +182,14 @@ class FastCell:
     def step(self):
         # Time stepping
 
-        self.n0 = self.n_inf(self.v0)
+        # self.n0 = self.n_inf(self.v0)
 
         y0 = [self.c0, self.v0, self.n0, self.hv0, self.hc0, self.x0, self.z0, self.p0, self.q0, self.bx0, self.cx0]
         sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
         return sol
 
     '''Visualize results'''
-    def plot(self, a, tmin=0, tmax=2, xlabel = 'time[s]', ylabel = None, color = 'b'):
+    def plot(self, a, tmin=0, tmax=5, xlabel = 'time[s]', ylabel = None, color = 'b'):
         plt.plot(self.time[int(tmin/self.dt):int(tmax/self.dt)], a[int(tmin/self.dt):int(tmax/self.dt)], color)
         if xlabel:  plt.xlabel(xlabel)
         if ylabel:  plt.ylabel(ylabel)
