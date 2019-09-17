@@ -25,21 +25,21 @@ class FastCell:
         self.hc0 = 0.95238
         self.x0 = 0.05416670048123607
         self.z0 = 0.65052
-        self.xa0 = 0.0935111953309457
-        self.xab10 = 0.8787194884600014
-        self.bx0 = 0.06951244510501192
-        self.cx0 = 0.06889595335007676
+        self.xa0 = None 
+        self.xab10 = None 
+        self.bx0 = None # 0.06951244510501192
+        self.cx0 = None # 0.06889595335007676
 
         # Calcium leak
         self.tau_ex = 0.1 # [s]
         
         # CaL parameters
-        self.g_cal = 0.0005 # [S/cm^2] 
+        self.g_cal = 0.0004 # [S/cm^2] 
         self.e_cal = 51
         self.k_cal = 1 # [uM]
 
         # CaT parameters
-        self.g_cat = 0.003 # 0.0003
+        self.g_cat = 0.0015
         self.e_cat = 51
 
         # KCNQ parameters
@@ -47,7 +47,7 @@ class FastCell:
         self.e_k = -75 
 
         # KCa parameters
-        self.g_kca = 0.0001
+        self.g_kca = 0.00015
         self.e_k = -83.6
         self.pa = 0.2
         self.pb = 0.1
@@ -95,16 +95,16 @@ class FastCell:
         return self.g_cat * bx**2 * cx * (v - self.e_cat)
 
     def bx_inf(self, v):
-        return 1 / (1 + np.exp(-(v+32.1)/6.9))
+        return 1 / (1 + np.exp(-(v+36.9)/6.6))
 
     def cx_inf(self, v):
         return 1 / (1 + np.exp((v+63.8)/5.3))
 
     def tau_bx(self, v):
-        return 0.00045 + 0.0039 / (1 + ((v+66)/26)**2)
+        return (0.00045 + 0.0039 / (1 + ((v+66)/26)**2))
 
     def tau_cx(self, v):
-        return 0.15 - 0.15 / ((1 + np.exp((v-417.43)/203.18))*(1 + np.exp(-(v+61.11)/8.07)))
+        return (0.15 - (0.15/((1+ np.exp((v-417.43)/203.18))*(1+np.exp(-(v+61.11)/8.07)))))
     
     '''KCNQ1 channel terms (Mahapatra 2018)'''
     def i_kcnq(self, v, x, z):
@@ -212,6 +212,13 @@ class FastCell:
         # Time stepping
 
         self.n0 = self.n_inf(self.v0)
+        self.xa0 = self.ssa(self.v0, self.c0)
+        self.xab10 = self.ssab1(self.v0, self.c0)
+        self.bx0 = self.bx_inf(self.v0)
+        self.cx0 = self.cx_inf(self.v0)
+
+        print(self.bx0, self.cx0)
+
 
         y0 = [self.c0, self.v0, self.n0, self.hv0, self.hc0, self.x0, self.z0, self.xa0, self.xab10, self.bx0, self.cx0]
         sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
@@ -251,7 +258,7 @@ if __name__ == '__main__':
     plt.subplot(425)
     model.plot(model.i_kcnq(v, x, z), ylabel='i_kncq[mA/cm^2]')
     plt.subplot(426)
-    model.plot(model.i_kca(v, c, xa, xab1), ylabel='i_kv[mA/cm^2]')
+    model.plot(model.i_kca(v, c, xa, xab1), ylabel='i_kca[mA/cm^2]')
     plt.subplot(427)
     model.plot([0.004 * model.stim(t) for t in model.time], ylabel='i_stim[mA/cm^2]', color = 'r')
     plt.show()
