@@ -14,6 +14,10 @@ class FastCell:
         self.V_cyt = 6e-9 # [cm^3]
         self.d = 10e-4 # 10e-4 # [cm]
         self.F = 96485332.9 # [mA*s/mol]
+        self.R = 8314000 # [uJ/K/mol]
+        self.Temp = 308 # [K]
+
+
         self.c0 = 0.05
         self.v0 = -50 # (-40 to -60)
         self.n0 = 0.005911068856243796
@@ -21,8 +25,8 @@ class FastCell:
         self.hc0 = 0.95238
         self.x0 = 0.05416670048123607
         self.z0 = 0.65052
-        self.p0 = 0.011595733688999755
-        self.q0 = 0.3697397770822487
+        self.xa0 = 0.0935111953309457
+        self.xab10 = 0.8787194884600014
         self.bx0 = 0.06951244510501192
         self.cx0 = 0.06889595335007676
 
@@ -42,8 +46,11 @@ class FastCell:
         self.g_kcnq = 0.0001 # [S/cm^2]
         self.e_k = -75 
 
-        # Kv parameters
-        self.g_kv = 0.0004
+        # KCa parameters
+        self.g_kca = 0.0001
+        self.e_k = -83.6
+        self.pa = 0.2
+        self.pb = 0.1
 
         # Background parameters
         self.g_bk = None
@@ -120,21 +127,42 @@ class FastCell:
         # [s]
         return 0.01 * (200 + 10 / (1 + 2 * ((v+56)/120)**5))
 
-    '''Kv channels (Mahapatra 2018)'''
-    def i_kv(self, v, p, q):
-        return self.g_kv * p * q * (v - self.e_k)
-    
-    def p_inf(self, v):
-        return 1 / (1 + np.exp(-(v+1.1)/11))
+    '''BK channels (Tong 2011)'''
+    def i_kca(self, v, c, xa, xab1):
 
-    def q_inf(self, v):
-        return 1 / (1 + np.exp((v+58)/15))
+        def ia(xa, v):
+            return xa * (v - self.e_k)
+        
+        def iab1(xab1, v):
+            return xab1 * (v - self.e_k)
 
-    def tau_p(self, v):
-        return 0.001 / (1 + np.exp((v+15)/20))
+        return self.g_kca * (self.pa * ia(xa, v) + self.pb * iab1(xab1, v))
+        
+    def ssa(self, v, c):
+        
+        def za(c):
+            return 8.38 / (1 + ((1000*c + 1538.29)/739.06)**2) - 0.749 / (1 + ((1000*c-0.063)/0.162)**2)
 
-    def tau_q(self, v):
-        return 0.4 * (200 + 10 / (1 + 2*((v+54.18)/120)**5))
+        def v05a(c):
+            return 5011.47 / (1 + ((1000*c+0.238)/0.000239)**0.423) - 37.51
+
+        return 1 / (1 + np.exp(-za(c) * self.F * (v - v05a(c)) / self.R / self.Temp))
+
+    def tau_a(self, v):
+        return 0.001 * 2.41 / (1 + ((v-158.78)/-52.15)**2)
+
+    def ssab1(self, v, c):
+
+        def zab1(c):
+            return 1.4 / (1 + ((1000*c + 228.71)/684.95)**2) - 0.681 / (1 + ((1000*c - 0.219)/0.428)**2)
+
+        def v05ab1(c):
+            return 8540.23 / (1 + ((1000*c + 0.401)/0.00399)**0.668) - 109.28
+
+        return 1 / (1 + np.exp(- zab1(c) * self.F * (v - v05ab1(c)) / self.R / self.Temp))
+
+    def tau_ab1(self, v):
+        return 0.001 * 13.8 / (1 + ((v-153.02)/66.5)**2)
 
     '''Background terms'''
     def i_bk(self, v):
@@ -142,7 +170,7 @@ class FastCell:
         g_bk = - (self.i_cal(self.v0, self.n0, self.hv0, self.hc0) \
         + self.i_cat(self.v0, self.bx0, self.cx0) \
         + self.i_kcnq(self.v0, self.x0, self.z0) \
-        + self.i_kv(self.v0, self.p0, self.q0))/(self.v0 - self.e_bk)
+        + self.i_kca(self.v0, self.c0, self.xa0, self.xab10))/(self.v0 - self.e_bk)
 
         return  g_bk * (v - self.e_bk)
 
@@ -161,36 +189,36 @@ class FastCell:
     '''Numerical terms'''
     def rhs(self, y, t):
         # Right-hand side function
-        c, v, n, hv, hc, x, z, p, q, bx, cx = y
+        c, v, n, hv, hc, x, z, xa, xab1, bx, cx = y
         dcdt = - self.r_ex(c) \
             - 1e9 * self.i_cal(v, n, hv, hc) / (2 * self.F * self.d) \
             + 1e9 * self.i_cal(self.v0, self.n0, self.hv0, self.hc0) / (2 * self.F * self.d) \
             - 1e9 * self.i_cat(v, bx, cx) / (2 * self.F * self.d) \
             + 1e9 * self.i_cat(self.v0, self.bx0, self.cx0) / (2 * self.F * self.d)
-        dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_cat(v, bx, cx) + self.i_kcnq(v, x, z) + self.i_kv(v, p, q) + self.i_bk(v) - 0.001 * self.stim(t))
+        dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_cat(v, bx, cx) + self.i_kcnq(v, x, z) + self.i_kca(v, c, xa, xab1) + self.i_bk(v) - 0.001 * self.stim(t))
         dndt = (self.n_inf(v) - n)/self.tau_n(v)
         dhvdt = (self.hv_inf(v) - hv)/self.tau_hv(v)
         dhcdt = (self.hc_inf(c) - hc)/self.tau_hc()
         dxdt = (self.x_inf(v) - x)/self.tau_x(v)
         dzdt = (self.z_inf(v) - z)/self.tau_z(v)
-        dpdt = (self.p_inf(v) - p)/self.tau_p(v)
-        dqdt = (self.q_inf(v) - q)/self.tau_q(v)
+        dxadt = (self.ssa(v, c) - xa)/self.tau_a(v)
+        dxab1dt = (self.ssab1(v, c) - xab1)/self.tau_ab1(v)
         dbxdt = (self.bx_inf(v) - bx)/self.tau_bx(v)
         dcxdt = (self.cx_inf(v) - cx)/self.tau_cx(v)
 
-        return [dcdt, dvdt, dndt, dhvdt, dhcdt, dxdt, dzdt, dpdt, dqdt, dbxdt, dcxdt]
+        return [dcdt, dvdt, dndt, dhvdt, dhcdt, dxdt, dzdt, dxadt, dxab1dt, dbxdt, dcxdt]
 
     def step(self):
         # Time stepping
 
         self.n0 = self.n_inf(self.v0)
 
-        y0 = [self.c0, self.v0, self.n0, self.hv0, self.hc0, self.x0, self.z0, self.p0, self.q0, self.bx0, self.cx0]
+        y0 = [self.c0, self.v0, self.n0, self.hv0, self.hc0, self.x0, self.z0, self.xa0, self.xab10, self.bx0, self.cx0]
         sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
         return sol
 
     '''Visualize results'''
-    def plot(self, a, tmin=0, tmax=2, xlabel = 'time[s]', ylabel = None, color = 'b'):
+    def plot(self, a, tmin=0, tmax=20, xlabel = 'time[s]', ylabel = None, color = 'b'):
         plt.plot(self.time[int(tmin/self.dt):int(tmax/self.dt)], a[int(tmin/self.dt):int(tmax/self.dt)], color)
         if xlabel:  plt.xlabel(xlabel)
         if ylabel:  plt.ylabel(ylabel)
@@ -205,8 +233,8 @@ if __name__ == '__main__':
     hc = sol[:, 4]
     x = sol[:, 5]
     z = sol[:, 6]
-    p = sol[:, 7]
-    q = sol[:, 8]
+    xa = sol[:, 7]
+    xab1 = sol[:, 8]
     bx = sol[:, 9]
     cx = sol[:, 10]
 
@@ -223,7 +251,7 @@ if __name__ == '__main__':
     plt.subplot(425)
     model.plot(model.i_kcnq(v, x, z), ylabel='i_kncq[mA/cm^2]')
     plt.subplot(426)
-    model.plot(model.i_kv(v, p, q), ylabel='i_kv[mA/cm^2]')
+    model.plot(model.i_kca(v, c, xa, xab1), ylabel='i_kv[mA/cm^2]')
     plt.subplot(427)
     model.plot([0.004 * model.stim(t) for t in model.time], ylabel='i_stim[mA/cm^2]', color = 'r')
     plt.show()
