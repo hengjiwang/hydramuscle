@@ -90,7 +90,7 @@ class HoferCell:
     def stim(self, t):
         # Stimulation
         if 10 <= t < 14:
-            return 1
+            return 1 # 1
         else:
             return self.v8
 
@@ -110,6 +110,8 @@ class HoferCell:
         # Time stepping    
 
         self.v8 = (self.i_deg(self.ip0) - self.i_plcd(self.c0)) / (1 / ((1 + self.kg)*(self.kg/(1+self.kg) + self.a0)) * self.a0)
+        self.r0 = self.ki**2 / (self.ki**2 + self.c0**2)
+
         y0 = [self.c0, self.s0, self.r0, self.ip0]
         sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
         return sol
