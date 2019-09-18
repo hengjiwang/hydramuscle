@@ -35,7 +35,7 @@ def save_pattern(x, filename, show = True):
     # Save the 2D/1D data as a spatiotemporal pattern
     ax = plt.figure().gca()
     x = x.T
-    im = plt.imshow(x, aspect = 'auto', cmap='Greens')
+    im = plt.imshow(x, aspect = 'auto')
     plt.ylabel('Cell #')
     plt.xlabel('t [ms]')
     # fig.savefig(filename)
@@ -47,12 +47,12 @@ def save_pattern(x, filename, show = True):
 def save_curve(x, filename, show = True):
     # Save the data as curve figure
     fig = plt.figure()
-    x = x.values.T
-    plt.plot(x[10])
+    x = x.values
+    plt.plot(x)
     plt.xlabel('t [ms]')
-    plt.ylabel('Fluorescence [A.U.]')
-    plt.title('Fluorescence of Cell 10')
-    fig.savefig(filename)
+    # plt.ylabel('Fluorescence [A.U.]')
+    # plt.title('Fluorescence of Cell 10')
+    # fig.savefig(filename)
     if show:    plt.show()
 
 
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     # # save_pattern(x, '../save/figures/grid_pattern.png')
     # save_anim(x, 1, '../save/animations/grid_movie.mp4')
 
-    x = pd.read_csv('../save/data/fluo_20x1_200s.csv')
+    x = pd.read_csv('../save/data/fluo_20x1_200s_kca.csv')
     # save_pattern(x, '../save/figures/chain_fluo_pattern.png')
     # save_anim(x, 1, '../save/animations/grid_fluo_movie.mp4')
-    save_pattern(x, None)
+    save_curve(x, None)

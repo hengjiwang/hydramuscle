@@ -19,40 +19,42 @@ class Chain(Cell):
         # Parameters
         super().__init__(T)
         self.gc = 1000 # 5e4
-        self.g_ip3 = 2 
+        self.g_ip3 = 1
         self.num = num
         onex = np.ones(self.num)
         self.Dx = spdiags(np.array([onex,-2*onex,onex]),np.array([-1,0,1]),self.num,self.num).toarray()
         self.Dx[0,0] = -1
         self.Dx[self.num-1,self.num-1] = -1 
-        self.k9 = 0.04
-        # self.ki = 0.6
-        self.s0 = 100
+        self.k9 = 0.02
+        # self.ki = 0.5
+        # self.s0 = 100
         self.d = 20e-4
+        # self.k3 = 1
+        self.v7 = 0.06
 
     def stim(self, t):
         # Stimulation
         if 20 <= t < 24:
-            return self.v8
+            return 1
         else:
             return self.v8
 
     def stim_v(self, t):
         # Stimulation
 
-        if 1 <= t < 1.01 or 5 <= t < 5.01 or 9 <= t < 9.01 \
-            or 12 <= t < 12.01 or 15 <= t < 15.01 or 17 <= t < 17.01 \
-            or 19 <= t < 19.01 \
-            or 21 <= t < 21.01 or 23 <= t < 23.01 or 25 <= t < 25.01 \
-            or 27 <= t < 27.01 or 30 <= t < 30.01 or 33 <= t < 33.01 or 36 <= t < 36.01 \
-            or 40 <= t < 40.01 or 43 <= t < 43.01:
+        # if 1 <= t < 1.01 or 5 <= t < 5.01 or 9 <= t < 9.01 \
+        #     or 12 <= t < 12.01 or 15 <= t < 15.01 or 17 <= t < 17.01 \
+        #     or 19 <= t < 19.01 \
+        #     or 21 <= t < 21.01 or 23 <= t < 23.01 or 25 <= t < 25.01 \
+        #     or 27 <= t < 27.01 or 30 <= t < 30.01 or 33 <= t < 33.01 or 36 <= t < 36.01 \
+        #     or 40 <= t < 40.01 or 43 <= t < 43.01:
 
-        # if 101 <= t < 101.01 or 103 <= t < 103.01 or 105 <= t < 105.01 \
-        #     or 109 <= t < 109.01 or 113 <= t < 113.01 or 117 <= t < 117.01 or 121 <= t < 121.01 \
-        #     or 125 <= t < 125.01 \
-        #     or 130 <= t < 130.01 or 135 <= t < 135.01 or 140 <= t < 140.01 \
-        #     or 145 <= t < 145.01 or 150 <= t < 150.01 or 155 <= t < 155.01 or 160 <= t < 160.01 \
-        #     or 166 <= t < 166.01 or 172 <= t < 172.01:
+        if 101 <= t < 101.01 or 103 <= t < 103.01 or 105 <= t < 105.01 \
+            or 109 <= t < 109.01 or 113 <= t < 113.01 or 117 <= t < 117.01 or 121 <= t < 121.01 \
+            or 125 <= t < 125.01 \
+            or 130 <= t < 130.01 or 135 <= t < 135.01 or 140 <= t < 140.01 \
+            or 145 <= t < 145.01 or 150 <= t < 150.01 or 155 <= t < 155.01 or 160 <= t < 160.01 \
+            or 166 <= t < 166.01 or 172 <= t < 172.01:
             return 1
         else:
             return 0
@@ -113,7 +115,7 @@ class Chain(Cell):
         sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
         return sol
 
-    def plot(self, a, tmin=0, tmax=100, xlabel = 'time[s]', ylabel = None):
+    def plot(self, a, tmin=0, tmax=200, xlabel = 'time[s]', ylabel = None):
         # Plot function
         plt.plot(self.time[int(tmin/self.dt):int(tmax/self.dt)], a[int(tmin/self.dt):int(tmax/self.dt)])
         if xlabel:  plt.xlabel(xlabel)
@@ -123,7 +125,7 @@ if __name__ == "__main__":
 
     n_cel = 20
 
-    model = Chain(n_cel, 100)
+    model = Chain(n_cel, 200)
     sol = model.step()
     c = sol[:,0:n_cel]
     s = sol[:,n_cel:2*n_cel]

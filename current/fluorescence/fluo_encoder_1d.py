@@ -57,8 +57,8 @@ class FluoEncoder1D(FluoEncoder):
 
 if __name__ == '__main__':
 
-    c = pd.read_csv('../save/data/c_20x1_200s.csv').values
+    c = pd.read_csv('../save/data/c_20x1_200s_kca.csv').values
     encoder = FluoEncoder1D(c)
     fluo = encoder.step()
     df = pd.DataFrame(fluo)
-    df.to_csv('../save/data/fluo_20x1_200s.csv', index = False)
+    df.to_csv('../save/data/fluo_20x1_200s_kca.csv', index = False)
