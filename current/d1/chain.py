@@ -19,20 +19,23 @@ class Chain(Cell):
         # Parameters
         super().__init__(T)
         self.gc = 1000 # 5e4
-        self.g_ip3 = 1 # 2 
+        self.g_ip3 = 2 
         self.num = num
         onex = np.ones(self.num)
         self.Dx = spdiags(np.array([onex,-2*onex,onex]),np.array([-1,0,1]),self.num,self.num).toarray()
         self.Dx[0,0] = -1
         self.Dx[self.num-1,self.num-1] = -1 
         self.k9 = 0.04
+        # self.ki = 0.6
+        self.s0 = 100
+        self.d = 20e-4
 
-    # def stim(self, t):
-    #     # Stimulation
-    #     if 20 <= t < 24:
-    #         return 1
-    #     else:
-    #         return self.v8
+    def stim(self, t):
+        # Stimulation
+        if 20 <= t < 24:
+            return self.v8
+        else:
+            return self.v8
 
     def stim_v(self, t):
         # Stimulation
@@ -68,7 +71,7 @@ class Chain(Cell):
         dsdt = self.beta * (self.i_serca(c) - self.i_rel(c, s, ip, r) - self.i_leak(c, s))
         drdt = self.v_r(c, r)
         dipdt = self.i_plcb(self.v8) + self.i_plcd(c) - self.i_deg(ip) + self.g_ip3 * self.Dx@ip
-        dipdt[0:3] += 0 # self.i_plcb(self.stim(t)) - self.i_plcb(self.v8)
+        dipdt[0:3] += self.i_plcb(self.stim(t)) - self.i_plcb(self.v8)
         dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_cat(v, bx, cx) + self.i_kca(v, c) + self.i_bk(v)) + self.gc * self.Dx@v
         dvdt[0:3] += 1 / self.c_m * 0.01 * self.stim_v(t)
         dndt = (self.n_inf(v) - n)/self.tau_n(v)

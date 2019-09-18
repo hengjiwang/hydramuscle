@@ -46,7 +46,7 @@ class FastCell:
         self.g_kv = 0 # 0.0004
 
         # BK parameters
-        self.g_kca = 45.7e-9 / self.A_cyt
+        self.g_kca =  10e-9 / self.A_cyt # 45.7e-9 / self.A_cyt
 
         # Background parameters
         self.g_bk = None
