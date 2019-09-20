@@ -142,6 +142,7 @@ class FastCell:
     '''BK channel terms (Corrias 2007)'''
     def i_kca(self, v, c):
         return self.g_kca * 1 / (1 + np.exp(v/(-17) - 2 * np.log(c))) * (v - self.e_k)
+        # return 5 * self.g_kca * c**2 / (c**2 + 5**2) * (v - self.e_k)
 
     '''Background terms'''
     def i_bk(self, v):
@@ -218,7 +219,7 @@ class FastCell:
         if ylabel:  plt.ylabel(ylabel)
 
 if __name__ == '__main__':
-    model = FastCell(100)
+    model = FastCell(2)
     sol = model.step()
     c = sol[:, 0]
     v = sol[:, 1]

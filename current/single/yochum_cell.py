@@ -7,7 +7,7 @@ from scipy.integrate import odeint
 
 class YochumCell:
     '''Following Yochum 2016'''
-    def __init__(self, T = 20, dt = 0.0001):
+    def __init__(self, T = 20, dt = 0.001):
         # General parameters
         self.c_m = 1e-3 # [mF/cm^2]
         self.R = 8.314 # [J/K/mol]
@@ -80,7 +80,7 @@ class YochumCell:
     '''Stimulation'''
     def i_stim(self, t):
         if 1 <= t < 1.4:
-            return 0.1175
+            return 0 # 0.1175
         else:
             return 0
 
@@ -105,13 +105,13 @@ class YochumCell:
         return sol
 
     '''Visualize results'''
-    def plot(self, a, tmin=0, tmax=100, xlabel = 'time[s]', ylabel = None, color = 'b'):
+    def plot(self, a, tmin=0, tmax=20, xlabel = 'time[s]', ylabel = None, color = 'b'):
         plt.plot(self.time[int(tmin/self.dt):int(tmax/self.dt)], a[int(tmin/self.dt):int(tmax/self.dt)], color)
         if xlabel:  plt.xlabel(xlabel)
         if ylabel:  plt.ylabel(ylabel)
 
 if __name__ == '__main__':
-    model = YochumCell(100)
+    model = YochumCell(20)
     sol = model.step()
     c = sol[:, 0]
     v = sol[:, 1]

@@ -59,7 +59,7 @@ class Cell(HoferCell, FastCell, FluoEncoder):
         #     or 130 <= t < 130.01 or 135 <= t < 135.01 or 140 <= t < 140.01 \
         #     or 145 <= t < 145.01 or 150 <= t < 150.01 or 155 <= t < 155.01 or 160 <= t < 160.01 \
         #     or 166 <= t < 166.01 or 172 <= t < 172.01:
-            return 0
+            return 0 # 1
         else:
             return 0
 
