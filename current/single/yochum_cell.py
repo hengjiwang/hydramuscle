@@ -7,7 +7,7 @@ from scipy.integrate import odeint
 
 class YochumCell:
     '''Following Yochum 2016'''
-    def __init__(self, T = 20, dt = 0.001):
+    def __init__(self, T = 20, dt = 0.0001):
         # General parameters
         self.c_m = 1e-3 # [mF/cm^2]
         self.R = 8.314 # [J/K/mol]
@@ -16,8 +16,8 @@ class YochumCell:
  
         # Calcium current parameters
         self.g_ca = 0.02694061 # [mS/cm^2]
-        self.v_ca = -20.07 # [mV]
-        self.r_ca = 5.97 # [mV]
+        self.v_ca = -20.07451779 # [mV]
+        self.r_ca = 5.97139101 # [mV]
         self.j_back = 0.02397327 # [uA/cm^2]
         self.co = 3000 # [uM]
 
@@ -71,11 +71,15 @@ class YochumCell:
 
     '''Leak channel'''
     def i_l(self, v):
-        return self.g_l * (v - self.e_l)
+
+        e_l = self.v0 - (- self.i_ca(self.v0, self.c0) \
+             - self.i_k(self.v0, self.n0) - self.i_kca(self.v0, self.c0)) / self.g_l
+
+        return self.g_l * (v - e_l)
 
     '''Stimulation'''
     def i_stim(self, t):
-        if 1 <= t < 5:
+        if 1 <= t < 1.4:
             return 0.1175
         else:
             return 0
@@ -92,6 +96,10 @@ class YochumCell:
         return [dcdt, dvdt, dndt]
 
     def step(self):
+        
+        self.n0 = self.n_inf(self.v0)
+        self.k_ca = -self.alpha*self.i_ca(self.v0, self.c0) / self.c0
+
         y0 = [self.c0, self.v0, self.n0]
         sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
         return sol
@@ -110,10 +118,12 @@ if __name__ == '__main__':
     n = sol[:, 2]
 
     plt.figure()
-    plt.subplot(211)
+    plt.subplot(311)
     model.plot(c, ylabel='c[uM]')
-    plt.subplot(212)
+    plt.subplot(312)
     model.plot(v, ylabel='v[mV]')
+    plt.subplot(313)
+    model.plot(n, ylabel='n')
     plt.show()
 
     
