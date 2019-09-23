@@ -28,7 +28,7 @@ class Chain(Cell):
         self.k9 = 0.02
         # self.ki = 0.5
         # self.s0 = 100
-        self.d = 20e-4
+        self.d = 10e-4 # 20e-4
         # self.k3 = 1
         self.v7 = 0.06
         self.k2 = 0.05
@@ -161,7 +161,7 @@ if __name__ == "__main__":
 
     # Save the [Ca2+]
     df = pd.DataFrame(sol[:,0:n_cel])
-    df.to_csv('../save/data/c_20x1_200s_include_fluo.csv', index = False)
+    df.to_csv('../save/data/c_20x1_200s_include_fluo_d_10.csv', index = False)
 
     
 

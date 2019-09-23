@@ -5,6 +5,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
+import sys
+sys.path.insert(0, '/home/hengji/Documents/hydra_calcium_model/current/force/')
+from maggio_force_encoder import MHMEncoder
+
 class YochumCell:
     '''Following Yochum 2016'''
     def __init__(self, T = 20, dt = 0.001):
@@ -80,7 +84,7 @@ class YochumCell:
     '''Stimulation'''
     def i_stim(self, t):
         if 1 <= t < 1.4:
-            return 0 # 0.1175
+            return 0.1175
         else:
             return 0
 
@@ -116,14 +120,18 @@ if __name__ == '__main__':
     c = sol[:, 0]
     v = sol[:, 1]
     n = sol[:, 2]
+    encoder = MHMEncoder(c)
+    force = encoder.step()
 
     plt.figure()
-    plt.subplot(311)
+    plt.subplot(221)
     model.plot(c, ylabel='c[uM]')
-    plt.subplot(312)
+    plt.subplot(222)
     model.plot(v, ylabel='v[mV]')
-    plt.subplot(313)
+    plt.subplot(223)
     model.plot(n, ylabel='n')
+    plt.subplot(224)
+    model.plot(force, ylabel = 'Force(mN)')
     plt.show()
 
     

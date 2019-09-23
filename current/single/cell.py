@@ -3,6 +3,7 @@
 
 import sys
 sys.path.insert(0, '/home/hengji/Documents/hydra_calcium_model/current/fluorescence/')
+sys.path.insert(0, '/home/hengji/Documents/hydra_calcium_model/current/force/')
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,6 +11,7 @@ from scipy.integrate import odeint
 from fast_cell import FastCell
 from hofer_cell import HoferCell
 from fluo_encoder import FluoEncoder
+from maggio_force_encoder import MHMEncoder
 
 
 class Cell(HoferCell, FastCell, FluoEncoder):
@@ -22,7 +24,7 @@ class Cell(HoferCell, FastCell, FluoEncoder):
         HoferCell.__init__(self, T, dt)
         self.k2 = 0.05 # 0.1
         self.s0 = 200
-        self.d = 20e-4
+        self.d = 10e-4 # 20e-4
         # self.v7 = 0
 
     def i_out(self, c):
@@ -137,19 +139,23 @@ if __name__ == '__main__':
     c3g = sol[:, 13]
     c4g = sol[:, 14]
     fluo = model.f_total(g, c1g, c2g, c3g, c4g)
+    encoder = MHMEncoder(c)
+    force = encoder.step()
 
     # Plot the results
     plt.figure()
-    plt.subplot(231)
+    plt.subplot(241)
     model.plot(c, ylabel = 'c[uM]')
-    plt.subplot(232)
+    plt.subplot(242)
     model.plot(s, ylabel = 'c_ER[uM]')
-    plt.subplot(233)
+    plt.subplot(243)
     model.plot(r, ylabel = 'Inactivation ratio of IP3R')
-    plt.subplot(234)
+    plt.subplot(244)
     model.plot(ip, ylabel = 'IP3[uM]')
-    plt.subplot(235)
+    plt.subplot(245)
     model.plot(fluo, ylabel = 'Fluorescence')
-    plt.subplot(236)
+    plt.subplot(246)
     model.plot(v, ylabel = 'v[mV]')
+    plt.subplot(247)
+    model.plot(force, ylabel = 'Active force')
     plt.show()
