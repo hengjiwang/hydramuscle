@@ -20,6 +20,10 @@ class Cell(HoferCell, FastCell, FluoEncoder):
         FluoEncoder.__init__(self, None, T, dt)
         FastCell.__init__(self, T, dt)
         HoferCell.__init__(self, T, dt)
+        self.k2 = 0.05 # 0.1
+        self.s0 = 200
+        self.d = 20e-4
+        # self.v7 = 0
 
     def i_out(self, c):
         # Additional eflux [uM/s]
@@ -40,18 +44,25 @@ class Cell(HoferCell, FastCell, FluoEncoder):
     def stim(self, t):
         # Stimulation
         if 20 <= t < 24:
-            return 1
+            return 1 # self.v8
         else:
             return self.v8
 
     def stim_v(self, t):
         # Stimulation
+        # if 1 <= t < 1.01 or 5 <= t < 5.01 or 9 <= t < 9.01 \
+        #     or 12 <= t < 12.01 or 15 <= t < 15.01 or 17 <= t < 17.01 \
+        #     or 19 <= t < 19.01 \
+        #     or 21 <= t < 21.01 or 23 <= t < 23.01 or 25 <= t < 25.01 \
+        #     or 27 <= t < 27.01 or 30 <= t < 30.01 or 33 <= t < 33.01 or 36 <= t < 36.01 \
+        #     or 40 <= t < 40.01 or 43 <= t < 43.01:
+
         if 1 <= t < 1.01 or 5 <= t < 5.01 or 9 <= t < 9.01 \
-            or 12 <= t < 12.01 or 15 <= t < 15.01 or 17 <= t < 17.01 \
-            or 19 <= t < 19.01 \
-            or 21 <= t < 21.01 or 23 <= t < 23.01 or 25 <= t < 25.01 \
-            or 27 <= t < 27.01 or 30 <= t < 30.01 or 33 <= t < 33.01 or 36 <= t < 36.01 \
-            or 40 <= t < 40.01 or 43 <= t < 43.01:
+            or 13 <= t < 13.01 or 17 <= t < 17.01 or 21 <= t < 21.01 \
+            or 25 <= t < 25.01 \
+            or 30 <= t < 30.01 or 35 <= t < 35.01 or 40 <= t < 40.01 \
+            or 45 <= t < 45.01 or 50 <= t < 50.01 or 55 <= t < 55.01 or 60 <= t < 60.01 \
+            or 66 <= t < 66.01 or 72 <= t < 72.01:
 
         # if 101 <= t < 101.01 or 103 <= t < 103.01 or 105 <= t < 105.01 \
         #     or 109 <= t < 109.01 or 113 <= t < 113.01 or 117 <= t < 117.01 or 121 <= t < 121.01 \
@@ -59,7 +70,7 @@ class Cell(HoferCell, FastCell, FluoEncoder):
         #     or 130 <= t < 130.01 or 135 <= t < 135.01 or 140 <= t < 140.01 \
         #     or 145 <= t < 145.01 or 150 <= t < 150.01 or 155 <= t < 155.01 or 160 <= t < 160.01 \
         #     or 166 <= t < 166.01 or 172 <= t < 172.01:
-            return 0 # 1
+            return 0
         else:
             return 0
 

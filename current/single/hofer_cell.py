@@ -90,7 +90,7 @@ class HoferCell:
     def stim(self, t):
         # Stimulation
         if 10 <= t < 14:
-            return 1 # 1
+            return 1
         else:
             return self.v8
 

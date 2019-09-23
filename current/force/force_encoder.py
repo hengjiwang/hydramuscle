@@ -69,8 +69,8 @@ class KatoForceEncoder:
         
         y0 = [m10, m20, p0]
         sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
-        return sol[:,1]/self.m2max
-        # return sol
+        # return sol[:,1]/self.m2max
+        return sol
 
 def calcium_trace(t):
     # Default calcium trace

@@ -31,6 +31,8 @@ class Chain(Cell):
         self.d = 20e-4
         # self.k3 = 1
         self.v7 = 0.06
+        self.k2 = 0.05
+        self.s0 = 200
 
     def stim(self, t):
         # Stimulation
@@ -63,13 +65,15 @@ class Chain(Cell):
         # Right-hand side formulation
         num = self.num
 
-        c, s, r, ip, v, n, hv, hc, bx, cx = (y[0:num], y[num:2*num], 
+        c, s, r, ip, v, n, hv, hc, bx, cx, g, c1g, c2g, c3g, c4g = (y[0:num], y[num:2*num], 
         y[2*num:3*num], y[3*num:4*num], y[4*num:5*num], 
         y[5*num:6*num], y[6*num:7*num], y[7*num:8*num], 
-        y[8*num:9*num], y[9*num:10*num])
+        y[8*num:9*num], y[9*num:10*num], y[10*num:11*num], y[11*num:12*num], y[12*num:13*num], 
+        y[13*num:14*num], y[14*num:15*num])
 
         dcdt = self.i_rel(c, s, ip, r) + self.i_leak(c, s) - self.i_serca(c) + self.i_in() - self.i_pmca(c) - self.i_out(c)\
-            - 1e9 * (self.i_cal(v, n, hv, hc) + self.i_cat(v, bx, cx)) / (2 * self.F * self.d)
+            - 1e9 * (self.i_cal(v, n, hv, hc) + self.i_cat(v, bx, cx)) / (2 * self.F * self.d) - self.r_1(c, g, c1g) - self.r_2(c, c1g, c2g) \
+            - self.r_3(c, c2g, c3g) - self.r_4(c, c3g, c4g)
         dsdt = self.beta * (self.i_serca(c) - self.i_rel(c, s, ip, r) - self.i_leak(c, s))
         drdt = self.v_r(c, r)
         dipdt = self.i_plcb(self.v8) + self.i_plcd(c) - self.i_deg(ip) + self.g_ip3 * self.Dx@ip
@@ -81,10 +85,15 @@ class Chain(Cell):
         dhcdt = (self.hc_inf(c) - hc)/self.tau_hc()
         dbxdt = (self.bx_inf(v) - bx)/self.tau_bx(v)
         dcxdt = (self.cx_inf(v) - cx)/self.tau_cx(v)
+        dgdt = - self.r_1(c, g, c1g)
+        dc1gdt = (self.r_1(c, g, c1g) - self.r_2(c, c1g, c2g))
+        dc2gdt = (self.r_2(c, c1g, c2g) - self.r_3(c, c2g, c3g))
+        dc3gdt = (self.r_3(c, c2g, c3g) - self.r_4(c, c3g, c4g))
+        dc4gdt = self.r_4(c, c3g, c4g)
 
-        deriv = np.array([dcdt, dsdt, drdt, dipdt, dvdt, dndt, dhvdt, dhcdt, dbxdt, dcxdt])
+        deriv = np.array([dcdt, dsdt, drdt, dipdt, dvdt, dndt, dhvdt, dhcdt, dbxdt, dcxdt, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt])
 
-        dydt = np.reshape(deriv, 10*num)
+        dydt = np.reshape(deriv, 15*num)
 
         return dydt
 
@@ -108,9 +117,14 @@ class Chain(Cell):
                        [self.hv0]*self.num,
                        [self.hc0]*self.num,
                        [self.bx0]*self.num,
-                       [self.cx0]*self.num])
+                       [self.cx0]*self.num,
+                       [self.g0]*self.num,
+                       [self.c1g0]*self.num,
+                       [self.c2g0]*self.num,
+                       [self.c3g0]*self.num,
+                       [self.c4g0]*self.num])
 
-        y0 = np.reshape(y0, 10*self.num)
+        y0 = np.reshape(y0, 15*self.num)
         
         sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
         return sol
@@ -147,7 +161,7 @@ if __name__ == "__main__":
 
     # Save the [Ca2+]
     df = pd.DataFrame(sol[:,0:n_cel])
-    df.to_csv('../save/data/c_20x1_100s_kca.csv', index = False)
+    df.to_csv('../save/data/c_20x1_200s_include_fluo.csv', index = False)
 
     
 
