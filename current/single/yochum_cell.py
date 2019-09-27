@@ -76,14 +76,14 @@ class YochumCell:
     '''Leak channel'''
     def i_l(self, v):
 
-        e_l = self.v0 - (- self.i_ca(self.v0, self.c0) \
-             - self.i_k(self.v0, self.n0) - self.i_kca(self.v0, self.c0)) / self.g_l
+        # e_l = self.v0 - (- self.i_ca(self.v0, self.c0) \
+        #      - self.i_k(self.v0, self.n0) - self.i_kca(self.v0, self.c0)) / self.g_l
 
-        return self.g_l * (v - e_l)
+        return self.g_l * (v - self.e_l)
 
     '''Stimulation'''
     def i_stim(self, t):
-        if 1 <= t < 1.4:
+        if 1 <= t < 15:
             return 0.1175
         else:
             return 0
@@ -101,8 +101,8 @@ class YochumCell:
 
     def step(self):
         
-        self.n0 = self.n_inf(self.v0)
-        self.k_ca = -self.alpha*self.i_ca(self.v0, self.c0) / self.c0
+        # self.n0 = self.n_inf(self.v0)
+        # self.k_ca = -self.alpha*self.i_ca(self.v0, self.c0) / self.c0
 
         y0 = [self.c0, self.v0, self.n0]
         sol = odeint(self.rhs, y0, self.time, hmax = 0.005)

@@ -22,8 +22,8 @@ class MHMEncoder:
 
         # General parameters
         self.nm = 4.7135
-        self.c_half = 0.4640758
-        self.K = 5.0859
+        self.c_half = 1 # 0.4640758
+        self.K = 1 # 5.0859
 
         # Initial variables
         self.m0 = 1

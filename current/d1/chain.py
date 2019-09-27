@@ -25,14 +25,13 @@ class Chain(Cell):
         self.Dx = spdiags(np.array([onex,-2*onex,onex]),np.array([-1,0,1]),self.num,self.num).toarray()
         self.Dx[0,0] = -1
         self.Dx[self.num-1,self.num-1] = -1 
-        self.k9 = 0.02
+        self.k9 = 0.01 # 0.02
         # self.ki = 0.5
-        # self.s0 = 100
         self.d = 10e-4 # 20e-4
         # self.k3 = 1
-        self.v7 = 0.06
-        self.k2 = 0.05
-        self.s0 = 200
+        self.v7 = 0 # 0.06
+        self.k2 = 0.1 # 0.05
+        self.s0 = 400
 
     def stim(self, t):
         # Stimulation
@@ -51,12 +50,12 @@ class Chain(Cell):
         #     or 27 <= t < 27.01 or 30 <= t < 30.01 or 33 <= t < 33.01 or 36 <= t < 36.01 \
         #     or 40 <= t < 40.01 or 43 <= t < 43.01:
 
-        if 101 <= t < 101.01 or 103 <= t < 103.01 or 105 <= t < 105.01 \
-            or 109 <= t < 109.01 or 113 <= t < 113.01 or 117 <= t < 117.01 or 121 <= t < 121.01 \
-            or 125 <= t < 125.01 \
-            or 130 <= t < 130.01 or 135 <= t < 135.01 or 140 <= t < 140.01 \
-            or 145 <= t < 145.01 or 150 <= t < 150.01 or 155 <= t < 155.01 or 160 <= t < 160.01 \
-            or 166 <= t < 166.01 or 172 <= t < 172.01:
+        if 201 <= t < 201.01 or 203 <= t < 203.01 or 205 <= t < 205.01 \
+            or 209 <= t < 209.01 or 213 <= t < 213.01 or 217 <= t < 217.01 or 221 <= t < 221.01 \
+            or 225 <= t < 225.01 \
+            or 230 <= t < 230.01 or 235 <= t < 235.01 or 240 <= t < 240.01 \
+            or 245 <= t < 245.01 or 250 <= t < 250.01 or 255 <= t < 255.01 or 260 <= t < 260.01 \
+            or 266 <= t < 266.01 or 272 <= t < 272.01:
             return 1
         else:
             return 0
@@ -129,7 +128,7 @@ class Chain(Cell):
         sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
         return sol
 
-    def plot(self, a, tmin=0, tmax=200, xlabel = 'time[s]', ylabel = None):
+    def plot(self, a, tmin=0, tmax=300, xlabel = 'time[s]', ylabel = None):
         # Plot function
         plt.plot(self.time[int(tmin/self.dt):int(tmax/self.dt)], a[int(tmin/self.dt):int(tmax/self.dt)])
         if xlabel:  plt.xlabel(xlabel)
@@ -137,9 +136,9 @@ class Chain(Cell):
 
 if __name__ == "__main__":
 
-    n_cel = 20
+    n_cel = 40
 
-    model = Chain(n_cel, 200)
+    model = Chain(n_cel, 300)
     sol = model.step()
     c = sol[:,0:n_cel]
     s = sol[:,n_cel:2*n_cel]
@@ -161,7 +160,7 @@ if __name__ == "__main__":
 
     # Save the [Ca2+]
     df = pd.DataFrame(sol[:,0:n_cel])
-    df.to_csv('../save/data/c_20x1_200s_include_fluo_d_10.csv', index = False)
+    df.to_csv('../save/data/c_40x1_300s_no_plcd.csv', index = False)
 
     
 
