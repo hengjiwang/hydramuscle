@@ -19,7 +19,7 @@ class Chain(Cell):
         # Parameters
         super().__init__(T)
         self.gc = 1000 # 5e4
-        self.g_ip3 = 1
+        self.g_ip3 = 2
         self.num = num
         onex = np.ones(self.num)
         self.Dx = spdiags(np.array([onex,-2*onex,onex]),np.array([-1,0,1]),self.num,self.num).toarray()
@@ -30,8 +30,8 @@ class Chain(Cell):
         self.d = 10e-4 # 20e-4
         # self.k3 = 1
         self.v7 = 0 # 0.06
-        self.k2 = 0.1 # 0.05
-        self.s0 = 400
+        self.k2 = 0.2 # 0.05
+        self.s0 = 600
 
     def stim(self, t):
         # Stimulation
@@ -160,7 +160,7 @@ if __name__ == "__main__":
 
     # Save the [Ca2+]
     df = pd.DataFrame(sol[:,0:n_cel])
-    df.to_csv('../save/data/c_40x1_300s_no_plcd.csv', index = False)
+    df.to_csv('../save/data/c_40x1_300s_no_plcd_gip3_2.csv', index = False)
 
     
 
