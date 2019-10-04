@@ -43,7 +43,7 @@ class Chain(Cell):
         y[8*num:9*num], y[9*num:10*num], y[10*num:11*num], y[11*num:12*num], y[12*num:13*num], 
         y[13*num:14*num], y[14*num:15*num])
 
-        dcdt = self.i_rel(c, s, ip, r) + self.i_leak(c, s) - self.i_serca(c) + self.i_in() - self.i_pmca(c) - self.i_out(c)\
+        dcdt = self.i_rel(c, s, ip, r) + self.i_leak(c, s) - self.i_serca(c) + self.i_in(ip) - self.i_pmca(c) - self.i_out(c)\
             - 1e9 * (self.i_cal(v, n, hv, hc) + self.i_cat(v, bx, cx)) / (2 * self.F * self.d) - self.r_1(c, g, c1g) - self.r_2(c, c1g, c2g) \
             - self.r_3(c, c2g, c3g) - self.r_4(c, c3g, c4g)
         dsdt = self.beta * (self.i_serca(c) - self.i_rel(c, s, ip, r) - self.i_leak(c, s))
