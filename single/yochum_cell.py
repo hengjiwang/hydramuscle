@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
 import sys
-sys.path.insert(0, '/home/hengji/Documents/hydra_calcium_model/current/force/')
+sys.path.insert(0, '/home/hengji/Documents/hydra_calcium_model/force/')
 from maggio_force_encoder import MHMEncoder
 
 class YochumCell:

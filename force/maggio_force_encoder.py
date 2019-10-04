@@ -17,13 +17,13 @@ class MHMEncoder:
         self.k3 = 14.4496
         self.k4 = 3.6124
         self.k5 = self.k2
-        self.k6 = None
+        self.k6 = 0
         self.k7 = 0.1340
 
         # General parameters
         self.nm = 4.7135
-        self.c_half = 1 # 0.4640758
-        self.K = 1 # 5.0859
+        self.c_half = 0.4640758 # 1
+        self.K = 5.0859 # 1 
 
         # Initial variables
         self.m0 = 1
@@ -47,7 +47,7 @@ class MHMEncoder:
         trans = np.array([[-k1, self.k2, 0, self.k7], 
                           [k1, -self.k2 - self.k3, self.k4, 0],
                           [0, self.k3, -self.k4-self.k5, self.k6],
-                          [0, 0, self.k5, -self.k6 - self.k7]])
+                          [0, 0, self.k5, - self.k6 - self.k7]])
 
         return list(trans@np.array(y))
 

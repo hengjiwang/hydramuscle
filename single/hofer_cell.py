@@ -87,33 +87,39 @@ class HoferCell:
         return self.k9 * ip
 
     '''Stimulation'''
-    def stim(self, t):
+    def stim(self, t, stims):
         # Stimulation
-        if 10 <= t < 14:
+
+        condition = False
+
+        for stim_t in stims:
+            condition = condition or stim_t <= t < stim_t + 4
+
+        if condition:
             return 1
         else:
-            return self.v8
+            return 0
 
     '''Numerical terms'''
-    def rhs(self, y, t):
+    def rhs(self, y, t, stims):
         # Right-hand side formulation
         c, s, r, ip = y
 
         dcdt = self.i_rel(c, s, ip, r) + self.i_leak(c, s) - self.i_serca(c) + self.i_in(c, ip) - self.i_pmca(c) - self.i_out(c)
         dsdt = self.beta * (self.i_serca(c) - self.i_rel(c, s, ip, r) - self.i_leak(c, s))
         drdt = self.v_r(c, r)
-        dipdt = self.i_plcb(self.stim(t)) + self.i_plcd(c) - self.i_deg(ip)
+        dipdt = self.i_plcb(self.stim(t, stims)) + self.i_plcd(c) - self.i_deg(ip)
 
         return [dcdt, dsdt, drdt, dipdt]
 
-    def step(self):
+    def step(self, stims = [10]):
         # Time stepping    
 
         self.v8 = (self.i_deg(self.ip0) - self.i_plcd(self.c0)) / (1 / ((1 + self.kg)*(self.kg/(1+self.kg) + self.a0)) * self.a0)
         self.r0 = self.ki**2 / (self.ki**2 + self.c0**2)
 
         y0 = [self.c0, self.s0, self.r0, self.ip0]
-        sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
+        sol = odeint(self.rhs, y0, self.time, args = (stims,), hmax = 0.005)
         return sol
 
     '''Plot'''

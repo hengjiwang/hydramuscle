@@ -15,7 +15,7 @@ from cell import Cell
 
 class Chain(Cell):
     '''A 1D cell chain with cells connected through gap junctions'''
-    def __init__(self, num=20, T=20):
+    def __init__(self, num=20, T=200, k2 = 0.2, s0 = 600, d = 10e-4, v7 = 0, k9 = 0.01):
         # Parameters
         super().__init__(T)
         self.gc = 1000 # 5e4
@@ -25,42 +25,15 @@ class Chain(Cell):
         self.Dx = spdiags(np.array([onex,-2*onex,onex]),np.array([-1,0,1]),self.num,self.num).toarray()
         self.Dx[0,0] = -1
         self.Dx[self.num-1,self.num-1] = -1 
-        self.k9 = 0.01 # 0.02
+        self.k9 = k9 # 0.02
         # self.ki = 0.5
-        self.d = 10e-4 # 20e-4
+        self.d = d # 20e-4
         # self.k3 = 1
-        self.v7 = 0 # 0.06
-        self.k2 = 0.2 # 0.05
-        self.s0 = 600
-
-    def stim(self, t):
-        # Stimulation
-        if 20 <= t < 24:
-            return 1
-        else:
-            return self.v8
-
-    def stim_v(self, t):
-        # Stimulation
-
-        # if 1 <= t < 1.01 or 5 <= t < 5.01 or 9 <= t < 9.01 \
-        #     or 12 <= t < 12.01 or 15 <= t < 15.01 or 17 <= t < 17.01 \
-        #     or 19 <= t < 19.01 \
-        #     or 21 <= t < 21.01 or 23 <= t < 23.01 or 25 <= t < 25.01 \
-        #     or 27 <= t < 27.01 or 30 <= t < 30.01 or 33 <= t < 33.01 or 36 <= t < 36.01 \
-        #     or 40 <= t < 40.01 or 43 <= t < 43.01:
-
-        if 201 <= t < 201.01 or 203 <= t < 203.01 or 205 <= t < 205.01 \
-            or 209 <= t < 209.01 or 213 <= t < 213.01 or 217 <= t < 217.01 or 221 <= t < 221.01 \
-            or 225 <= t < 225.01 \
-            or 230 <= t < 230.01 or 235 <= t < 235.01 or 240 <= t < 240.01 \
-            or 245 <= t < 245.01 or 250 <= t < 250.01 or 255 <= t < 255.01 or 260 <= t < 260.01 \
-            or 266 <= t < 266.01 or 272 <= t < 272.01:
-            return 1
-        else:
-            return 0
+        self.v7 = v7 # 0.06
+        self.k2 = k2 # 0.05
+        self.s0 = s0
     
-    def rhs(self, y, t):
+    def rhs(self, y, t, stims_v, stims_ip):
         # Right-hand side formulation
         num = self.num
 
@@ -76,9 +49,9 @@ class Chain(Cell):
         dsdt = self.beta * (self.i_serca(c) - self.i_rel(c, s, ip, r) - self.i_leak(c, s))
         drdt = self.v_r(c, r)
         dipdt = self.i_plcb(self.v8) + self.i_plcd(c) - self.i_deg(ip) + self.g_ip3 * self.Dx@ip
-        dipdt[0:3] += self.i_plcb(self.stim(t)) - self.i_plcb(self.v8)
+        dipdt[0:3] += self.i_plcb(self.stim(t, stims_ip)) - self.i_plcb(self.v8)
         dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_cat(v, bx, cx) + self.i_kca(v, c) + self.i_bk(v)) + self.gc * self.Dx@v
-        dvdt[0:3] += 1 / self.c_m * 0.01 * self.stim_v(t)
+        dvdt[0:3] += 1 / self.c_m * 0.01 * self.stim_v(t, stims_v)
         dndt = (self.n_inf(v) - n)/self.tau_n(v)
         dhvdt = (self.hv_inf(v) - hv)/self.tau_hv(v)
         dhcdt = (self.hc_inf(c) - hc)/self.tau_hc()
@@ -96,7 +69,7 @@ class Chain(Cell):
 
         return dydt
 
-    def step(self):
+    def step(self, stims_v = [201,203,205,207,209,211,213,215,217,219], stims_ip = [10]):
         # Time stepping
 
         self.r0 =  self.ki**2 / (self.ki**2 + self.c0**2)
@@ -125,12 +98,11 @@ class Chain(Cell):
 
         y0 = np.reshape(y0, 15*self.num)
         
-        sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
+        sol = odeint(self.rhs, y0, self.time, args = (stims_v, stims_ip), hmax = 0.005)
         return sol
 
-    def plot(self, a, tmin=0, tmax=300, xlabel = 'time[s]', ylabel = None):
-        # Plot function
-        plt.plot(self.time[int(tmin/self.dt):int(tmax/self.dt)], a[int(tmin/self.dt):int(tmax/self.dt)])
+    def plot(self, a, tmin=0, tmax=300, xlabel = 'time[s]', ylabel = None, color = 'b'):
+        plt.plot(self.time[int(tmin/self.dt):int(tmax/self.dt)], a[int(tmin/self.dt):int(tmax/self.dt)], color)
         if xlabel:  plt.xlabel(xlabel)
         if ylabel:  plt.ylabel(ylabel)
 

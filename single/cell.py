@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import sys
-sys.path.insert(0, '/home/hengji/Documents/hydra_calcium_model/current/fluorescence/')
-sys.path.insert(0, '/home/hengji/Documents/hydra_calcium_model/current/force/')
+sys.path.insert(0, '/home/hengji/Documents/hydra_calcium_model/fluorescence/')
+sys.path.insert(0, '/home/hengji/Documents/hydra_calcium_model/force/')
+sys.path.insert(0, '/home/hengji/Documents/hydra_calcium_model/single/')
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,16 +17,16 @@ from maggio_force_encoder import MHMEncoder
 
 class Cell(HoferCell, FastCell, FluoEncoder):
     # This is a intracellular model without L-type calcium channel
-    def __init__(self, T = 20, dt = 0.001):
+    def __init__(self, T = 20, dt = 0.001, k2 = 0.05, s0 = 200, d = 10e-4, v7 = 0.04):
         # Parameters
         # SlowCell.__init__(self, T, dt)
         FluoEncoder.__init__(self, None, T, dt)
         FastCell.__init__(self, T, dt)
         HoferCell.__init__(self, T, dt)
-        self.k2 = 0.05 # 0.1
-        self.s0 = 200
-        self.d = 10e-4 # 20e-4
-        # self.v7 = 0
+        self.k2 = k2 # 0.1
+        self.s0 = s0
+        self.d = d # 20e-4
+        self.v7 = v7 # 0.04
 
     def i_out(self, c):
         # Additional eflux [uM/s]
@@ -42,41 +43,7 @@ class Cell(HoferCell, FastCell, FluoEncoder):
         + self.i_kca(self.v0, self.c0))/(self.v0 - self.e_bk)
         return g_bk * (v - self.e_bk)
 
-    '''Stimulation'''
-    def stim(self, t):
-        # Stimulation
-        if 20 <= t < 24:
-            return 1 # self.v8
-        else:
-            return self.v8
-
-    def stim_v(self, t):
-        # Stimulation
-        # if 1 <= t < 1.01 or 5 <= t < 5.01 or 9 <= t < 9.01 \
-        #     or 12 <= t < 12.01 or 15 <= t < 15.01 or 17 <= t < 17.01 \
-        #     or 19 <= t < 19.01 \
-        #     or 21 <= t < 21.01 or 23 <= t < 23.01 or 25 <= t < 25.01 \
-        #     or 27 <= t < 27.01 or 30 <= t < 30.01 or 33 <= t < 33.01 or 36 <= t < 36.01 \
-        #     or 40 <= t < 40.01 or 43 <= t < 43.01:
-
-        if 1 <= t < 1.01 or 5 <= t < 5.01 or 9 <= t < 9.01 \
-            or 13 <= t < 13.01 or 17 <= t < 17.01 or 21 <= t < 21.01 \
-            or 25 <= t < 25.01 \
-            or 30 <= t < 30.01 or 35 <= t < 35.01 or 40 <= t < 40.01 \
-            or 45 <= t < 45.01 or 50 <= t < 50.01 or 55 <= t < 55.01 or 60 <= t < 60.01 \
-            or 66 <= t < 66.01 or 72 <= t < 72.01:
-
-        # if 101 <= t < 101.01 or 103 <= t < 103.01 or 105 <= t < 105.01 \
-        #     or 109 <= t < 109.01 or 113 <= t < 113.01 or 117 <= t < 117.01 or 121 <= t < 121.01 \
-        #     or 125 <= t < 125.01 \
-        #     or 130 <= t < 130.01 or 135 <= t < 135.01 or 140 <= t < 140.01 \
-        #     or 145 <= t < 145.01 or 150 <= t < 150.01 or 155 <= t < 155.01 or 160 <= t < 160.01 \
-        #     or 166 <= t < 166.01 or 172 <= t < 172.01:
-            return 0
-        else:
-            return 0
-
-    def rhs(self, y, t):
+    def rhs(self, y, t, stims_v, stims_ip):
         # Right-hand side formulation
         c, s, r, ip, v, n, hv, hc, bx, cx, g, c1g, c2g, c3g, c4g = y
 
@@ -85,8 +52,8 @@ class Cell(HoferCell, FastCell, FluoEncoder):
             - self.r_3(c, c2g, c3g) - self.r_4(c, c3g, c4g)
         dsdt = self.beta * (self.i_serca(c) - self.i_rel(c, s, ip, r) - self.i_leak(c, s))
         drdt = self.v_r(c, r)
-        dipdt = self.i_plcb(self.stim(t)) + self.i_plcd(c) - self.i_deg(ip)
-        dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_cat(v, bx, cx) + self.i_kca(v, c) + self.i_bk(v) - 0.001 * self.stim_v(t))
+        dipdt = self.i_plcb(self.stim(t, stims_ip)) + self.i_plcd(c) - self.i_deg(ip)
+        dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_cat(v, bx, cx) + self.i_kca(v, c) + self.i_bk(v) - 0.001 * self.stim_v(t, stims_v))
         dndt = (self.n_inf(v) - n)/self.tau_n(v)
         dhvdt = (self.hv_inf(v) - hv)/self.tau_hv(v)
         dhcdt = (self.hc_inf(c) - hc)/self.tau_hc()
@@ -100,7 +67,7 @@ class Cell(HoferCell, FastCell, FluoEncoder):
 
         return [dcdt, dsdt, drdt, dipdt, dvdt, dndt, dhvdt, dhcdt, dbxdt, dcxdt, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt]
 
-    def step(self):
+    def step(self, stims_v = [101,103,105,107,109,111,113,115,117,119], stims_ip = [10]):
         # Time stepping
         # self.hh0 = self.hh_inf(self.c0, self.ip0)
         
@@ -117,16 +84,16 @@ class Cell(HoferCell, FastCell, FluoEncoder):
         y0 = [self.c0, self.s0, self.r0, self.ip0, self.v0, self.n0, self.hv0, 
         self.hc0, self.bx0, self.cx0, self.g0, self.c1g0, self.c2g0, self.c3g0, self.c4g0]
 
-        sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
+        sol = odeint(self.rhs, y0, self.time, args = (stims_v, stims_ip, ), hmax = 0.005)
         return sol
 
-    def plot(self, a, tmin=0, tmax=100, xlabel = 'time[s]', ylabel = None, color = 'b'):
+    def plot(self, a, tmin=0, tmax=200, xlabel = 'time[s]', ylabel = None, color = 'b'):
         plt.plot(self.time[int(tmin/self.dt):int(tmax/self.dt)], a[int(tmin/self.dt):int(tmax/self.dt)], color)
         if xlabel:  plt.xlabel(xlabel)
         if ylabel:  plt.ylabel(ylabel)
 
 if __name__ == '__main__':
-    model = Cell(T=100)
+    model = Cell(T=200)
     sol = model.step()
     c = sol[:,0]
     s = sol[:,1]

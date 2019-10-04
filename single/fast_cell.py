@@ -162,19 +162,20 @@ class FastCell:
         return (c-self.c0)/self.tau_ex
 
     '''Stimulation'''
-    def stim(self, t):
-        if 1 <= t < 1.01 or 5 <= t < 5.01 or 9 <= t < 9.01 \
-            or 13 <= t < 13.01 or 17 <= t < 17.01 or 21 <= t < 21.01 \
-            or 25 <= t < 25.01 \
-            or 30 <= t < 30.01 or 35 <= t < 35.01 or 40 <= t < 40.01 \
-            or 45 <= t < 45.01 or 50 <= t < 50.01 or 55 <= t < 55.01 or 60 <= t < 60.01 \
-            or 66 <= t < 66.01 or 72 <= t < 72.01:
+    def stim_v(self, t, stims):
+
+        condition = False
+
+        for stim_t in stims:
+            condition = condition or stim_t <= t < stim_t + 0.01
+
+        if condition:
             return 1
         else:
             return 0
 
     '''Numerical terms'''
-    def rhs(self, y, t):
+    def rhs(self, y, t, stims):
         # Right-hand side function
         c, v, n, hv, hc, x, z, p, q, bx, cx = y
         dcdt = - self.r_ex(c) \
@@ -182,7 +183,7 @@ class FastCell:
             + 1e9 * self.i_cal(self.v0, self.n0, self.hv0, self.hc0) / (2 * self.F * self.d) \
             - 1e9 * self.i_cat(v, bx, cx) / (2 * self.F * self.d) \
             + 1e9 * self.i_cat(self.v0, self.bx0, self.cx0) / (2 * self.F * self.d)
-        dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_cat(v, bx, cx) + self.i_kcnq(v, x, z) + self.i_kv(v, p, q) + self.i_kca(v, c) + self.i_bk(v) - 0.001 * self.stim(t))
+        dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_cat(v, bx, cx) + self.i_kcnq(v, x, z) + self.i_kv(v, p, q) + self.i_kca(v, c) + self.i_bk(v) - 0.001 * self.stim_v(t, stims))
         dndt = (self.n_inf(v) - n)/self.tau_n(v)
         dhvdt = (self.hv_inf(v) - hv)/self.tau_hv(v)
         dhcdt = (self.hc_inf(c) - hc)/self.tau_hc()
@@ -195,7 +196,7 @@ class FastCell:
 
         return [dcdt, dvdt, dndt, dhvdt, dhcdt, dxdt, dzdt, dpdt, dqdt, dbxdt, dcxdt]
 
-    def step(self):
+    def step(self, stims = [1,3,5,7,9,11,13,15,17,19]):
         # Time stepping
 
         self.n0 = self.n_inf(self.v0)
@@ -209,7 +210,7 @@ class FastCell:
         self.cx0 = self.cx_inf(self.v0)
 
         y0 = [self.c0, self.v0, self.n0, self.hv0, self.hc0, self.x0, self.z0, self.p0, self.q0, self.bx0, self.cx0]
-        sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
+        sol = odeint(self.rhs, y0, self.time, args = (stims,), hmax = 0.005)
         return sol
 
     '''Visualize results'''
@@ -219,7 +220,7 @@ class FastCell:
         if ylabel:  plt.ylabel(ylabel)
 
 if __name__ == '__main__':
-    model = FastCell(2)
+    model = FastCell(20)
     sol = model.step()
     c = sol[:, 0]
     v = sol[:, 1]
@@ -250,5 +251,5 @@ if __name__ == '__main__':
     plt.subplot(427)
     model.plot(model.i_kca(v, c), ylabel = 'i_kca[mA/cm^2]')
     plt.subplot(428)
-    model.plot([0.004 * model.stim(t) for t in model.time], ylabel='i_stim[mA/cm^2]', color = 'r')
+    model.plot([0.004 * model.stim_v(t, [1,3,5,7,9,11,13,15,17,19]) for t in model.time], ylabel='i_stim[mA/cm^2]', color = 'r')
     plt.show()
