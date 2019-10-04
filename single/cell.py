@@ -17,7 +17,7 @@ from maggio_force_encoder import MHMEncoder
 
 class Cell(HoferCell, FastCell, FluoEncoder):
     # This is a intracellular model without L-type calcium channel
-    def __init__(self, T = 20, dt = 0.001, k2 = 0.05, s0 = 200, d = 10e-4, v7 = 0.04):
+    def __init__(self, T = 20, dt = 0.001, k2 = 0.05, s0 = 200, d = 10e-4, v7 = 0.04, v41 = 0.2):
         # Parameters
         # SlowCell.__init__(self, T, dt)
         FluoEncoder.__init__(self, None, T, dt)
@@ -27,13 +27,16 @@ class Cell(HoferCell, FastCell, FluoEncoder):
         self.s0 = s0
         self.d = d # 20e-4
         self.v7 = v7 # 0.04
+        self.v41 = v41
 
     def i_out(self, c):
         # Additional eflux [uM/s]
         return self.k5 * c
 
-    def i_in(self):
-        return 1e9 * (self.i_cal(self.v0, self.n0, self.hv0, self.hc0) + self.i_cat(self.v0, self.bx0, self.cx0)) / (2 * self.F * self.d) + self.i_out(self.c0) + self.i_pmca(self.c0)
+    def i_in(self, ip):
+        return 1e9 * (self.i_cal(self.v0, self.n0, self.hv0, self.hc0) + \
+        self.i_cat(self.v0, self.bx0, self.cx0)) / (2 * self.F * self.d) + self.i_out(self.c0) + self.i_pmca(self.c0) + \
+        self.v41 * ip**2 / (self.kr**2 + ip**2) - self.v41 * self.ip0**2 / (self.kr**2 + self.ip0**2)
 
     '''Background terms'''
     def i_bk(self, v):
@@ -47,8 +50,9 @@ class Cell(HoferCell, FastCell, FluoEncoder):
         # Right-hand side formulation
         c, s, r, ip, v, n, hv, hc, bx, cx, g, c1g, c2g, c3g, c4g = y
 
-        dcdt = self.i_rel(c, s, ip, r) + self.i_leak(c, s) - self.i_serca(c) + self.i_in() - self.i_pmca(c) - self.i_out(c)\
-            - 1e9 * (self.i_cal(v, n, hv, hc) + self.i_cat(v, bx, cx)) / (2 * self.F * self.d) - self.r_1(c, g, c1g) - self.r_2(c, c1g, c2g) \
+        dcdt = self.i_rel(c, s, ip, r) + self.i_leak(c, s) - self.i_serca(c) + self.i_in(ip) - self.i_pmca(c) - self.i_out(c) \
+            - 1e9 * (self.i_cal(v, n, hv, hc) + self.i_cat(v, bx, cx)) / (2 * self.F * self.d) \
+            - self.r_1(c, g, c1g) - self.r_2(c, c1g, c2g) \
             - self.r_3(c, c2g, c3g) - self.r_4(c, c3g, c4g)
         dsdt = self.beta * (self.i_serca(c) - self.i_rel(c, s, ip, r) - self.i_leak(c, s))
         drdt = self.v_r(c, r)
@@ -93,8 +97,8 @@ class Cell(HoferCell, FastCell, FluoEncoder):
         if ylabel:  plt.ylabel(ylabel)
 
 if __name__ == '__main__':
-    model = Cell(T=200)
-    sol = model.step()
+    model = Cell(T=200, k2 = 0.01)
+    sol = model.step(stims_ip = [10])
     c = sol[:,0]
     s = sol[:,1]
     r = sol[:,2]
