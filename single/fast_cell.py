@@ -16,15 +16,15 @@ class FastCell:
         self.F = 96485332.9 # [mA*s/mol]
         self.c0 = 0.05
         self.v0 = -50 # (-40 to -60)
-        self.n0 = None
-        self.hv0 = None
-        self.hc0 = None
-        self.x0 = None
-        self.z0 = None
-        self.p0 = None
-        self.q0 = None
-        self.bx0 = None
-        self.cx0 = None
+        self.n0 = 0
+        self.hv0 = 0
+        self.hc0 = 0
+        self.x0 = 0
+        self.z0 = 0
+        self.p0 = 0
+        self.q0 = 0
+        self.bx0 = 0
+        self.cx0 = 0
 
         # Calcium leak
         self.tau_ex = 0.1 # [s]
@@ -49,7 +49,7 @@ class FastCell:
         self.g_kca =  10e-9 / self.A_cyt # 45.7e-9 / self.A_cyt
 
         # Background parameters
-        self.g_bk = None
+        self.g_bk = 0
         self.e_bk = -55
 
         # Time
