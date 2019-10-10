@@ -103,7 +103,7 @@ L = np.kron(Dx, Ix) + np.kron(Ix, Dx)
 @jitclass(spec)
 class Grid():
     '''A 2D dynamical model with cells connected by gap junctions'''
-    def __init__(self, num=num, T=100, dt = 0.01, k2=0.2, s0=600, d=10e-4, v7=0, k9=0.01, scale_stim_v = 0.01, scale_stim_ip = 1.0, L=L):
+    def __init__(self, num=num, T=300, dt = 0.001, k2=0.2, s0=600, d=10e-4, v7=0, k9=0.01, scale_stim_v = 0.01, scale_stim_ip = 1.0, L=L):
         
         # General parameters
         self.gc = 5e4
@@ -500,12 +500,12 @@ def step(model, stims_v = [201,203,205,207,209,211,213,215,217,219], stims_ip = 
 
 if __name__ == '__main__':
     n_cel = num
-    model = Grid(n_cel, 200)
+    model = Grid(n_cel, 300)
     sol = step(model)
     # c = np.reshape(sol[:,0:n_cel*n_cel], (-1,n_cel,n_cel))
     # df = pd.DataFrame(np.reshape(c,(-1,n_cel**2)))
     df = pd.DataFrame(sol[:,0:n_cel*n_cel])
-    df.to_csv('../save/data/c_50x50_200s_withjit.csv', index = False)
+    # df.to_csv('../save/data/c_50x50_200s_withjit.csv', index = False)
 
 
     
