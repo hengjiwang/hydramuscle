@@ -91,7 +91,7 @@ spec = [('k1', float64),
 ('phi3', float64),
 ('phi4', float64)]
 
-num = 50
+num = 20
 
 onex = np.ones(num)
 Dx = spdiags(np.array([onex,-2*onex,onex]), np.array([-1,0,1]),num,num).toarray()
@@ -439,7 +439,7 @@ class Grid():
         drdt = self.v_r(c, r)
 
         # IP3 of downstream cells
-        dipdt = iplcb_rest + self.i_plcd(c) - self.i_deg(ip) + self.g_ip3 * self.L@ip
+        dipdt = iplcb_rest + self.i_plcd(c) - self.i_deg(ip) # + self.g_ip3 * self.L@ip
         
         # IP3 of stimulated cells
         dipdt[-int(num/2)-1         : -int(num/2) + 2        ] += iplcb_stim - iplcb_rest
@@ -447,8 +447,7 @@ class Grid():
         dipdt[-int(num/2)-1 - 2*num : -int(num/2) + 2 - 2*num] += iplcb_stim - iplcb_rest
     
         # Voltage of downstream cells
-        dvdt = - 1 / self.c_m * (ical + icat + self.i_kca(v, c) + self.i_bk(v)) \
-            + self.gc * self.L@v
+        dvdt = - 1 / self.c_m * (ical + icat + self.i_kca(v, c) + self.i_bk(v)) # + self.gc * self.L@v
         
         # Voltage of stimulated cells
         dvdt[0:3*num] += 1 / self.c_m * self.scale_stim_v * self.stim_v(t, stims_v)
