@@ -44,6 +44,7 @@ class Cell(HoferCell, FastCell, FluoEncoder):
         g_bk = - (self.i_cal(self.v0, self.n0, self.hv0, self.hc0) \
         + self.i_cat(self.v0, self.bx0, self.cx0) \
         + self.i_kca(self.v0, self.c0))/(self.v0 - self.e_bk)
+
         return g_bk * (v - self.e_bk)
 
     def rhs(self, y, t, stims_v, stims_ip):
@@ -84,6 +85,7 @@ class Cell(HoferCell, FastCell, FluoEncoder):
         self.cx0 = self.cx_inf(self.v0)
 
         self.v8 = (self.i_deg(self.ip0) - self.i_plcd(self.c0)) / (1 / ((1 + self.kg)*(self.kg/(1+self.kg) + self.a0)) * self.a0)
+
 
         y0 = [self.c0, self.s0, self.r0, self.ip0, self.v0, self.n0, self.hv0, 
         self.hc0, self.bx0, self.cx0, self.g0, self.c1g0, self.c2g0, self.c3g0, self.c4g0]

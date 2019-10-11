@@ -44,7 +44,7 @@ def save_pattern(x, filename, save = True, show = True, size = (20, 20)):
     cb.set_label("Fluorescence [A.U.]")
     if show:    plt.show()
 
-def save_curve(x, filename, show = True):
+def save_curve(x, filename, show = True, save = True):
     # Save the data as curve figure
     fig = plt.figure()
     x = x.values
@@ -52,7 +52,7 @@ def save_curve(x, filename, show = True):
     plt.xlabel('t [ms]')
     # plt.ylabel('Fluorescence [A.U.]')
     # plt.title('Fluorescence of Cell 10')
-    # fig.savefig(filename)
+    if save:    fig.savefig(filename)
     if show:    plt.show()
 
 def vplot(pars, model, tmin=0 , tmax = 100, separate = True,

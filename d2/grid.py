@@ -1,16 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-import sys
-sys.path.insert(0, '/home/hengji/Documents/hydra_calcium_model/single/')
-
 import numpy as np
 import matplotlib.pyplot as plt
 import time
 from scipy.integrate import odeint
 from scipy.sparse import spdiags
 import pandas as pd
-# from cell import Cell
 from numba import jitclass, int32, float64
 
 spec = [('k1', float64),
@@ -47,10 +42,6 @@ spec = [('k1', float64),
 ('n0', float64),
 ('hv0', float64),
 ('hc0', float64),
-('x0', float64),
-('z0', float64),
-('p0', float64),
-('q0', float64),
 ('bx0', float64),
 ('cx0', float64),
 ('g_cal', float64),
@@ -89,7 +80,8 @@ spec = [('k1', float64),
 ('phi1', float64),
 ('phi2', float64),
 ('phi3', float64),
-('phi4', float64)]
+('phi4', float64),
+('const_iin', float64)]
 
 num = 20
 
@@ -110,7 +102,6 @@ class Grid():
         self.g_ip3 = 1
 
         # Hofer parameters
-        self.k1 = 0.0004
         self.k2 = 0.08
         self.ka = 0.2
         self.kip = 0.3
@@ -124,14 +115,14 @@ class Grid():
         self.kg = 0.1 # unknown
         self.a0 = 1 # 1e-3 - 10
         self.v7 = 0.04 # 0 - 0.05
-        self.v8 = 4e-4
+        self.v8 = 0.00012 # 4e-4
         self.kca = 0.3
         self.k9 = 0.08
         self.beta = 20
 
         self.c0 = 0.05
         self.s0 = 60
-        self.r0 = 0.94
+        self.r0 = 0.9411764705882353
         self.ip0 = 0.01
 
         # Fast Parameters
@@ -141,15 +132,11 @@ class Grid():
         self.d = 10e-4 # 10e-4 # [cm]
         self.F = 96485332.9 # [mA*s/mol]
         self.v0 = -50 # (-40 to -60)
-        self.n0 = 0
-        self.hv0 = 0
-        self.hc0 = 0
-        self.x0 = 0
-        self.z0 = 0
-        self.p0 = 0
-        self.q0 = 0
-        self.bx0 = 0
-        self.cx0 = 0
+        self.n0 = 0.00591106885624379
+        self.hv0 = 0.8232409668812207
+        self.hc0 = 0.9523809523809523
+        self.bx0 = 0.06951244510501192
+        self.cx0 = 0.06889595335007676
 
         # Fluorescence Parameters
         self.r_inc = 200
@@ -192,7 +179,6 @@ class Grid():
         self.g_kca =  10e-9 / self.A_cyt # 45.7e-9 / self.A_cyt
 
         # Background parameters
-        self.g_bk = 0
         self.e_bk = -55
 
 
@@ -216,6 +202,10 @@ class Grid():
         self.dt = dt
         self.time = np.linspace(0, T, int(T/dt))
 
+        self.g_bk = 2.028567365131953e-05
+        self.const_iin = -0.5049104594276217
+        self.k1 = 2.938083356243623e-05
+
     '''Hofer methods'''
     def i_rel(self, c, s, ip, r):
         # Release from ER, including IP3R and leak term [uM/s]
@@ -229,19 +219,10 @@ class Grid():
         return self.k3 * c
 
     def i_leak(self, c, s):
-        k1 = (self.i_serca(self.c0) - self.i_rel(self.c0, self.s0, self.ip0, self.r0)) / (self.s0 - self.c0)
-        return k1 * (s - c)
+        return self.k1 * (s - c)
 
     def i_in(self, ip):
-        return 1e9 * (self.i_cal(self.v0, self.n0, self.hv0, self.hc0) + \
-        self.i_cat(self.v0, self.bx0, self.cx0)) / (2 * self.F * self.d) + self.i_out(self.c0) + self.i_pmca(self.c0) + \
-        self.v41 * ip**2 / (self.kr**2 + ip**2) - self.v41 * self.ip0**2 / (self.kr**2 + self.ip0**2)
-
-    def i_pmca(self, c):
-        # PMCA [uM/s]
-        k_pmca = 2.5
-        v_pmca = 4
-        return 0 * v_pmca * c**2 / (c**2 + k_pmca**2)
+        return self.const_iin + self.v41 * ip**2 / (self.kr**2 + ip**2)
 
     def i_out(self, c):
         # Additional eflux [uM/s]
@@ -271,10 +252,7 @@ class Grid():
         for stim_t in stims:
             condition = condition or stim_t <= t < stim_t + 4
 
-        if condition:
-            return 1
-        else:
-            return 0
+        return int(condition)
 
     '''Fast methods'''
     def i_cal(self, v, n, hv, hc):
@@ -357,14 +335,11 @@ class Grid():
 
     def i_kca(self, v, c):
         return self.g_kca * 1 / (1 + np.exp(v/(-17) - 2 * np.log(c))) * (v - self.e_k)
-        # return 5 * self.g_kca * c**2 / (c**2 + 5**2) * (v - self.e_k)
 
     def i_bk(self, v):
         # Background voltage leak [mA/cm^2]
-        g_bk = - (self.i_cal(self.v0, self.n0, self.hv0, self.hc0) \
-        + self.i_cat(self.v0, self.bx0, self.cx0) \
-        + self.i_kca(self.v0, self.c0))/(self.v0 - self.e_bk)
-        return g_bk * (v - self.e_bk)
+
+        return self.g_bk * (v - self.e_bk)
 
     def stim_v(self, t, stims):
 
@@ -373,10 +348,7 @@ class Grid():
         for stim_t in stims:
             condition = condition or stim_t <= t < stim_t + 0.01
 
-        if condition:
-            return 1
-        else:
-            return 0
+       	return int(condition)
 
     '''Fluorescence methods'''
     def f_total(self, g, c1g, c2g, c3g, c4g):
@@ -417,7 +389,6 @@ class Grid():
         ileak = self.i_leak(c, s)
         iserca = self.i_serca(c)
         iin = self.i_in(ip)
-        ipmca = self.i_pmca(c)
         iout = self.i_out(c)
         ical = self.i_cal(v, n, hv, hc)
         icat = self.i_cat(v, bx, cx)
@@ -429,7 +400,7 @@ class Grid():
         ir4 = self.r_4(c, c3g, c4g)
 
         # Cytosolic calcium
-        dcdt = irel + ileak - iserca + iin - ipmca - iout - 1e9 * (ical + icat) / (2 * self.F * self.d) \
+        dcdt = irel + ileak - iserca + iin - iout - 1e9 * (ical + icat) / (2 * self.F * self.d) \
             - ir1 - ir2 - ir3 - ir4
 
         # Total calcium
@@ -439,7 +410,7 @@ class Grid():
         drdt = self.v_r(c, r)
 
         # IP3 of downstream cells
-        dipdt = iplcb_rest + self.i_plcd(c) - self.i_deg(ip) # + self.g_ip3 * self.L@ip
+        dipdt = iplcb_rest + self.i_plcd(c) - self.i_deg(ip) + self.g_ip3 * self.L@ip
         
         # IP3 of stimulated cells
         dipdt[-int(num/2)-1         : -int(num/2) + 2        ] += iplcb_stim - iplcb_rest
@@ -447,7 +418,7 @@ class Grid():
         dipdt[-int(num/2)-1 - 2*num : -int(num/2) + 2 - 2*num] += iplcb_stim - iplcb_rest
     
         # Voltage of downstream cells
-        dvdt = - 1 / self.c_m * (ical + icat + self.i_kca(v, c) + self.i_bk(v)) # + self.gc * self.L@v
+        dvdt = - 1 / self.c_m * (ical + icat + self.i_kca(v, c) + self.i_bk(v))  + self.gc * self.L@v
         
         # Voltage of stimulated cells
         dvdt[0:3*num] += 1 / self.c_m * self.scale_stim_v * self.stim_v(t, stims_v)
@@ -473,15 +444,7 @@ def step(model, stims_v = [201,203,205,207,209,211,213,215,217,219], stims_ip = 
     # Time stepping
 
     start_time = time.time() # Begin counting time
-
-    model.r0 =  model.ki**2 / (model.ki**2 + model.c0**2)
-    model.n0 = model.n_inf(model.v0)
-    model.hv0 = model.hv_inf(model.v0)
-    model.hc0 = model.hc_inf(model.c0)
-    model.bx0 = model.bx_inf(model.v0)
-    model.cx0 = model.cx_inf(model.v0)
-    model.v8 = (model.i_deg(model.ip0) - model.i_plcd(model.c0)) / (1 / ((1 + model.kg)*(model.kg/(1+model.kg) + model.a0)) * model.a0)
-
+    
     base_mat = np.ones((model.num,model.num))
 
     inits = [model.c0, model.s0, model.r0, model.ip0, model.v0, model.n0, model.hv0, 
@@ -494,18 +457,18 @@ def step(model, stims_v = [201,203,205,207,209,211,213,215,217,219], stims_ip = 
     sol = odeint(model.rhs, y0, model.time, args = (np.array(stims_v), np.array(stims_ip)), hmax = 0.005)
 
     elapsed = (time.time() - start_time) # End counting time
-    print("Time used:",elapsed)
+    print("Num: " + str(model.num) + "; Time used:" + str(elapsed))
 
     return sol
 
 if __name__ == '__main__':
     n_cel = num
-    model = Grid(n_cel, 300)
+    model = Grid(n_cel, 100, 0.1)
     sol = step(model)
     # c = np.reshape(sol[:,0:n_cel*n_cel], (-1,n_cel,n_cel))
     # df = pd.DataFrame(np.reshape(c,(-1,n_cel**2)))
     df = pd.DataFrame(sol[:,0:n_cel*n_cel])
-    # df.to_csv('../save/data/c_50x50_200s_withjit.csv', index = False)
+    df.to_csv('c_20x20_100s.csv', index = False)
 
 
     
