@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 from scipy.integrate import odeint
-from scipy.sparse import spdiag
+from scipy.sparse import spdiags
 import scipy
 import pandas as pd
 from numba import jitclass, int32, float64
@@ -92,7 +92,10 @@ Dx = spdiags(np.array([onex,-2*onex,onex]), np.array([-1,0,1]),num,num).toarray(
 Dx[0,0] = -1
 Dx[num-1,num-1] = -1 
 Ix = np.eye(num)
-L = np.kron(Dx, Ix) + np.kron(Ix, Dx)
+Dx = scipy.sparse.csr_matrix(Dx)
+Ix = scipy.sparse.csr_matrix(Ix)
+L = scipy.sparse.kron(Dx, Ix) + scipy.sparse.kron(Ix, Dx)
+# L = np.kron(Dx, Ix) + np.kron(Ix, Dx)
 
 # @jitclass(spec)
 class Grid():
@@ -412,7 +415,7 @@ class Grid():
         drdt = self.v_r(c, r)
 
         # IP3 of downstream cells
-        dipdt = iplcb_rest + self.i_plcd(c) - self.i_deg(ip) + self.g_ip3 * self.L@ip
+        dipdt = iplcb_rest + self.i_plcd(c) - self.i_deg(ip) + self.g_ip3 * self.L.dot(ip)
         
         # IP3 of stimulated cells
         dipdt[-int(num/2)-1         : -int(num/2) + 2        ] += iplcb_stim - iplcb_rest
@@ -420,7 +423,7 @@ class Grid():
         dipdt[-int(num/2)-1 - 2*num : -int(num/2) + 2 - 2*num] += iplcb_stim - iplcb_rest
     
         # Voltage of downstream cells
-        dvdt = - 1 / self.c_m * (ical + icat + self.i_kca(v, c) + self.i_bk(v)) + self.gc * self.L@v
+        dvdt = - 1 / self.c_m * (ical + icat + self.i_kca(v, c) + self.i_bk(v)) + self.gc * self.L.dot(v)
         
         # Voltage of stimulated cells
         dvdt[0:3*num] += 1 / self.c_m * self.scale_stim_v * self.stim_v(t, stims_v)
