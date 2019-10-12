@@ -1,17 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-import sys
-sys.path.insert(0, '/home/hengji/Documents/hydra_calcium_model/single/')
-
 import numpy as np
 import matplotlib.pyplot as plt
 import time
 from scipy.integrate import odeint
-from scipy.sparse import spdiags
+from scipy.sparse import spdiag
+import scipy
 import pandas as pd
-# from cell import Cell
 from numba import jitclass, int32, float64
+import os
 
 spec = [('k1', float64),
 ('k2', float64),
@@ -47,10 +44,6 @@ spec = [('k1', float64),
 ('n0', float64),
 ('hv0', float64),
 ('hc0', float64),
-('x0', float64),
-('z0', float64),
-('p0', float64),
-('q0', float64),
 ('bx0', float64),
 ('cx0', float64),
 ('g_cal', float64),
@@ -90,7 +83,7 @@ spec = [('k1', float64),
 ('phi2', float64),
 ('phi3', float64),
 ('phi4', float64),
-('iin', float64)]
+('const_iin', float64)]
 
 num = 20
 
@@ -101,7 +94,7 @@ Dx[num-1,num-1] = -1
 Ix = np.eye(num)
 L = np.kron(Dx, Ix) + np.kron(Ix, Dx)
 
-@jitclass(spec)
+# @jitclass(spec)
 class Grid():
     '''A 2D dynamical model with cells connected by gap junctions'''
     def __init__(self, num=num, T=300, dt = 0.001, k2=0.2, s0=600, d=10e-4, v7=0, k9=0.01, scale_stim_v = 0.01, scale_stim_ip = 1.0, L=L):
@@ -124,14 +117,14 @@ class Grid():
         self.kg = 0.1 # unknown
         self.a0 = 1 # 1e-3 - 10
         self.v7 = 0.04 # 0 - 0.05
-        self.v8 = 4e-4
+        self.v8 = 0.00012 # 4e-4
         self.kca = 0.3
         self.k9 = 0.08
         self.beta = 20
 
         self.c0 = 0.05
         self.s0 = 60
-        self.r0 = 0.94
+        self.r0 = 0.9411764705882353
         self.ip0 = 0.01
 
         # Fast Parameters
@@ -141,15 +134,11 @@ class Grid():
         self.d = 10e-4 # 10e-4 # [cm]
         self.F = 96485332.9 # [mA*s/mol]
         self.v0 = -50 # (-40 to -60)
-        self.n0 = 0
-        self.hv0 = 0
-        self.hc0 = 0
-        self.x0 = 0
-        self.z0 = 0
-        self.p0 = 0
-        self.q0 = 0
-        self.bx0 = 0
-        self.cx0 = 0
+        self.n0 = 0.00591106885624379
+        self.hv0 = 0.8232409668812207
+        self.hc0 = 0.9523809523809523
+        self.bx0 = 0.06951244510501192
+        self.cx0 = 0.06889595335007676
 
         # Fluorescence Parameters
         self.r_inc = 200
@@ -213,14 +202,11 @@ class Grid():
         # Time
         self.T = T
         self.dt = dt
-        self.time = np.linspace(0, T, int(T/dt))
+        self.time = np.linspace(0, T, 1+int(T/dt))
 
-        self.g_bk = - (self.i_cal(self.v0, self.n0, self.hv0, self.hc0) \
-        + self.i_cat(self.v0, self.bx0, self.cx0) \
-        + self.i_kca(self.v0, self.c0))/(self.v0 - self.e_bk)
-
-        self.iin = 1e9 * (self.i_cal(self.v0, self.n0, self.hv0, self.hc0) + self.i_cat(self.v0, self.bx0, self.cx0)) / (2 * self.F * self.d) + self.i_out(self.c0) - self.v41 * self.ip0**2 / (self.kr**2 + self.ip0**2)
-        self.k1 = (self.i_serca(self.c0) - self.i_rel(self.c0, self.s0, self.ip0, self.r0)) / (self.s0 - self.c0)
+        self.g_bk = 2.028567365131953e-05
+        self.const_iin = -0.5049104594276217
+        self.k1 = 2.938083356243623e-05
 
     '''Hofer methods'''
     def i_rel(self, c, s, ip, r):
@@ -238,7 +224,7 @@ class Grid():
         return self.k1 * (s - c)
 
     def i_in(self, ip):
-        return self.iin + self.v41 * ip**2 / (self.kr**2 + ip**2)
+        return self.const_iin + self.v41 * ip**2 / (self.kr**2 + ip**2)
 
     def i_out(self, c):
         # Additional eflux [uM/s]
@@ -354,6 +340,7 @@ class Grid():
 
     def i_bk(self, v):
         # Background voltage leak [mA/cm^2]
+
         return self.g_bk * (v - self.e_bk)
 
     def stim_v(self, t, stims):
@@ -433,7 +420,7 @@ class Grid():
         dipdt[-int(num/2)-1 - 2*num : -int(num/2) + 2 - 2*num] += iplcb_stim - iplcb_rest
     
         # Voltage of downstream cells
-        dvdt = - 1 / self.c_m * (ical + icat + self.i_kca(v, c) + self.i_bk(v))  + self.gc * self.L@v
+        dvdt = - 1 / self.c_m * (ical + icat + self.i_kca(v, c) + self.i_bk(v)) + self.gc * self.L@v
         
         # Voltage of stimulated cells
         dvdt[0:3*num] += 1 / self.c_m * self.scale_stim_v * self.stim_v(t, stims_v)
@@ -451,7 +438,7 @@ class Grid():
         dc4gdt = ir4
 
         # Put together
-        dydt = np.concatenate((dcdt, dsdt, drdt, dipdt, dvdt, dndt, dhvdt, dhcdt, dbxdt, dcxdt, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt))  
+        dydt = np.concatenate((dcdt, dsdt, drdt, dipdt, dvdt, dndt, dhvdt, dhcdt, dbxdt, dcxdt, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt)) 
 
         return dydt
 
@@ -459,15 +446,7 @@ def step(model, stims_v = [201,203,205,207,209,211,213,215,217,219], stims_ip = 
     # Time stepping
 
     start_time = time.time() # Begin counting time
-
-    model.r0 =  model.ki**2 / (model.ki**2 + model.c0**2)
-    model.n0 = model.n_inf(model.v0)
-    model.hv0 = model.hv_inf(model.v0)
-    model.hc0 = model.hc_inf(model.c0)
-    model.bx0 = model.bx_inf(model.v0)
-    model.cx0 = model.cx_inf(model.v0)
-    model.v8 = (model.i_deg(model.ip0) - model.i_plcd(model.c0)) / (1 / ((1 + model.kg)*(model.kg/(1+model.kg) + model.a0)) * model.a0)
-
+    
     base_mat = np.ones((model.num,model.num))
 
     inits = [model.c0, model.s0, model.r0, model.ip0, model.v0, model.n0, model.hv0, 
@@ -477,7 +456,7 @@ def step(model, stims_v = [201,203,205,207,209,211,213,215,217,219], stims_ip = 
 
     y0 = np.reshape(y0, 15*model.num2)   
 
-    sol = odeint(model.rhs, y0, model.time, args = (np.array(stims_v), np.array(stims_ip)), hmax = 0.005)
+    sol = odeint(model.rhs, y0, model.time, args = (np.array(stims_v), np.array(stims_ip)), hmax = 0.1)
 
     elapsed = (time.time() - start_time) # End counting time
     print("Num: " + str(model.num) + "; Time used:" + str(elapsed))
@@ -486,14 +465,9 @@ def step(model, stims_v = [201,203,205,207,209,211,213,215,217,219], stims_ip = 
 
 if __name__ == '__main__':
     n_cel = num
-    model = Grid(n_cel, 300)
+    model = Grid(n_cel, 100, 0.1)
     sol = step(model)
     # c = np.reshape(sol[:,0:n_cel*n_cel], (-1,n_cel,n_cel))
     # df = pd.DataFrame(np.reshape(c,(-1,n_cel**2)))
     df = pd.DataFrame(sol[:,0:n_cel*n_cel])
-    df.to_csv('c_50x50_300s.csv', index = False)
-
-
-    
-
-    
+    df.to_csv('c_20x20_100s.csv', index = False)
