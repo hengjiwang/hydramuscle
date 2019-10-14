@@ -7,6 +7,7 @@ import matplotlib.animation as anim
 import numpy as np
 import pandas as pd
 from matplotlib.ticker import MaxNLocator
+from mpl_toolkits.mplot3d import axes3d, Axes3D
 
 def save_anim(x, interval, filename, canvas = 'flat', show = True):
     # Convert the 2D data into a video and save it
@@ -71,6 +72,34 @@ def vplot(pars, model, tmin=0 , tmax = 100, separate = True,
     if legend: plt.legend(legend)
     plt.show()   
 
+def plot_frame(x, t, dt):
+    ncels = len(x[0])
+    x = np.reshape(x, (-1, int(np.sqrt(ncels)), int(np.sqrt(ncels))))
+    frame = x[int(t/dt)]
+    plt.figure()
+    plt.imshow(frame, vmin=0, vmax=2)
+    plt.colorbar()
+    plt.show()
+
+def plot_frames(data, ts, dt):
+    ncels = len(data[0])
+    nside = int(np.sqrt(ncels))
+    ntime = len(data)
+    data = np.reshape(data, (-1, nside, nside))
+
+    nrow = 2
+    ncol = int(np.ceil(len(ts)/nrow))
+
+    fig = plt.figure(figsize=(20,10))
+    
+    for j in range(len(ts)):
+        t = ts[j]
+        plt.subplot(nrow, ncol, j+1)
+        frame = data[int(t/dt)]
+        plt.imshow(frame, vmin=0, vmax=2)
+        plt.title('t=' + str(t) + 's')
+
+    plt.show()
 
 if __name__ == '__main__':
     
@@ -78,7 +107,7 @@ if __name__ == '__main__':
     # # save_pattern(x, '../save/figures/grid_pattern.png')
     # save_anim(x, 1, '../save/animations/grid_movie.mp4')
 
-    x = pd.read_csv('../save/data/c_20x1_100s_no_plcd.csv')
+    x = pd.read_csv('../save/data/c_20x20_100s.csv')
     # save_pattern(x, '../save/figures/chain_fluo_pattern.png')
     # save_anim(x, 1, '../save/animations/grid_fluo_movie.mp4')
-    save_curve(x, None)
+    plot_frames(x.values, [11, 20, 30], 0.1)
