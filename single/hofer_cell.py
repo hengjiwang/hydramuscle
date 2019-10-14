@@ -110,6 +110,8 @@ class HoferCell:
         drdt = self.v_r(c, r)
         dipdt = self.i_plcb(self.stim(t, stims)) + self.i_plcd(c) - self.i_deg(ip)
 
+        print(t)
+
         return [dcdt, dsdt, drdt, dipdt]
 
     def step(self, stims = [10]):
@@ -120,6 +122,16 @@ class HoferCell:
 
         y0 = [self.c0, self.s0, self.r0, self.ip0]
         sol = odeint(self.rhs, y0, self.time, args = (stims,), hmax = 0.005)
+
+        # # Self-defined Euler's Method
+        # y = y0
+        # sol = np.zeros((len(self.time), len(y0)))       
+        # for j in range(len(self.time)):
+        #     t = self.time[j]
+        #     sol[j,:] = y
+        #     dydt = self.rhs(y, t, stims)
+        #     y += self.dt * np.array(dydt)
+
         return sol
 
     '''Plot'''

@@ -90,7 +90,19 @@ class Cell(HoferCell, FastCell, FluoEncoder):
         y0 = [self.c0, self.s0, self.r0, self.ip0, self.v0, self.n0, self.hv0, 
         self.hc0, self.bx0, self.cx0, self.g0, self.c1g0, self.c2g0, self.c3g0, self.c4g0]
 
-        sol = odeint(self.rhs, y0, self.time, args = (stims_v, stims_ip, ), hmax = 0.005)
+        # sol = odeint(self.rhs, y0, self.time, args = (stims_v, stims_ip, ), hmax = 0.005)
+
+        y = y0
+        sol = np.zeros((len(self.time), len(y0)))
+
+        for j in range(1): # (len(self.time)):
+            t = self.time[j]
+            sol[j,:] = y
+            dydt = self.rhs(y, t, stims_v, stims_ip)
+            y += self.dt * np.array(dydt)
+            # print('y: ', y)
+            print('dydt: ', dydt)
+
         return sol
 
     def plot(self, a, tmin=0, tmax=200, xlabel = 'time[s]', ylabel = None, color = 'b'):
@@ -100,7 +112,7 @@ class Cell(HoferCell, FastCell, FluoEncoder):
 
 if __name__ == '__main__':
     model = Cell(T=200, k2 = 0.01)
-    sol = model.step(stims_ip = [10])
+    sol = model.step(stims_v = [-1], stims_ip = [-1])
     c = sol[:,0]
     s = sol[:,1]
     r = sol[:,2]

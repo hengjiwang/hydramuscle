@@ -194,6 +194,8 @@ class FastCell:
         dbxdt = (self.bx_inf(v) - bx)/self.tau_bx(v)
         dcxdt = (self.cx_inf(v) - cx)/self.tau_cx(v)
 
+        print(t)
+
         return [dcdt, dvdt, dndt, dhvdt, dhcdt, dxdt, dzdt, dpdt, dqdt, dbxdt, dcxdt]
 
     def step(self, stims = [1,3,5,7,9,11,13,15,17,19]):
@@ -210,7 +212,19 @@ class FastCell:
         self.cx0 = self.cx_inf(self.v0)
 
         y0 = [self.c0, self.v0, self.n0, self.hv0, self.hc0, self.x0, self.z0, self.p0, self.q0, self.bx0, self.cx0]
-        sol = odeint(self.rhs, y0, self.time, args = (stims,), hmax = 0.005)
+
+        # scipy.integrate.odeint
+        sol = odeint(self.rhs, y0, self.time, args = (stims,), hmax=0.005)
+
+        # Self-defined Euler's Method
+        # y = y0
+        # sol = np.zeros((len(self.time), len(y0)))       
+        # for j in range(len(self.time)):
+        #     t = self.time[j]
+        #     sol[j,:] = y
+        #     dydt = self.rhs(y, t, stims)
+        #     y += self.dt * np.array(dydt)
+
         return sol
 
     '''Visualize results'''
@@ -220,7 +234,7 @@ class FastCell:
         if ylabel:  plt.ylabel(ylabel)
 
 if __name__ == '__main__':
-    model = FastCell(20)
+    model = FastCell(100, 0.001)
     sol = model.step()
     c = sol[:, 0]
     v = sol[:, 1]
