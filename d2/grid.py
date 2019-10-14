@@ -10,82 +10,7 @@ import pandas as pd
 from numba import jitclass, int32, float64
 import os
 
-spec = [('k1', float64),
-('k2', float64),
-('ka', float64),
-('kip', float64),
-('k3', float64),
-('v40', float64),
-('v41', float64),
-('kr', float64),
-('k5', float64),
-('k6', float64),
-('ki', float64),
-('kg', float64),
-('a0', float64),
-('v7', float64),
-('v8', float64),
-('kca', float64),
-('k9', float64),
-('beta', float64),
-('c0', float64),
-('s0', float64),
-('r0', float64),
-('ip0', float64),
-('T', float64),
-('dt', float64),
-('time', float64[:]),
-('c_m', float64),
-('A_cyt', float64),
-('V_cyt', float64),
-('d', float64),
-('F', float64),
-('v0', float64),
-('n0', float64),
-('hv0', float64),
-('hc0', float64),
-('bx0', float64),
-('cx0', float64),
-('g_cal', float64),
-('e_cal', float64),
-('k_cal', float64),
-('g_cat', float64),
-('e_cat', float64),
-('g_kcnq', float64),
-('e_k', float64),
-('g_kv', float64),
-('g_kca', float64),
-('g_bk', float64),
-('e_bk', float64),
-('gc', float64),
-('g_ip3', float64),
-('num', int32),
-('num2', int32),
-('L', float64[:,:]),
-('scale_stim_v', float64),
-('scale_stim_ip', float64),
-('r_inc', float64),
-('k1p', float64),
-('k1n', float64),
-('k2p', float64),
-('k2n', float64),
-('k3p', float64),
-('k3n', float64),
-('k4p', float64),
-('k4n', float64),
-('g0', float64),
-('c1g0', float64),
-('c2g0', float64),
-('c3g0', float64),
-('c4g0', float64),
-('phi0', float64),
-('phi1', float64),
-('phi2', float64),
-('phi3', float64),
-('phi4', float64),
-('const_iin', float64)]
-
-num = 20
+num = 100
 
 onex = np.ones(num)
 Dx = spdiags(np.array([onex,-2*onex,onex]), np.array([-1,0,1]),num,num).toarray()
@@ -190,7 +115,6 @@ class Grid():
         # Build grid
         self.num = num
         self.num2 = self.num ** 2
-        self.L = L
 
         # Modified parameters
         # self.ip_decay = 0.04
@@ -383,6 +307,7 @@ class Grid():
         # Assign variables
         num = self.num
         num2 = self.num2
+
         c, s, r, ip, v, n, hv, hc, bx, cx, g, c1g, c2g, c3g, c4g = (y[0:num2], 
         y[num2:2*num2], y[2*num2:3*num2], y[3*num2:4*num2], y[4*num2:5*num2], 
         y[5*num2:6*num2], y[6*num2:7*num2], y[7*num2:8*num2], y[8*num2:9*num2], 
@@ -415,7 +340,7 @@ class Grid():
         drdt = self.v_r(c, r)
 
         # IP3 of downstream cells
-        dipdt = iplcb_rest + self.i_plcd(c) - self.i_deg(ip) + self.g_ip3 * self.L.dot(ip)
+        dipdt = iplcb_rest + self.i_plcd(c) - self.i_deg(ip) + self.g_ip3 * L.dot(ip)
         
         # IP3 of stimulated cells
         dipdt[-int(num/2)-1         : -int(num/2) + 2        ] += iplcb_stim - iplcb_rest
@@ -423,7 +348,7 @@ class Grid():
         dipdt[-int(num/2)-1 - 2*num : -int(num/2) + 2 - 2*num] += iplcb_stim - iplcb_rest
     
         # Voltage of downstream cells
-        dvdt = - 1 / self.c_m * (ical + icat + self.i_kca(v, c) + self.i_bk(v)) + self.gc * self.L.dot(v)
+        dvdt = - 1 / self.c_m * (ical + icat + self.i_kca(v, c) + self.i_bk(v)) + self.gc * L.dot(v)
         
         # Voltage of stimulated cells
         dvdt[0:3*num] += 1 / self.c_m * self.scale_stim_v * self.stim_v(t, stims_v)
@@ -445,32 +370,25 @@ class Grid():
 
         return dydt
 
-def step(model, stims_v = [201,203,205,207,209,211,213,215,217,219], stims_ip = [10]):
+model = Grid(num, 100, 1)
+base_mat = np.ones((model.num,model.num))
+inits = [model.c0, model.s0, model.r0, model.ip0, model.v0, model.n0, model.hv0, 
+model.hc0, model.bx0, model.cx0, model.g0, model.c1g0, model.c2g0, model.c3g0, model.c4g0]
+y0 = np.array([x*base_mat for x in inits])
+y0 = np.reshape(y0, 15*model.num2)  
+
+
+def step(stims_v = [201,203,205,207,209,211,213,215,217,219], stims_ip = [10]):
     # Time stepping
 
     start_time = time.time() # Begin counting time
-    
-    base_mat = np.ones((model.num,model.num))
-
-    inits = [model.c0, model.s0, model.r0, model.ip0, model.v0, model.n0, model.hv0, 
-    model.hc0, model.bx0, model.cx0, model.g0, model.c1g0, model.c2g0, model.c3g0, model.c4g0]
-
-    y0 = np.array([x*base_mat for x in inits])
-
-    y0 = np.reshape(y0, 15*model.num2)   
-
-    sol = odeint(model.rhs, y0, model.time, args = (np.array(stims_v), np.array(stims_ip)), hmax = 0.1)
-
+    sol = odeint(model.rhs, y0, model.time, args = (np.array(stims_v), np.array(stims_ip)))
     elapsed = (time.time() - start_time) # End counting time
     print("Num: " + str(model.num) + "; Time used:" + str(elapsed))
 
     return sol
 
 if __name__ == '__main__':
-    n_cel = num
-    model = Grid(n_cel, 100, 0.1)
-    sol = step(model)
-    # c = np.reshape(sol[:,0:n_cel*n_cel], (-1,n_cel,n_cel))
-    # df = pd.DataFrame(np.reshape(c,(-1,n_cel**2)))
-    df = pd.DataFrame(sol[:,0:n_cel*n_cel])
-    df.to_csv('c_20x20_100s.csv', index = False)
+    sol = step()
+    df = pd.DataFrame(sol[:,0:num*num])
+    df.to_csv('c_100x100_100s.csv', index = False)

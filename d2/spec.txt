@@ -1,4 +1,4 @@
-('k1', float64),
+spec = [('k1', float64),
 ('k2', float64),
 ('ka', float64),
 ('kip', float64),
@@ -32,10 +32,6 @@
 ('n0', float64),
 ('hv0', float64),
 ('hc0', float64),
-('x0', float64),
-('z0', float64),
-('p0', float64),
-('q0', float64),
 ('bx0', float64),
 ('cx0', float64),
 ('g_cal', float64),
@@ -74,4 +70,5 @@
 ('phi1', float64),
 ('phi2', float64),
 ('phi3', float64),
-('phi4', float64)
+('phi4', float64),
+('const_iin', float64)]
