@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
-class HoferCell:
+class SlowCell:
     '''An intracellular model following Hofer 2002'''
 
     def __init__(self, T = 60, dt = 0.001):
@@ -23,14 +23,14 @@ class HoferCell:
         self.kg = 0.1 # unknown
         self.a0 = 1 # 1e-3 - 10
         self.v7 = 0.04 # 0 - 0.05
-        self.v8 = 4e-4
+        self.v8 = None
         self.kca = 0.3
         self.k9 = 0.08
         self.beta = 20
 
         self.c0 = 0.05
         self.s0 = 60
-        self.r0 = 0.94
+        self.r0 = 0.9411764705882353
         self.ip0 = 0.01
 
         self.T = T
@@ -38,35 +38,25 @@ class HoferCell:
         self.time = np.linspace(0, T, int(T/dt))
 
     '''Calcium terms'''
-    def i_rel(self, c, s, ip, r):
+    def i_ipr(self, c, s, ip, r):
         # Release from ER, including IP3R and leak term [uM/s]
         return (self.k2 * r * c**2 * ip**2 / (self.ka**2 + c**2) / (self.kip**2 + ip**2)) * (s - c)
 
     def i_serca(self, c):
         # SERCA [uM/s]
-        # v_serca = 2
-        # k_serca = 0.1
-        # return v_serca * c / (c + k_serca)
         return self.k3 * c
 
     def i_leak(self, c, s):
-        k1 = (self.i_serca(self.c0) - self.i_rel(self.c0, self.s0, self.ip0, self.r0)) / (self.s0 - self.c0)
+        k1 = (self.i_serca(self.c0) - self.i_ipr(self.c0, self.s0, self.ip0, self.r0)) / (self.s0 - self.c0)
         return k1 * (s - c)
 
-    def i_in(self, c, ip):
-        # Calcium entry rate [uM/s]
-        return self.v40 + self.v41 * ip**2 / (self.kr**2 + ip**2)
-
     def i_pmca(self, c):
-        # PMCA [uM/s]
-        k_pmca = 2.5
-        v_pmca = 4
-        return 0 * v_pmca * c**2 / (c**2 + k_pmca**2)
-
-    def i_out(self, c):
         # Additional eflux [uM/s]
-        k5 = (self.i_in(self.c0, self.ip0) - self.i_pmca(self.c0)) / self.c0
-        return k5 * c
+        return self.k5 * c
+
+    def i_in(self, ip):
+        # Calcium entry rate [uM/s]
+        return self.i_pmca(self.c0) + self.v41 * ip**2 / (self.kr**2 + ip**2) - self.v41 * self.ip0**2 / (self.kr**2 + self.ip0**2)
 
     '''IP3R terms'''
     def v_r(self, c, r):
@@ -98,15 +88,15 @@ class HoferCell:
         if condition:
             return 1
         else:
-            return 0
+            return self.v8
 
     '''Numerical terms'''
     def rhs(self, y, t, stims):
         # Right-hand side formulation
         c, s, r, ip = y
 
-        dcdt = self.i_rel(c, s, ip, r) + self.i_leak(c, s) - self.i_serca(c) + self.i_in(c, ip) - self.i_pmca(c) - self.i_out(c)
-        dsdt = self.beta * (self.i_serca(c) - self.i_rel(c, s, ip, r) - self.i_leak(c, s))
+        dcdt = self.i_ipr(c, s, ip, r) + self.i_leak(c, s) - self.i_serca(c) + self.i_in(ip) - self.i_pmca(c)
+        dsdt = self.beta * (self.i_serca(c) - self.i_ipr(c, s, ip, r) - self.i_leak(c, s))
         drdt = self.v_r(c, r)
         dipdt = self.i_plcb(self.stim(t, stims)) + self.i_plcd(c) - self.i_deg(ip)
 
@@ -116,19 +106,9 @@ class HoferCell:
         # Time stepping    
 
         self.v8 = (self.i_deg(self.ip0) - self.i_plcd(self.c0)) / (1 / ((1 + self.kg)*(self.kg/(1+self.kg) + self.a0)) * self.a0)
-        self.r0 = self.ki**2 / (self.ki**2 + self.c0**2)
 
         y0 = [self.c0, self.s0, self.r0, self.ip0]
         sol = odeint(self.rhs, y0, self.time, args = (stims,), hmax = 0.005)
-
-        # # Self-defined Euler's Method
-        # y = y0
-        # sol = np.zeros((len(self.time), len(y0)))       
-        # for j in range(len(self.time)):
-        #     t = self.time[j]
-        #     sol[j,:] = y
-        #     dydt = self.rhs(y, t, stims)
-        #     y += self.dt * np.array(dydt)
 
         return sol
 
@@ -139,7 +119,7 @@ class HoferCell:
         if ylabel:  plt.ylabel(ylabel)
 
 if __name__ == "__main__":
-    model = HoferCell(100)
+    model = SlowCell(100)
     sol = model.step()
     c = sol[:,0]
     s = sol[:,1]
@@ -160,14 +140,9 @@ if __name__ == "__main__":
 
     # Plot the currents
     plt.figure()
-    model.plot(model.i_rel(c, s, ip, r), color='b')
+    model.plot(model.i_ipr(c, s, ip, r), color='b')
     model.plot(model.i_serca(c), color = 'r')
     model.plot(model.i_pmca(c), color = 'g')
     model.plot(model.i_leak(c, s), color = 'y')
-    model.plot(model.i_out(c), color='k')
-    plt.legend(['i_ip3r', 'i_serca', 'i_pmca', 'i_leak', 'i_out'])
+    plt.legend(['i_ip3r', 'i_serca', 'i_pmca', 'i_leak'])
     plt.show()
-
-    
-
-    
