@@ -10,7 +10,7 @@ import pandas as pd
 from numba import jitclass, int32, float64
 import os
 
-num = 50 # 100
+num = 20 # 100
 
 onex = np.ones(num)
 Dx = spdiags(np.array([onex,-2*onex,onex]), np.array([-1,0,1]),num,num).toarray()
@@ -370,7 +370,7 @@ class Grid():
 
         return dydt
 
-model = Grid(num, T=100, dt=0.001)
+model = Grid(num, T=10, dt=0.001)
 base_mat = np.ones((model.num,model.num))
 inits = [model.c0, model.s0, model.r0, model.ip0, model.v0, model.n0, model.hv0, 
 model.hc0, model.bx0, model.cx0, model.g0, model.c1g0, model.c2g0, model.c3g0, model.c4g0]

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-sys.path.insert(0, '/home/hengji/Documents/hydra_calcium_model/current/single/')
+sys.path.insert(0, '/home/hengji/Documents/hydra_calcium_model/single/')
 
 import numpy as np
 import pandas as pd
@@ -15,7 +15,7 @@ from cell import Cell
 
 class Chain(Cell):
     '''A 1D cell chain with cells connected through gap junctions'''
-    def __init__(self, num=20, T=200, k2 = 0.2, s0 = 600, d = 10e-4, v7 = 0, k9 = 0.01):
+    def __init__(self, num=20, T=200, k2 = 0.2, s0 = 600, d = 10e-4, v7 = 0.04, k9 = 0.01):
         # Parameters
         super().__init__(T)
         self.gc = 1000 # 5e4

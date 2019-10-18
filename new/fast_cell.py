@@ -124,11 +124,8 @@ class FastCell:
         for stim_t in stims:
             condition = condition or stim_t <= t < stim_t + 0.01
 
-        if condition:
-            return 1
-        else:
-            return 0
-
+       	return int(condition)
+           
     '''Numerical terms'''
     def rhs(self, y, t, stims):
         # Right-hand side function

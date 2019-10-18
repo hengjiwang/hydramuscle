@@ -85,10 +85,7 @@ class SlowCell:
         for stim_t in stims:
             condition = condition or stim_t <= t < stim_t + 4
 
-        if condition:
-            return 1
-        else:
-            return self.v8
+        return 1 if condition else self.v8 
 
     '''Numerical terms'''
     def rhs(self, y, t, stims):

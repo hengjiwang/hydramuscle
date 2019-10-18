@@ -16,7 +16,7 @@ from fluo_encoder import FluoEncoder
 
 class Chain(Cell, FluoEncoder):
     '''A 1D cell chain with cells connected through gap junctions'''
-    def __init__(self, num=20, T=200, dt = 0.001, k2 = 0.2, s0 = 600, d = 10e-4, v7 = 0.04, k9 = 0.01):
+    def __init__(self, num=20, T=200, dt = 0.001, k2 = 0.2, s0 = 600, d = 20e-4, v7 = 0.02, k9 = 0.04):
         # Parameters
         FluoEncoder.__init__(self, T, dt)
         Cell.__init__(self, T, dt)
