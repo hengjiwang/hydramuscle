@@ -98,7 +98,7 @@ class HoferCell:
         if condition:
             return 1
         else:
-            return 0
+            return self.v8
 
     '''Numerical terms'''
     def rhs(self, y, t, stims):

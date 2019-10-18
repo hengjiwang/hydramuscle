@@ -130,7 +130,7 @@ if __name__ == "__main__":
 
     # Save the [Ca2+]
     df = pd.DataFrame(sol[:,0:n_cel])
-    df.to_csv('../save/data/c_40x1_300s_no_plcd_gip3_2.csv', index = False)
+    # df.to_csv('../save/data/c_40x1_300s_no_plcd_gip3_2.csv', index = False)
 
     
 

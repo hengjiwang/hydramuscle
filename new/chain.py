@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-sys.path.insert(0, '/home/hengji/Documents/hydra_calcium_model/fluorescence/')
+sys.path.insert(0, '../fluorescence/')
 
 import numpy as np
 import pandas as pd
@@ -16,7 +16,7 @@ from fluo_encoder import FluoEncoder
 
 class Chain(Cell, FluoEncoder):
     '''A 1D cell chain with cells connected through gap junctions'''
-    def __init__(self, num=20, T=200, dt = 0.001, k2 = 0.2, s0 = 600, d = 10e-4, v7 = 0.1, k9 = 0.08):
+    def __init__(self, num=20, T=200, dt = 0.001, k2 = 0.2, s0 = 600, d = 10e-4, v7 = 0.04, k9 = 0.01):
         # Parameters
         FluoEncoder.__init__(self, T, dt)
         Cell.__init__(self, T, dt)
@@ -33,13 +33,10 @@ class Chain(Cell, FluoEncoder):
         self.v7 = v7
         self.k2 = k2
         self.s0 = s0
-        self.k3 = 10
-        self.k5 = 10
-        self.ki = 0.1
         
         # General
         self.alpha = 1e9 / (2 * self.F * self.d)
-        self.beta = 5.5
+        # self.beta = 5.5
     
     def rhs(self, y, t, stims_v, stims_ip):
         # Right-hand side formulation
@@ -66,10 +63,12 @@ class Chain(Cell, FluoEncoder):
         ikca = self.i_kca(v, c)
         ibk = self.i_bk(v)
         istimv = self.stim_v(t, stims_v)
+        ir1 = self.r_1(c, g, c1g)
+        ir2 = self.r_2(c, c1g, c2g)
+        ir3 = self.r_3(c, c2g, c3g)
+        ir4 = self.r_4(c, c3g, c4g)
 
-
-        dcdt =  iipr +ileak - iserca + iin - ipmca - self.alpha * (ical + icat) - self.r_1(c, g, c1g) - self.r_2(c, c1g, c2g) \
-            - self.r_3(c, c2g, c3g) - self.r_4(c, c3g, c4g)
+        dcdt =  (iipr +ileak - iserca) + (iin - ipmca - self.alpha * (ical + icat)) - ir1 - ir2 - ir3 - ir4
         dsdt = self.beta * (iserca - iipr - ileak)
         drdt = vr
         dipdt = iplcb_base + iplcd - ideg + self.g_ip3 * self.Dx.dot(ip)
@@ -81,11 +80,11 @@ class Chain(Cell, FluoEncoder):
         dhcdt = (self.hc_inf(c) - hc)/self.tau_hc()
         dbxdt = (self.bx_inf(v) - bx)/self.tau_bx(v)
         dcxdt = (self.cx_inf(v) - cx)/self.tau_cx(v)
-        dgdt = - self.r_1(c, g, c1g)
-        dc1gdt = (self.r_1(c, g, c1g) - self.r_2(c, c1g, c2g))
-        dc2gdt = (self.r_2(c, c1g, c2g) - self.r_3(c, c2g, c3g))
-        dc3gdt = (self.r_3(c, c2g, c3g) - self.r_4(c, c3g, c4g))
-        dc4gdt = self.r_4(c, c3g, c4g)
+        dgdt = - ir1
+        dc1gdt = ir1 - ir2
+        dc2gdt = ir2 - ir3
+        dc3gdt = ir3 - ir4
+        dc4gdt = ir4
 
         deriv = np.array([dcdt, dsdt, drdt, dipdt, dvdt, dndt, dhvdt, dhcdt, dbxdt, dcxdt, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt])
 
@@ -133,7 +132,7 @@ if __name__ == "__main__":
 
     n_cel = 40
 
-    model = Chain(n_cel, 100)
+    model = Chain(n_cel, 200)
     sol = model.step(stims_v=[-100])
     c = sol[:,0:n_cel]
     s = sol[:,n_cel:2*n_cel]

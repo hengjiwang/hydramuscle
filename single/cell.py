@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import sys
-sys.path.insert(0, '/home/hengji/Documents/hydra_calcium_model/fluorescence/')
-sys.path.insert(0, '/home/hengji/Documents/hydra_calcium_model/force/')
-sys.path.insert(0, '/home/hengji/Documents/hydra_calcium_model/single/')
+sys.path.insert(0, '../fluorescence/')
+sys.path.insert(0, '../force/')
+sys.path.insert(0, '../single/')
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -54,8 +54,8 @@ class Cell(HoferCell, FastCell, FluoEncoder):
         dcdt = self.i_rel(c, s, ip, r) + self.i_leak(c, s) - self.i_serca(c) + self.i_in(ip) - self.i_pmca(c) - self.i_out(c) \
             - 1e9 * (self.i_cal(v, n, hv, hc) + self.i_cat(v, bx, cx)) / (2 * self.F * self.d) \
             - self.r_1(c, g, c1g) - self.r_2(c, c1g, c2g) - self.r_3(c, c2g, c3g) - self.r_4(c, c3g, c4g) \
-            # + self.r_1(self.c0, self.g0, self.c1g0) + self.r_2(self.c0, self.c1g0, self.c2g0) + \
-            #     self.r_3(self.c0, self.c2g0, self.c3g0) + self.r_4(self.c0, self.c3g0, self.c4g0)
+            + self.r_1(self.c0, self.g0, self.c1g0) + self.r_2(self.c0, self.c1g0, self.c2g0) + \
+                self.r_3(self.c0, self.c2g0, self.c3g0) + self.r_4(self.c0, self.c3g0, self.c4g0)
         dsdt = self.beta * (self.i_serca(c) - self.i_rel(c, s, ip, r) - self.i_leak(c, s))
         drdt = self.v_r(c, r)
         dipdt = self.i_plcb(self.stim(t, stims_ip)) + self.i_plcd(c) - self.i_deg(ip)
@@ -71,13 +71,12 @@ class Cell(HoferCell, FastCell, FluoEncoder):
         dc3gdt = (self.r_3(c, c2g, c3g) - self.r_4(c, c3g, c4g))
         dc4gdt = self.r_4(c, c3g, c4g)
 
-        if t < 0.002:   print([dcdt, dsdt, drdt, dipdt, dvdt, dndt, dhvdt, dhcdt, dbxdt, dcxdt, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt])
+        # if t < 0.001:   print(dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt)
 
         return [dcdt, dsdt, drdt, dipdt, dvdt, dndt, dhvdt, dhcdt, dbxdt, dcxdt, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt]
 
     def step(self, stims_v = [101,103,105,107,109,111,113,115,117,119], stims_ip = [10]):
         # Time stepping
-        # self.hh0 = self.hh_inf(self.c0, self.ip0)
         
         self.r0 =  self.ki**2 / (self.ki**2 + self.c0**2)
 
@@ -94,17 +93,6 @@ class Cell(HoferCell, FastCell, FluoEncoder):
         self.hc0, self.bx0, self.cx0, self.g0, self.c1g0, self.c2g0, self.c3g0, self.c4g0]
 
         sol = odeint(self.rhs, y0, self.time, args = (stims_v, stims_ip, ), hmax = 0.005)
-
-        # y = y0
-        # sol = np.zeros((len(self.time), len(y0)))
-
-        # for j in range(len(self.time)):
-        #     t = self.time[j]
-        #     sol[j,:] = y
-        #     dydt = self.rhs(y, t, stims_v, stims_ip)
-        #     y += self.dt * np.array(dydt)
-        #     # print('y: ', y)
-        #     print('dydt: ', dydt)
 
         return sol
 

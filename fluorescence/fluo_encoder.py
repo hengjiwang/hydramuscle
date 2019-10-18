@@ -25,11 +25,11 @@ class FluoEncoder:
         self.k4p = 1069
         self.k4n = 5.8
         self.c = c
-        self.g0 = 3.281
-        self.c1g0 = 4.101
-        self.c2g0 = 0.017
-        self.c3g0 = 0
-        self.c4g0 = 0.0007
+        self.g0 = 3.28088468
+        self.c1g0 = 4.10110585
+        self.c2g0 = 0.01690456
+        self.c3g0 = 7.87924326e-05
+        self.c4g0 = 0.00072611
         self.phi0 = 1
         self.phi1 = 1
         self.phi2 = 1
@@ -112,4 +112,11 @@ class FluoEncoder:
         c4g = sol[:, 4]
         f_total = self.f_total(g, c1g, c2g, c3g, c4g)
 
+        print(g, c1g, c2g, c3g, c4g)
+
         return f_total
+
+if __name__ == "__main__":
+    c = np.zeros((100000))+0.05
+    encoder = FluoEncoder(c)
+    fluo = encoder.step()

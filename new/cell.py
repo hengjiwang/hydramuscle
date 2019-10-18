@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-sys.path.insert(0, '/home/hengji/Documents/hydra_calcium_model/force/')
+sys.path.insert(0, '../force/')
 
 import numpy as np
 import matplotlib.pyplot as plt
