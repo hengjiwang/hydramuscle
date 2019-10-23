@@ -94,7 +94,7 @@ def plot_frames(data, nx, ny, ts, dt):
         t = ts[j]
         plt.subplot(nrow, ncol, j+1)
         frame = data[int(t/dt)]
-        plt.imshow(frame, vmin=0, vmax=1.5)
+        plt.imshow(frame, vmin=0, vmax=1)
         plt.colorbar()
         plt.title('t=' + str(t) + 's')
 

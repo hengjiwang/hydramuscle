@@ -13,14 +13,14 @@ from fluo_encoder import FluoEncoder
 
 class Grid(Cell, FluoEncoder):
     '''A 1D cell chain with cells connected through gap junctions'''
-    def __init__(self, numx=20, numy=40, T=200, dt = 0.001, k2 = 0.3, s0 = 600, d = 20e-4, v7 = 0.02, k9 = 0.04):
+    def __init__(self, numx=20, numy=40, T=200, dt = 0.001, k2 = 0.3, s0 = 600, d = 20e-4, v7 = 0.03, k9 = 0.06):
         # Parameters
         FluoEncoder.__init__(self, T, dt)
         Cell.__init__(self, T, dt)
         self.gcx = 1000
         self.gcy = 1000
         self.g_ip3x = 0
-        self.g_ip3y = 2
+        self.g_ip3y = 1
         self.numx = numx
         self.numy = numy
         onex = np.ones(self.numx)
@@ -146,4 +146,4 @@ if __name__ == "__main__":
     model = Grid(numx=10, numy=20, T=100, dt=0.001)
     sol = model.step()
     df = pd.DataFrame(sol[:,0:model.numx*model.numy])
-    df.to_csv('c_10x20_11s.csv', index = False)
+    df.to_csv('c_10x20_100s.csv', index = False)
