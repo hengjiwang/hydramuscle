@@ -4,6 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
+import time
 
 class HoferCell:
     '''An intracellular model following Hofer 2002'''
@@ -115,11 +116,12 @@ class HoferCell:
     def step(self, stims = [10]):
         # Time stepping    
 
+        start = time.time()
         self.v8 = (self.i_deg(self.ip0) - self.i_plcd(self.c0)) / (1 / ((1 + self.kg)*(self.kg/(1+self.kg) + self.a0)) * self.a0)
         self.r0 = self.ki**2 / (self.ki**2 + self.c0**2)
 
         y0 = [self.c0, self.s0, self.r0, self.ip0]
-        sol = odeint(self.rhs, y0, self.time, args = (stims,), hmax = 0.005)
+        sol = odeint(self.rhs, y0, self.time, args = (stims,), hmax = 1, atol=0.1, rtol=0.1)
 
         # # Self-defined Euler's Method
         # y = y0
@@ -129,6 +131,9 @@ class HoferCell:
         #     sol[j,:] = y
         #     dydt = self.rhs(y, t, stims)
         #     y += self.dt * np.array(dydt)
+        end = time.time()
+
+        print(str(end - start) + ' s')
 
         return sol
 
@@ -139,7 +144,7 @@ class HoferCell:
         if ylabel:  plt.ylabel(ylabel)
 
 if __name__ == "__main__":
-    model = HoferCell(100)
+    model = HoferCell(100, 1)
     sol = model.step()
     c = sol[:,0]
     s = sol[:,1]

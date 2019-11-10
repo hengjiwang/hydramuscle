@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 from scipy.sparse import spdiags
 from cell import Cell
+import time
 
 from fluo_encoder import FluoEncoder
 
@@ -118,7 +119,11 @@ class Chain(Cell, FluoEncoder):
 
         y0 = np.reshape(y0, 15*self.num)
         
-        sol = odeint(self.rhs, y0, self.time, args = (stims_v, stims_ip), hmax = 0.005)
+        start = time.time()
+        sol = odeint(self.rhs, y0, self.time, args = (stims_v, stims_ip), hmax = 0.008) #, atol = 0.01, rtol = 0.01)
+        end = time.time()
+
+        print(str(end - start) + ' s')
         return sol
 
     def plot(self, a, tmin=0, tmax=300, xlabel = 'time[s]', ylabel = None, color = 'b'):

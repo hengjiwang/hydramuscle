@@ -11,6 +11,7 @@ from cell import Cell
 import time
 from fluo_encoder import FluoEncoder
 import random
+from tqdm import tqdm
 
 class Grid(Cell, FluoEncoder):
     '''A 1D cell chain with cells connected through gap junctions'''
@@ -40,10 +41,10 @@ class Grid(Cell, FluoEncoder):
         Iy = scipy.sparse.csr_matrix(Iy)
         self.Lc = self.gcx * scipy.sparse.kron(Dx, Iy) + self.gcy * scipy.sparse.kron(Ix, Dy)
         self.Lip3 = self.g_ip3x * scipy.sparse.kron(Dx, Iy) + self.g_ip3y * scipy.sparse.kron(Ix, Dy)
-        plt.figure()
-        plt.imshow(self.Lip3.toarray(), 'rainbow')
-        plt.colorbar()
-        plt.show()
+        # plt.figure()
+        # plt.imshow(self.Lip3.toarray(), 'rainbow')
+        # plt.colorbar()
+        # plt.show()
         self.k9 = k9
         self.d = d
         self.v7 = v7
@@ -54,14 +55,14 @@ class Grid(Cell, FluoEncoder):
         # Build grid
         self.num2 = self.numx * self.numy
 
-        # Stim indices
-        # self.s_ip = [(int(numx/2)-1)*numy, (int(numx/2))*numy, (int(numx/2)+1)*numy]
+        # Elongation Stimulation
+        # self.s_ip = [j for j in range(self.num2)]
+        # self.s_ip = random.sample(self.s_ip, 20)
 
-        self.s_ip = [j for j in range(self.num2)]
-        self.s_ip = random.sample(self.s_ip, 20)
+        # Bending Stimulation
+        self.s_ip = [(int(numx/2)-j)*numy for j in range(-5, 5)]
 
-        print(self.s_ip)
-
+        # Electrical Stimulation
         self.s_v = [numy*i for i in range(numx)]
         # self.s_v.extend([numy*i+1 for i in range(numx)])
         # self.s_v.extend([numy*i+2 for i in range(numx)])
@@ -71,7 +72,7 @@ class Grid(Cell, FluoEncoder):
         # self.beta = 5.5
 
     def i_in(self, ip):
-        return 1e9 * (self.i_cal(self.v0, self.n0, self.hv0, self.hc0) + \
+        return 1e9 * (self.i_cal(self.v0, self.m0, self.h0) + \
         self.i_cat(self.v0, self.bx0, self.cx0)) / (2 * self.F * self.d) + self.i_pmca(self.c0) + \
         self.v41 * ip**2 / (self.kr**2 + ip**2) - self.v41 * self.ip0**2 / (self.kr**2 + self.ip0**2)
 
@@ -82,18 +83,18 @@ class Grid(Cell, FluoEncoder):
         numy = self.numy
         num2 = self.num2
 
-        c, s, r, ip, v, n, hv, hc, bx, cx, g, c1g, c2g, c3g, c4g = (y[0:num2], 
+        c, s, r, ip, v, m, h, bx, cx, g, c1g, c2g, c3g, c4g = (y[0:num2], 
         y[num2:2*num2], y[2*num2:3*num2], y[3*num2:4*num2], y[4*num2:5*num2], 
         y[5*num2:6*num2], y[6*num2:7*num2], y[7*num2:8*num2], y[8*num2:9*num2], 
         y[9*num2:10*num2], y[10*num2:11*num2], y[11*num2:12*num2], y[12*num2:13*num2],
-        y[13*num2:14*num2], y[14*num2:15*num2])
+        y[13*num2:14*num2])
 
         iipr = self.i_ipr(c, s, ip, r)
         ileak = self.i_leak(c, s)
         iserca = self.i_serca(c)
         iin = self.i_in(ip)
         ipmca = self.i_pmca(c)
-        ical = self.i_cal(v, n, hv, hc)
+        ical = self.i_cal(v, m, h)
         icat = self.i_cat(v, bx, cx)
         vr = self.v_r(c, r)
         iplcb_base = self.i_plcb(self.v8)    
@@ -101,7 +102,7 @@ class Grid(Cell, FluoEncoder):
         ideg = self.i_deg(ip)
         ikca = self.i_kca(v, c)
         ibk = self.i_bk(v)
-        # istimv = self.stim_v(t, stims_v)
+        istimv = self.stim_v(t, stims_v)
         ir1 = self.r_1(c, g, c1g)
         ir2 = self.r_2(c, c1g, c2g)
         ir3 = self.r_3(c, c2g, c3g)
@@ -112,10 +113,8 @@ class Grid(Cell, FluoEncoder):
         drdt = vr
         dipdt = iplcb_base + iplcd - ideg + self.Lip3.dot(ip)
         dvdt = - 1 / self.c_m * (ical + icat + ikca + ibk) + self.Lc.dot(v)
-        # dvdt[self.s_v] += 1 / self.c_m * 0.01 * istimv
-        dndt = (self.n_inf(v) - n)/self.tau_n(v)
-        dhvdt = (self.hv_inf(v) - hv)/self.tau_hv(v)
-        dhcdt = (self.hc_inf(c) - hc)/self.tau_hc()
+        dmdt = (self.m_inf(v) - m)/self.tau_m(v)
+        dhdt = (self.h_inf(v) - h)/self.tau_h(v)
         dbxdt = (self.bx_inf(v) - bx)/self.tau_bx(v)
         dcxdt = (self.cx_inf(v) - cx)/self.tau_cx(v)
         dgdt = - ir1
@@ -124,34 +123,44 @@ class Grid(Cell, FluoEncoder):
         dc3gdt = ir3 - ir4
         dc4gdt = ir4
 
-        if 10<t<14 or 30<t<34 or 50<t<54 or 70<t<74:
+        if 10<t<14:
             dipdt[self.s_ip] += self.i_plcb(1) - iplcb_base
+        dvdt[self.s_v] += 1 / self.c_m * 0.01 * istimv
 
-        deriv = np.array([dcdt, dsdt, drdt, dipdt, dvdt, dndt, dhvdt, dhcdt, dbxdt, dcxdt, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt])
+        deriv = np.array([dcdt, dsdt, drdt, dipdt, dvdt, dmdt, dhdt, dbxdt, dcxdt, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt])
 
-        dydt = np.reshape(deriv, 15*num2)
+        dydt = np.reshape(deriv, 14*num2)
 
         return dydt
 
-    def step(self, stims_v = [1,3,5,7,9,12,15,18,22,26,31,36,42,48], stims_ip = [-100]):
+    def step(self, stims_v = [101,103,105,107,109,112,115,118,122,126,131,136,142,148], stims_ip = [-100]):
         # Time stepping
-        self.n0 = self.n_inf(self.v0)
-        self.hv0 = self.hv_inf(self.v0)
-        self.hc0 = self.hc_inf(self.c0)
+        self.m0 = self.m_inf(self.v0)
+        self.h0 = self.h_inf(self.v0)
         self.bx0 = self.bx_inf(self.v0)
         self.cx0 = self.cx_inf(self.v0)
         self.v8 = (self.i_deg(self.ip0) - self.i_plcd(self.c0)) / (1 / ((1 + self.kg)*(self.kg/(1+self.kg) + self.a0)) * self.a0)
 
         base_mat = np.ones((self.numy, self.numx))
-        inits = [self.c0, self.s0, self.r0, self.ip0, self.v0, self.n0, self.hv0, 
-                self.hc0, self.bx0, self.cx0, self.g0, self.c1g0, self.c2g0, self.c3g0, self.c4g0]
+        inits = [self.c0, self.s0, self.r0, self.ip0, self.v0, self.m0, self.h0,
+         self.bx0, self.cx0, self.g0, self.c1g0, self.c2g0, self.c3g0, self.c4g0]
         y0 = np.array([x*base_mat for x in inits])
-        y0 = np.reshape(y0, 15*self.num2)  
+        y0 = np.reshape(y0, 14*self.num2)  
 
         start_time = time.time() # Begin counting time
-        atol = np.array([0.01]*len(y0))
-        rtol = np.array([0.01]*len(y0))
-        sol = odeint(self.rhs, y0, self.time, args = (np.array(stims_v), np.array(stims_ip)), hmax=0.008, atol=atol, rtol=rtol)
+        
+        y = y0
+        T = self.T
+        dt = self.dt
+
+        sol = np.zeros((int(T/dt/100), 14*self.num2))
+
+        for j in tqdm(np.arange(0, int(T/dt))):
+            t = j*dt
+            dydt = self.rhs(y, t, stims_v, stims_ip)
+            y += dydt * dt
+            if j%100 == 0: sol[int(j/100), :] = y
+
         elapsed = (time.time() - start_time) # End counting time
         print("Num: " + str(self.numx) + ',' + str(self.numy) + "; Time used:" + str(elapsed))
 
@@ -163,7 +172,7 @@ class Grid(Cell, FluoEncoder):
         if ylabel:  plt.ylabel(ylabel)
 
 if __name__ == "__main__":
-    model = Grid(numx=20, numy=20, T=100, dt=0.01)
-    sol = model.step(stims_v = [-100], stims_ip= [10, 30, 50, 70])
+    model = Grid(numx=200, numy=200, T=200, dt=0.0002)
+    sol = model.step()
     df = pd.DataFrame(sol[:,0:model.numx*model.numy])
-    df.to_csv('c_20x20_100s_elongation.csv', index = False)
+    df.to_csv('c_200x200_200s.csv', index = False)

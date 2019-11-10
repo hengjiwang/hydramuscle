@@ -99,7 +99,7 @@ class SlowCell:
 
         return [dcdt, dsdt, drdt, dipdt]
 
-    def step(self, stims = [10]):
+    def step(self, stims = [10, 30, 50, 70]):
         # Time stepping    
 
         self.v8 = (self.i_deg(self.ip0) - self.i_plcd(self.c0)) / (1 / ((1 + self.kg)*(self.kg/(1+self.kg) + self.a0)) * self.a0)

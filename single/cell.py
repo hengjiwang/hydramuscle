@@ -53,9 +53,7 @@ class Cell(HoferCell, FastCell, FluoEncoder):
 
         dcdt = self.i_rel(c, s, ip, r) + self.i_leak(c, s) - self.i_serca(c) + self.i_in(ip) - self.i_pmca(c) - self.i_out(c) \
             - 1e9 * (self.i_cal(v, n, hv, hc) + self.i_cat(v, bx, cx)) / (2 * self.F * self.d) \
-            - self.r_1(c, g, c1g) - self.r_2(c, c1g, c2g) - self.r_3(c, c2g, c3g) - self.r_4(c, c3g, c4g) \
-            + self.r_1(self.c0, self.g0, self.c1g0) + self.r_2(self.c0, self.c1g0, self.c2g0) + \
-                self.r_3(self.c0, self.c2g0, self.c3g0) + self.r_4(self.c0, self.c3g0, self.c4g0)
+            - self.r_1(c, g, c1g) - self.r_2(c, c1g, c2g) - self.r_3(c, c2g, c3g) - self.r_4(c, c3g, c4g)
         dsdt = self.beta * (self.i_serca(c) - self.i_rel(c, s, ip, r) - self.i_leak(c, s))
         drdt = self.v_r(c, r)
         dipdt = self.i_plcb(self.stim(t, stims_ip)) + self.i_plcd(c) - self.i_deg(ip)
@@ -75,7 +73,7 @@ class Cell(HoferCell, FastCell, FluoEncoder):
 
         return [dcdt, dsdt, drdt, dipdt, dvdt, dndt, dhvdt, dhcdt, dbxdt, dcxdt, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt]
 
-    def step(self, stims_v = [101,103,105,107,109,111,113,115,117,119], stims_ip = [10]):
+    def step(self, stims_v = [101,103,105,107,109,112,115,118,122,126,130, 135, 141, 147], stims_ip = [10, 30, 50, 70]):
         # Time stepping
         
         self.r0 =  self.ki**2 / (self.ki**2 + self.c0**2)
@@ -103,7 +101,7 @@ class Cell(HoferCell, FastCell, FluoEncoder):
 
 if __name__ == '__main__':
     model = Cell(T=200, k2 = 0.01)
-    sol = model.step(stims_v = [-100], stims_ip = [-100])
+    sol = model.step()
     c = sol[:,0]
     s = sol[:,1]
     r = sol[:,2]

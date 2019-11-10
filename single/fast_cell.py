@@ -4,6 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
+import time
 
 class FastCell:
     '''An intracellular model for calcium influx from extracellular space'''
@@ -194,8 +195,6 @@ class FastCell:
         dbxdt = (self.bx_inf(v) - bx)/self.tau_bx(v)
         dcxdt = (self.cx_inf(v) - cx)/self.tau_cx(v)
 
-        print('y:', y)
-
         return [dcdt, dvdt, dndt, dhvdt, dhcdt, dxdt, dzdt, dpdt, dqdt, dbxdt, dcxdt]
 
     def step(self, stims = [1,3,5,7,9,11,13,15,17,19]):
@@ -213,11 +212,15 @@ class FastCell:
 
         y0 = [self.c0, self.v0, self.n0, self.hv0, self.hc0, self.x0, self.z0, self.p0, self.q0, self.bx0, self.cx0]
 
+        start = time.time()
         # scipy.integrate.odeint
-        sol = odeint(self.rhs, y0, self.time, args = (stims,), hmax=0.005)
+        sol = odeint(self.rhs, y0, self.time, args = (stims,), hmax=0.008, atol=0.01, rtol=0.01)
+        end = time.time()
+
+        print(str(end-start) + ' s')
 
         # Self-defined Euler's Method
-        y = y0
+        # y = y0
         # sol = np.zeros((len(self.time), len(y0)))       
         # for j in range(1004): # range(len(self.time)):
         #     t = self.time[j]
@@ -233,13 +236,13 @@ class FastCell:
         return sol
 
     '''Visualize results'''
-    def plot(self, a, tmin=0.995, tmax=100, xlabel = 'time[s]', ylabel = None, color = 'b'):
+    def plot(self, a, tmin=0, tmax=100, xlabel = 'time[s]', ylabel = None, color = 'b'):
         plt.plot(self.time[int(tmin/self.dt):int(tmax/self.dt)], a[int(tmin/self.dt):int(tmax/self.dt)], color)
         if xlabel:  plt.xlabel(xlabel)
         if ylabel:  plt.ylabel(ylabel)
 
 if __name__ == '__main__':
-    model = FastCell(1.1, 0.001)
+    model = FastCell(10, 0.001)
     sol = model.step()
     c = sol[:, 0]
     v = sol[:, 1]

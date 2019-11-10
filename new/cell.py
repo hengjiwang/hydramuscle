@@ -4,7 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
-from fast_cell import FastCell
+from fast_cell_euler import FastCell
 from slow_cell import SlowCell
 # from fluo_encoder import FluoEncoder
 from maggio_force_encoder import MHMEncoder
@@ -30,7 +30,7 @@ class Cell(SlowCell, FastCell):
     '''Background terms'''
     def i_bk(self, v):
         # Background voltage leak [mA/cm^2]
-        g_bk = - (self.i_cal(self.v0, self.n0, self.hv0, self.hc0) \
+        g_bk = - (self.i_cal(self.v0, self.m0, self.h0) \
         + self.i_cat(self.v0, self.bx0, self.cx0) \
         + self.i_kca(self.v0, self.c0))/(self.v0 - self.e_bk)
 
@@ -54,7 +54,7 @@ class Cell(SlowCell, FastCell):
 
         return [dcdt, dsdt, drdt, dipdt, dvdt, dndt, dhvdt, dhcdt, dbxdt, dcxdt]
 
-    def step(self, stims_v = [101,103,105,107,109,111,113,115,117,119], stims_ip = [10]):
+    def step(self, stims_v = [101,103,105,107,109,111,113,115,117,119], stims_ip = [10, 30, 50, 70]):
         # Time stepping
 
         self.n0 = self.n_inf(self.v0)
@@ -80,7 +80,7 @@ class Cell(SlowCell, FastCell):
 
 if __name__ == '__main__':
     model = Cell(T=200, k2 = 0.01)
-    sol = model.step()
+    sol = model.step(stims_v = [101,103,105,107,109,112,115,118,122,126,131,136,142,148])
     c = sol[:,0]
     s = sol[:,1]
     r = sol[:,2]
