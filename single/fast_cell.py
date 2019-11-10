@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 import time
+from tqdm import tqdm
 
 class FastCell:
     '''An intracellular model for calcium influx from extracellular space'''
@@ -17,13 +18,8 @@ class FastCell:
         self.F = 96485332.9 # [mA*s/mol]
         self.c0 = 0.05
         self.v0 = -50 # (-40 to -60)
-        self.n0 = 0
-        self.hv0 = 0
-        self.hc0 = 0
-        self.x0 = 0
-        self.z0 = 0
-        self.p0 = 0
-        self.q0 = 0
+        self.m0 = 0
+        self.h0 = 0
         self.bx0 = 0
         self.cx0 = 0
 
@@ -39,15 +35,9 @@ class FastCell:
         self.g_cat = 0.003 # 0.0003
         self.e_cat = 51
 
-        # KCNQ parameters
-        self.g_kcnq = 0 # 0.0001 # [S/cm^2]
-        self.e_k = -75 
-
-        # Kv parameters
-        self.g_kv = 0 # 0.0004
-
         # BK parameters
         self.g_kca =  10e-9 / self.A_cyt # 45.7e-9 / self.A_cyt
+        self.e_k = -75 
 
         # Background parameters
         self.g_bk = 0
@@ -56,46 +46,43 @@ class FastCell:
         # Time
         self.T = T
         self.dt = dt
-        self.time = np.linspace(0, T, 1+int(T/dt))
+        self.time = np.linspace(0, T, int(T/dt))
 
-    '''CaL channel terms (Mahapatra 2018)'''
-    def i_cal(self, v, n, hv, hc):
+    '''General functions'''
+    def sig(self, v, vstar, sstar):
+        # Sigmoidal function
+        return 1 / (1 + np.exp(-(v-vstar)/sstar))
+
+    def bell(self, v, vstar, sstar, taustar, tau0):
+        # Bell-shape function
+        return taustar/(np.exp(-(v-vstar)/sstar) + np.exp((v-vstar)/sstar)) + tau0
+
+    '''CaL channel terms (Diderichsen 2006)'''
+    def i_cal(self, v, m, h):
         # L-type calcium channel [mA/cm^2]
-        return self.g_cal * n**2 * hv * hc * (v - self.e_cal)
+        return self.g_cal * m**2 * h * (v - self.e_cal)
 
-    def n_inf(self, v):
-        # [-]
-        return 1 / (1 + np.exp(-(v+9)/8))
+    def m_inf(self, v):
+        return self.sig(v, -25, 10)
 
-    def hv_inf(self, v):
-        # [-]
-        return 1 / (1 + np.exp((v+30)/13))
+    def h_inf(self, v):
+        return self.sig(v, -28, -5)
 
-    def hc_inf(self, c):
-        # [-]
-        return self.k_cal / (self.k_cal + c)
+    def tau_m(self, v):
+        return self.bell(v, -23, 20, 0.001, 0.00005)
 
-    def tau_n(self, v):
-        # [s]
-        return 0.000001 / (1 + np.exp(-(v+22)/308))
-
-    def tau_hv(self, v):
-        # [s]
-        return 0.09 * (1 - 1 / ((1 + np.exp((v+14)/45)) * (1 + np.exp(-(v+9.8)/3.39))))
-
-    def tau_hc(self):
-        # [s]
-        return 0.02
+    def tau_h(self, v):
+        return self.bell(v, 0, 20, 0.03, 0.021)
 
     '''T-type calcium channel terms (Mahapatra 2018)'''
     def i_cat(self, v, bx, cx):
         return self.g_cat * bx**2 * cx * (v - self.e_cat)
 
     def bx_inf(self, v):
-        return 1 / (1 + np.exp(-(v+32.1)/6.9))
+        return self.sig(v, -32.1, 6.9)
 
     def cx_inf(self, v):
-        return 1 / (1 + np.exp((v+63.8)/5.3))
+        return self.sig(v, -63.8, -5.3)
 
     def tau_bx(self, v):
         return 0.00045 + 0.0039 / (1 + ((v+66)/26)**2)
@@ -103,42 +90,6 @@ class FastCell:
     def tau_cx(self, v):
         return 0.15 - 0.15 / ((1 + np.exp((v-417.43)/203.18))*(1 + np.exp(-(v+61.11)/8.07)))
     
-    '''KCNQ1 channel terms (Mahapatra 2018)'''
-    def i_kcnq(self, v, x, z):
-        # KCNQ1 channel [mA/cm^2]
-        return self.g_kcnq * x**2 * z * (v - self.e_k)
-
-    def x_inf(self, v):
-        # [-]
-        return 1 / (1 + np.exp(-(v+7.1)/15))
-
-    def z_inf(self, v):
-        # [-]
-        return 0.55 / (1 + np.exp((v+55)/9)) + 0.45
-
-    def tau_x(self, v):
-        # [s]
-        return 0.001 / (1 + np.exp((v+15)/20))
-
-    def tau_z(self, v):
-        # [s]
-        return 0.01 * (200 + 10 / (1 + 2 * ((v+56)/120)**5))
-
-    '''Kv channels (Mahapatra 2018)'''
-    def i_kv(self, v, p, q):
-        return self.g_kv * p * q * (v - self.e_k)
-    
-    def p_inf(self, v):
-        return 1 / (1 + np.exp(-(v+1.1)/11))
-
-    def q_inf(self, v):
-        return 1 / (1 + np.exp((v+58)/15))
-
-    def tau_p(self, v):
-        return 0.001 / (1 + np.exp((v+15)/20))
-
-    def tau_q(self, v):
-        return 0.4 * (200 + 10 / (1 + 2*((v+54.18)/120)**5))
 
     '''BK channel terms (Corrias 2007)'''
     def i_kca(self, v, c):
@@ -148,12 +99,10 @@ class FastCell:
     '''Background terms'''
     def i_bk(self, v):
         # Background voltage leak [mA/cm^2]
-        g_bk = - (self.i_cal(self.v0, self.n0, self.hv0, self.hc0) \
+        # g_bk = - (self.i_cal(self.v0, self.n0, self.hv0, self.hc0) \
+        g_bk = - (self.i_cal(self.v0, self.m0, self.h0) \
         + self.i_cat(self.v0, self.bx0, self.cx0) \
-        + self.i_kcnq(self.v0, self.x0, self.z0) \
-        + self.i_kv(self.v0, self.p0, self.q0) \
         + self.i_kca(self.v0, self.c0))/(self.v0 - self.e_bk)
-        
 
         return g_bk * (v - self.e_bk)
 
@@ -170,91 +119,71 @@ class FastCell:
         for stim_t in stims:
             condition = condition or stim_t <= t < stim_t + 0.01
 
-        if condition:
-            return 1
-        else:
-            return 0
-
+       	return int(condition)
+           
     '''Numerical terms'''
     def rhs(self, y, t, stims):
         # Right-hand side function
-        c, v, n, hv, hc, x, z, p, q, bx, cx = y
+        c, v, m, h, bx, cx = y
         dcdt = - self.r_ex(c) \
-            - 1e9 * self.i_cal(v, n, hv, hc) / (2 * self.F * self.d) \
-            + 1e9 * self.i_cal(self.v0, self.n0, self.hv0, self.hc0) / (2 * self.F * self.d) \
+            - 1e9 * self.i_cal(v, m, h) / (2 * self.F * self.d) \
+            + 1e9 * self.i_cal(self.v0, self.m0, self.h0) / (2 * self.F * self.d) \
             - 1e9 * self.i_cat(v, bx, cx) / (2 * self.F * self.d) \
             + 1e9 * self.i_cat(self.v0, self.bx0, self.cx0) / (2 * self.F * self.d)
-        dvdt = - 1 / self.c_m * (self.i_cal(v, n, hv, hc) + self.i_cat(v, bx, cx) + self.i_kcnq(v, x, z) + self.i_kv(v, p, q) + self.i_kca(v, c) + self.i_bk(v) - 0.001 * self.stim_v(t, stims))
-        dndt = (self.n_inf(v) - n)/self.tau_n(v)
-        dhvdt = (self.hv_inf(v) - hv)/self.tau_hv(v)
-        dhcdt = (self.hc_inf(c) - hc)/self.tau_hc()
-        dxdt = (self.x_inf(v) - x)/self.tau_x(v)
-        dzdt = (self.z_inf(v) - z)/self.tau_z(v)
-        dpdt = (self.p_inf(v) - p)/self.tau_p(v)
-        dqdt = (self.q_inf(v) - q)/self.tau_q(v)
+        dvdt = - 1 / self.c_m * (self.i_cal(v, m, h) + self.i_cat(v, bx, cx) + self.i_kca(v, c) + self.i_bk(v) - 0.001 * self.stim_v(t, stims))
+        dmdt = (self.m_inf(v) - m)/self.tau_m(v)
+        dhdt = (self.h_inf(v) - h)/self.tau_h(v)
         dbxdt = (self.bx_inf(v) - bx)/self.tau_bx(v)
         dcxdt = (self.cx_inf(v) - cx)/self.tau_cx(v)
 
-        return [dcdt, dvdt, dndt, dhvdt, dhcdt, dxdt, dzdt, dpdt, dqdt, dbxdt, dcxdt]
+        return np.array([dcdt, dvdt, dmdt, dhdt, dbxdt, dcxdt])
 
     def step(self, stims = [1,3,5,7,9,11,13,15,17,19]):
         # Time stepping
 
-        self.n0 = self.n_inf(self.v0)
-        self.hv0 = self.hv_inf(self.v0)
-        self.hc0 = self.hc_inf(self.c0)
-        self.x0 = self.x_inf(self.v0)
-        self.z0 = self.z_inf(self.v0)
-        self.p0 = self.p_inf(self.v0)
-        self.q0 = self.q_inf(self.v0)
+        self.m0 = self.m_inf(self.v0)
+        self.h0 = self.h_inf(self.v0)
         self.bx0 = self.bx_inf(self.v0)
         self.cx0 = self.cx_inf(self.v0)
 
-        y0 = [self.c0, self.v0, self.n0, self.hv0, self.hc0, self.x0, self.z0, self.p0, self.q0, self.bx0, self.cx0]
+        y0 = [self.c0, self.v0, self.m0, self.h0, self.bx0, self.cx0]
 
-        start = time.time()
-        # scipy.integrate.odeint
-        sol = odeint(self.rhs, y0, self.time, args = (stims,), hmax=0.008, atol=0.01, rtol=0.01)
-        end = time.time()
+        start_time = time.time() # Begin counting time
+        
+        y = y0
+        T = self.T
+        dt = self.dt
 
-        print(str(end-start) + ' s')
+        sol = np.zeros((int(T/dt/10), len(y0)))
 
-        # Self-defined Euler's Method
-        # y = y0
-        # sol = np.zeros((len(self.time), len(y0)))       
-        # for j in range(1004): # range(len(self.time)):
-        #     t = self.time[j]
-        #     print('t:', t)
-        #     sol[j,:] = y
-        #     dydt = self.rhs(y, t, stims)
-        #     print('y: ', y)
-        #     y += self.dt * np.array(dydt)
+        for j in tqdm(np.arange(0, int(T/dt))):
+            t = j*dt
+            dydt = self.rhs(y, t, stims)
+            y += dydt * dt
+            if j%10 == 0: sol[int(j/10), :] = y
 
-            
-        #     print('dydt: ', dydt)
+
+        elapsed = (time.time() - start_time) # End counting time
+        print("Time used:" + str(elapsed))
 
         return sol
 
     '''Visualize results'''
     def plot(self, a, tmin=0, tmax=100, xlabel = 'time[s]', ylabel = None, color = 'b'):
-        plt.plot(self.time[int(tmin/self.dt):int(tmax/self.dt)], a[int(tmin/self.dt):int(tmax/self.dt)], color)
+        x = np.linspace(tmin, tmax, len(a))
+        plt.plot(x, a[int(tmin/self.dt):int(tmax/self.dt)], color)
         if xlabel:  plt.xlabel(xlabel)
         if ylabel:  plt.ylabel(ylabel)
 
 if __name__ == '__main__':
-    model = FastCell(10, 0.001)
+    model = FastCell(10, 0.0004)
     sol = model.step()
     c = sol[:, 0]
     v = sol[:, 1]
-    n = sol[:, 2]
-    hv = sol[:, 3]
-    hc = sol[:, 4]
-    x = sol[:, 5]
-    z = sol[:, 6]
-    p = sol[:, 7]
-    q = sol[:, 8]
-    bx = sol[:, 9]
-    cx = sol[:, 10]
+    m = sol[:, 2]
+    h = sol[:, 3]
+    bx = sol[:, 4]
+    cx = sol[:, 5]
 
     # Plot the results
     plt.figure()
@@ -263,15 +192,13 @@ if __name__ == '__main__':
     plt.subplot(422)
     model.plot(v, ylabel='v[mV]')
     plt.subplot(423)
-    model.plot(model.i_cal(v, n , hv, hc), ylabel='i_cal[mA/cm^2]')
+    model.plot(model.i_cal(v, m, h), ylabel='i_cal[mA/cm^2]')
     plt.subplot(424)
     model.plot(model.i_cat(v, bx, cx), ylabel='i_cat[mA/cm^2]')
     plt.subplot(425)
-    model.plot(model.i_kcnq(v, x, z), ylabel='i_kncq[mA/cm^2]')
-    plt.subplot(426)
     model.plot(model.i_bk(v), ylabel='i_bk[mA/cm^2]')
-    plt.subplot(427)
+    plt.subplot(426)
     model.plot(model.i_kca(v, c), ylabel = 'i_kca[mA/cm^2]')
-    plt.subplot(428)
+    plt.subplot(427)
     model.plot([0.004 * model.stim_v(t, [1,3,5,7,9,11,13,15,17,19]) for t in model.time], ylabel='i_stim[mA/cm^2]', color = 'r')
     plt.show()
