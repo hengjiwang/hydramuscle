@@ -20,6 +20,8 @@ def save_frames(source, target, nx, ny):
     X, Y = np.meshgrid(x, y) 
     X, Z = np.meshgrid(x, z) 
 
+    fig = plt.figure(figsize=(10, 10))
+
     for j in tqdm.tqdm(range(len(c))):
 
         C = np.reshape(c[j], (nx, ny))
@@ -31,7 +33,8 @@ def save_frames(source, target, nx, ny):
 
         fcolors = m.to_rgba(color.T)
 
-        fig = plt.figure(figsize=(20, 10))
+        plt.clf()
+        
         ax = fig.gca(projection='3d')
         ax.set_xticks([])
         ax.set_yticks([])
@@ -40,12 +43,16 @@ def save_frames(source, target, nx, ny):
         ax.plot_surface(X, Y, Z, rstride=1, cstride=1, alpha=0.8, edgecolor='k',
             linewidth=0.5, facecolors=fcolors, vmin=0, vmax=0.8, shade=False)
         ax.view_init(180, 100)
-        plt.savefig('./save/animations/'+target+'/frames/img' + str(j) + '.jpg')
-        plt.close(fig)
+        try:
+            plt.savefig('./save/animations/'+target+'/frames/img' + str(j) + '.jpg', orientation='landscape')
+        except FileNotFoundError:
+            os.makedirs('./save/animations/'+target+'/frames/')
+            os.makedirs('./save/animations/'+target+'/movie/')
+            plt.savefig('./save/animations/'+target+'/frames/img' + str(j) + '.jpg', orientation='landscape')
 
 def save_video(target, fps):
     
-    file_to_save = './save/animations/'+target+'/movie/movie_4x.avi'
+    file_to_save = './save/animations/'+target+'/movie/movie.avi'
     frames_loc = './save/animations/'+target + '/frames/'
     
     frames = os.listdir(frames_loc)
