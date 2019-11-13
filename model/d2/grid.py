@@ -147,7 +147,8 @@ class Grid(Cell, FluoEncoder):
         y0 = np.array([x*base_mat for x in inits])
         y0 = np.reshape(y0, 14*self.num2)  
 
-        start_time = time.time() # Begin counting time
+        # Begin counting time
+        start_time = time.time() 
         
         y = y0
         T = self.T
@@ -155,13 +156,15 @@ class Grid(Cell, FluoEncoder):
 
         sol = np.zeros((int(T/dt/100), 14*self.num2))
 
+        # Euler method integration
         for j in tqdm(np.arange(0, int(T/dt))):
             t = j*dt
             dydt = self.rhs(y, t, stims_v, stims_ip)
             y += dydt * dt
             if j%100 == 0: sol[int(j/100), :] = y
-
-        elapsed = (time.time() - start_time) # End counting time
+        
+        # End counting time
+        elapsed = (time.time() - start_time) 
         print("Num: " + str(self.numx) + ',' + str(self.numy) + "; Time used:" + str(elapsed))
 
         return sol

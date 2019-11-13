@@ -1,0 +1,8 @@
+[{
+    "SourceFile": "../../save/data/c_200x200_200s.csv",
+    "TargetFile": "200x200_200s",
+    "NumX": 200,
+    "NumY": 200,
+    "FramesSaved": "False",
+    "TargetFPS": 400
+}]
