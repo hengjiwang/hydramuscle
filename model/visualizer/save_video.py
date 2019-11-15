@@ -5,32 +5,18 @@ import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 from vlib import save_pattern, save_curve, plot_frame, plot_frames
-<<<<<<< HEAD
-import pandas as pd
-import cv2, tqdm, sys, os
-
-def save_frames(source, target, nx, ny):
-
-    c = pd.read_csv(source)
-=======
 
 def save_frames(source, target, nx, ny):
 
     c = pd.read_csv(source).values
->>>>>>> 6244a870cd20e4588a2ced5d4ceeba226af483ef
     nx = nx
     ny = ny
 
-    # domains
-<<<<<<< HEAD
-    x = np.linspace(-nx/2,nx/2,nx) 
-    y = np.linspace(-ny/np.pi/2,ny/np.pi/2,ny)           
-=======
+    # domains         
     x = np.linspace(-nx/2, nx/2, nx)    
     theta = np.linspace(0, 2*np.pi, ny)
     y = ny/2/np.pi * np.cos(theta)
     z = ny/2/np.pi * np.sin(theta)
->>>>>>> 6244a870cd20e4588a2ced5d4ceeba226af483ef
     X, Y = np.meshgrid(x, y) 
     X, Z = np.meshgrid(x, z) 
 
@@ -38,23 +24,12 @@ def save_frames(source, target, nx, ny):
 
     for j in tqdm.tqdm(range(len(c))):
 
-<<<<<<< HEAD
-        C = np.reshape(c.values[j], (nx, ny))
-        color1 = C[:, 0:int(ny/2)] # change to desired fourth dimension
-        color2 = C[:, int(ny/2):]
-        norm = matplotlib.colors.Normalize(vmin=0, vmax=0.8)
-        m = plt.cm.ScalarMappable(norm=norm, cmap='jet')
-        m.set_array([])
-        fcolors1 = m.to_rgba(color1)
-        fcolors2 = m.to_rgba(color2)
-=======
         C = np.reshape(c[j], (nx, ny))
         color = C
 
         norm = matplotlib.colors.Normalize(vmin=0, vmax=0.8)
         m = plt.cm.ScalarMappable(norm=norm, cmap='jet')
         m.set_array([])
->>>>>>> 6244a870cd20e4588a2ced5d4ceeba226af483ef
 
         fcolors = m.to_rgba(color.T)
 
@@ -64,23 +39,6 @@ def save_frames(source, target, nx, ny):
         ax.set_xticks([])
         ax.set_yticks([])
         ax.set_zticks([])
-<<<<<<< HEAD
-        ax.plot_surface(X,Y,np.sqrt((ny/4)**2-Y**2), rstride=1, cstride=1, facecolors=fcolors1, vmin = 0, vmax = 0.8, shade=False)
-        ax.plot_surface(X,Y,-np.sqrt((ny/4)**2-Y**2), rstride=1, cstride=1, facecolors=fcolors2, vmin = 0, vmax = 0.8, shade=False)
-        ax.view_init(100, 180)
-        try:
-            plt.savefig('../../save/animations/'+target+'/frames/img' + str(j) + '.jpg')
-        except FileNotFoundError:
-            os.makedirs('../../save/animations/'+target+'/frames/')
-            os.makedirs('../../save/animations/'+target+'/movie/')
-            plt.savefig('../../save/animations/'+target+'/frames/img' + str(j) + '.jpg')
-        plt.close(fig)
-
-def save_video(target, target_fps):
-    
-    file_to_save = '../../save/animations/'+target+'/movie/movie.avi'
-    frames_loc = '../../save/animations/'+target + '/frames/'
-=======
 
         ax.plot_surface(X, Y, Z, rstride=1, cstride=1, alpha=0.8, edgecolor='k',
             linewidth=0.5, facecolors=fcolors, vmin=0, vmax=0.8, shade=False)
@@ -96,7 +54,6 @@ def save_video(target, fps):
     
     file_to_save = './save/animations/'+target+'/movie/movie.avi'
     frames_loc = './save/animations/'+target + '/frames/'
->>>>>>> 6244a870cd20e4588a2ced5d4ceeba226af483ef
     
     frames = os.listdir(frames_loc)
     total_num = len(frames)
@@ -115,15 +72,6 @@ if __name__ == '__main__':
     df = pd.read_json('config.json')
     source = df.SourceFile.values[0]
     target = df.TargetFile.values[0]
-<<<<<<< HEAD
-    nx = df.NumX.values[0]
-    ny = df.NumY.values[0]
-    target_fps = df.TargetFPS.values[0]
-    frames_saved = df.FramesSaved.values[0]
-    if frames_saved == 'False': 
-        save_frames(source, target, nx, ny)
-    save_video(target, target_fps)
-=======
     frames_saved = df.FramesSaved.values[0]
     nx = df.NumX.values[0]
     ny = df.NumY.values[0]
@@ -131,4 +79,3 @@ if __name__ == '__main__':
     if frames_saved == 'False':
         save_frames(source, target, nx, ny)
     save_video(target, fps)
->>>>>>> 6244a870cd20e4588a2ced5d4ceeba226af483ef
