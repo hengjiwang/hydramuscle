@@ -12,7 +12,7 @@ def save_frames(source, target, nx, ny):
     nx = nx
     ny = ny
 
-    # domains
+    # domains         
     x = np.linspace(-nx/2, nx/2, nx)    
     theta = np.linspace(0, 2*np.pi, ny)
     y = ny/2/np.pi * np.cos(theta)

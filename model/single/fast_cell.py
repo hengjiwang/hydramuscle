@@ -14,7 +14,7 @@ class FastCell:
         self.c_m = 1e-6 # [F/cm^2]
         self.A_cyt = 4e-5 # [cm^2]
         self.V_cyt = 6e-9 # [cm^3]
-        self.d = 10e-4 # 10e-4 # [cm]
+        self.d = 20e-4 # [cm]
         self.F = 96485332.9 # [mA*s/mol]
         self.c0 = 0.05
         self.v0 = -50 # (-40 to -60)
@@ -176,7 +176,7 @@ class FastCell:
         if ylabel:  plt.ylabel(ylabel)
 
 if __name__ == '__main__':
-    model = FastCell(10, 0.0004)
+    model = FastCell(10, 0.0002)
     sol = model.step()
     c = sol[:, 0]
     v = sol[:, 1]

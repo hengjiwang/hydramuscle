@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import sys
+sys.path.insert(0, '../force/')
 
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 from fast_cell import FastCell
 from slow_cell import SlowCell
-from force.maggio_force_encoder import MHMEncoder
+from maggio_force_encoder import MHMEncoder
 
 
 class Cell(SlowCell, FastCell):
