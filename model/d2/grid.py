@@ -20,14 +20,14 @@ from tqdm import tqdm
 
 class Grid(Cell, FluoEncoder):
     '''A 1D cell chain with cells connected through gap junctions'''
-    def __init__(self, numx=20, numy=40, T=200, dt = 0.001, k2 = 0.03, s0 = 600, d = 40e-4, v7 = 0.02, k9 = 0.04, v41 = 0.5):
+    def __init__(self, numx=20, numy=40, T=200, dt = 0.001, k2 = 0.1, s0 = 200, d = 40e-4, v7 = 0.04, k9 = 0.06, v41 = 0.5):
         # Parameters
         FluoEncoder.__init__(self, T, dt)
         Cell.__init__(self, T, dt)
         self.gcx = 1000
         self.gcy = 1000
-        self.g_ip3x = 1
-        self.g_ip3y = 1
+        self.g_ip3x = 0.1
+        self.g_ip3y = 5
         self.numx = numx
         self.numy = numy
         onex = np.ones(self.numx)
@@ -65,10 +65,10 @@ class Grid(Cell, FluoEncoder):
         # self.s_ip = random.sample(self.s_ip, 4000)
 
         # Bending Stimulation
-        # self.s_ip = [(int(numx/2)-j)*numy for j in range(-5, 5)]
+        self.s_ip = [(int(numx/2)-j)*numy for j in range(-10, 10)]
 
         # Electrical Stimulation
-        self.s_v = [numy*i for i in range(numx)]
+        # self.s_v = [numy*i for i in range(numx)]
         # self.s_v.extend([numy*i+1 for i in range(numx)])
         # self.s_v.extend([numy*i+2 for i in range(numx)])
 
@@ -107,7 +107,7 @@ class Grid(Cell, FluoEncoder):
         ideg = self.i_deg(ip)
         ikca = self.i_kca(v, c)
         ibk = self.i_bk(v)
-        istimv = self.stim_v(t, stims_v)
+        # istimv = self.stim_v(t, stims_v)
         ir1 = self.r_1(c, g, c1g)
         ir2 = self.r_2(c, c1g, c2g)
         ir3 = self.r_3(c, c2g, c3g)
@@ -128,9 +128,9 @@ class Grid(Cell, FluoEncoder):
         dc3gdt = ir3 - ir4
         dc4gdt = ir4
 
-        # if 10<t<14 or 30<t<34 or 50<t<54 or 70<t<74:
-        #     dipdt[self.s_ip] += self.i_plcb(1) - iplcb_base
-        dvdt[self.s_v] += 1 / self.c_m * 0.01 * istimv
+        if 10<t<14:
+            dipdt[self.s_ip] += self.i_plcb(1) - iplcb_base
+        # dvdt[self.s_v] += 1 / self.c_m * 0.01 * istimv
 
         deriv = np.array([dcdt, dsdt, drdt, dipdt, dvdt, dmdt, dhdt, dbxdt, dcxdt, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt])
 
@@ -183,4 +183,4 @@ if __name__ == "__main__":
     model = Grid(numx=200, numy=200, T=100, dt=0.0002)
     sol = model.step([1,3,5,7,9,12,15,18,22,26,31,36,42])
     df = pd.DataFrame(sol[:,0:model.numx*model.numy])
-    df.to_csv('c_200x200_100s_cb_fewer.csv', index = False)
+    df.to_csv('~/Documents/hydra_calcium_model/save/data/calcium/c_200x200_100s_bend.csv', index = False)
