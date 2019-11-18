@@ -81,7 +81,7 @@ def plot_frame(x, t, dt):
     plt.colorbar()
     plt.show()
 
-def plot_frames(data, nx, ny, ts, dt):
+def plot_frames(data, nx, ny, ts, dt, vmax):
     ntime = len(data)
     data = np.reshape(data, (-1, nx, ny))
 
@@ -94,7 +94,7 @@ def plot_frames(data, nx, ny, ts, dt):
         t = ts[j]
         plt.subplot(nrow, ncol, j+1)
         frame = data[int(t/dt)]
-        plt.imshow(frame, vmin=0, vmax=1)
+        plt.imshow(frame, vmin=0, vmax=vmax)
         plt.colorbar()
         plt.title('t=' + str(t) + 's')
 
@@ -109,4 +109,4 @@ if __name__ == '__main__':
     x = pd.read_csv('../save/data/c_20x20_100s.csv')
     # save_pattern(x, '../save/figures/chain_fluo_pattern.png')
     # save_anim(x, 1, '../save/animations/grid_fluo_movie.mp4')
-    plot_frames(x.values, [11, 20, 30], 0.1)
+    plot_frames(x.values, [11, 20, 30], 0.1, 1.0)

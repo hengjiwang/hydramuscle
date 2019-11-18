@@ -20,7 +20,7 @@ from tqdm import tqdm
 
 class Grid(Cell, FluoEncoder):
     '''A 1D cell chain with cells connected through gap junctions'''
-    def __init__(self, numx=20, numy=40, T=200, dt = 0.001, k2 = 0.2, s0 = 200, d = 40e-4, v7 = 0.04, k9 = 0.04, v41 = 0.2):
+    def __init__(self, numx=20, numy=40, T=200, dt = 0.001, k2 = 0.1, s0 = 200, d = 40e-4, v7 = 0.04, k9 = 0.06, v41 = 0.5):
         # Parameters
         FluoEncoder.__init__(self, T, dt)
         Cell.__init__(self, T, dt)
@@ -65,7 +65,7 @@ class Grid(Cell, FluoEncoder):
         # self.s_ip = random.sample(self.s_ip, 4000)
 
         # Bending Stimulation
-        self.s_ip = [(int(numx/2)-j)*numy for j in range(-5, 5)]
+        self.s_ip = [(int(numx/2)-j)*numy for j in range(-10, 10)]
 
         # Electrical Stimulation
         # self.s_v = [numy*i for i in range(numx)]
@@ -180,7 +180,7 @@ class Grid(Cell, FluoEncoder):
         if ylabel:  plt.ylabel(ylabel)
 
 if __name__ == "__main__":
-    model = Grid(numx=200, numy=200, T=100, dt=0.0002)
+    model = Grid(numx=200, numy=200, T=200, dt=0.0002)
     sol = model.step([1,3,5,7,9,12,15,18,22,26,31,36,42])
     df = pd.DataFrame(sol[:,0:model.numx*model.numy])
-    df.to_csv('c_200x200_100s_bend.csv', index = False)
+    df.to_csv('~/Documents/hydra_calcium_model/save/data/calcium/c_200x200_100s_bend.csv', index = False)

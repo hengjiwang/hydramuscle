@@ -23,7 +23,7 @@ def compress_frame(frame, size_x, size_y, to_size_x, to_size_y):
     return np.reshape(new_mat, (to_size_x*to_size_y))
 
 if __name__ == "__main__":
-    force = load_data('/home/hengji/Documents/hydra_calcium_model/save/data/force/force_200x200_100s_cb.csv')
+    force = load_data('/home/hengji/Documents/hydra_calcium_model/save/data/force/force_200x200_100s_elong.csv')
     new_force = np.zeros((len(force), 400))
 
     for j in range(len(force)):
@@ -31,5 +31,5 @@ if __name__ == "__main__":
         new_force[j,:] = compress_frame(frame, 200, 200, 20, 20)
 
     df = pd.DataFrame(new_force)
-    df.to_csv('../../save/data/force/force_200x200_100s_cb_averaged.csv', index = False)
+    df.to_csv('/home/hengji/Documents/hydra_calcium_model/save/data/force/force_200x200_100s_elong_averaged.csv', index = False)
 

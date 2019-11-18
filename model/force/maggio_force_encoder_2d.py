@@ -90,8 +90,8 @@ class MHMEncoder:
 
 
 if __name__ == "__main__":
-    c = pd.read_csv("../../save/data/calcium/c_200x200_100s_cb.csv").values
+    c = pd.read_csv("../../save/data/calcium/c_200x200_100s_bend.csv").values
     encoder = MHMEncoder(c, 200, 200, 0.02)
     force = encoder.step()
     df = pd.DataFrame(force)
-    df.to_csv('force_200x200_100s_cb.csv', index = False)
+    df.to_csv('../../save/data/force/force_200x200_100s_bend.csv', index = False)

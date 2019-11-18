@@ -10,14 +10,14 @@ class SlowCell:
 
     def __init__(self, T = 60, dt = 0.001):
         self.k1 = 0.0004
-        self.k2 = 0.01 # 0.08
+        self.k2 = 0.02 # 0.08
         self.ka = 0.2
         self.kip = 0.3
-        self.k3 = 0.5
+        self.k3 = 5 # 0.5
         self.v40 = 0.025
         self.v41 = 0 # 0.2
         self.kr = 1
-        self.k5 = 0.5
+        self.k5 = 2 # 0.5
         self.k6 = 4
         self.ki = 0.2
         self.kg = 0.1 # unknown
@@ -25,7 +25,7 @@ class SlowCell:
         self.v7 = 0.04 # 0 - 0.05
         self.v8 = None
         self.kca = 0.3
-        self.k9 = 0.08
+        self.k9 = 0.2 # 0.08
         self.beta = 20
 
         self.c0 = 0.05
@@ -99,7 +99,7 @@ class SlowCell:
 
         return [dcdt, dsdt, drdt, dipdt]
 
-    def step(self, stims = [10]):
+    def step(self, stims = [10, 20, 30, 40]):
         # Time stepping    
 
         self.v8 = (self.i_deg(self.ip0) - self.i_plcd(self.c0)) / (1 / ((1 + self.kg)*(self.kg/(1+self.kg) + self.a0)) * self.a0)

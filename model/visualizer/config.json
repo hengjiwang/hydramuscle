@@ -1,6 +1,6 @@
 [{
-    "SourceFile": "../../save/data/c_200x200_200s.csv",
-    "TargetFile": "200x200_200s",
+    "SourceFile": "../../save/data/calcium/c_200x200_100s_cb_fewer.csv",
+    "TargetFile": "200x200_100s_cb_fewer",
     "NumX": 200,
     "NumY": 200,
     "FramesSaved": "False",
