@@ -159,14 +159,14 @@ class Grid(Cell, FluoEncoder):
         T = self.T
         dt = self.dt
 
-        sol = np.zeros((int(T/dt/100), 14*self.num2))
+        sol = np.zeros((int(T/dt/200), 14*self.num2))
 
         # Euler method integration
         for j in tqdm(np.arange(0, int(T/dt))):
             t = j*dt
             dydt = self.rhs(y, t, stims_v, stims_ip)
             y += dydt * dt
-            if j%100 == 0: sol[int(j/100), :] = y
+            if j%200 == 0: sol[int(j/200), :] = y
         
         # End counting time
         elapsed = (time.time() - start_time) 
@@ -180,7 +180,7 @@ class Grid(Cell, FluoEncoder):
         if ylabel:  plt.ylabel(ylabel)
 
 if __name__ == "__main__":
-    model = Grid(numx=200, numy=200, T=100, dt=0.0002)
+    model = Grid(numx=200, numy=200, T=200, dt=0.0002)
     sol = model.step([1,3,5,7,9,12,15,18,22,26,31,36,42])
     df = pd.DataFrame(sol[:,0:model.numx*model.numy])
     df.to_csv('~/Documents/hydra_calcium_model/save/data/calcium/c_200x200_100s_elongation_stim_20s.csv', index = False)

@@ -19,10 +19,11 @@ def save_frames(source, target, nx, ny):
     z = ny/2/np.pi * np.sin(theta)
     X, Y = np.meshgrid(x, y) 
     X, Z = np.meshgrid(x, z) 
+        
 
-    fig = plt.figure(figsize=(10, 10))
-
-    for j in tqdm.tqdm(range(len(c))):
+    for j in range(len(c)):
+        # print(j)
+        fig = plt.figure(figsize=(10, 10))
 
         C = np.reshape(c[j], (nx, ny))
         color = C
@@ -31,7 +32,7 @@ def save_frames(source, target, nx, ny):
         m = plt.cm.ScalarMappable(norm=norm, cmap='jet')
         m.set_array([])
 
-        fcolors = m.to_rgba(color.T)
+        fcolors = m.to_rgba(color)
 
         plt.clf()
         
@@ -44,12 +45,14 @@ def save_frames(source, target, nx, ny):
             linewidth=0.5, facecolors=fcolors, vmin=0, vmax=0.8, shade=False)
         ax.view_init(180, 100)
         try:
-            plt.savefig('./save/animations/'+target+'/frames/img' + str(j) + '.jpg', orientation='landscape')
+            plt.savefig('./save/animations/'+target+'/frames/img' + str(j) + '.jpg')
         except FileNotFoundError:
             os.makedirs('./save/animations/'+target+'/frames/')
             os.makedirs('./save/animations/'+target+'/movie/')
             plt.savefig('./save/animations/'+target+'/frames/img' + str(j) + '.jpg', orientation='landscape')
-
+        
+        plt.close(fig)
+        
 def save_video(target, fps):
     
     file_to_save = './save/animations/'+target+'/movie/movie.avi'
