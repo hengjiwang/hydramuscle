@@ -9,10 +9,10 @@ import sys
 
 class KatoForceEncoder:
     # Kato 1984 Force-Ca model
-    def __init__(self, c):
+    def __init__(self, c, dt):
         # Parameters
         self.c = c
-        self.dt = 0.001
+        self.dt = dt
         self.T = len(c)*self.dt
         self.cm0 = 1e-5
         self.mlck0 = 1e-6

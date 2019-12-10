@@ -1,4 +1,4 @@
-import cv2, tqdm, sys, os, time
+import cv2, tqdm, sys, os, time, multiprocessing
 import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -11,14 +11,13 @@ def save_frame(j, c, X, Y, Z):
 
     fig = plt.figure(figsize=(10, 10))
 
-    C = np.reshape(c[j], (nx, ny))
-    color = C
+    color = c[j]
 
     norm = matplotlib.colors.Normalize(vmin=0, vmax=0.8)
     m = plt.cm.ScalarMappable(norm=norm, cmap='jet')
     m.set_array([])
 
-    fcolors = m.to_rgba(color.T)
+    fcolors = m.to_rgba(color)
 
     # plt.clf()
     
@@ -30,24 +29,21 @@ def save_frame(j, c, X, Y, Z):
     ax.plot_surface(X, Y, Z, rstride=1, cstride=1, alpha=0.8, edgecolor='k',
         linewidth=0.5, facecolors=fcolors, vmin=0, vmax=0.8, shade=False)
     ax.view_init(180, 100)
-    # try:
-    print('saving' + str(j))
-    plt.savefig('./save/animations/'+target+'/frames/img' + str(j) + '.jpg', orientation='landscape')
-    # except FileNotFoundError:
-        # os.makedirs('./save/animations/'+target+'/frames/')
-        # os.makedirs('./save/animations/'+target+'/movie/')
-        # plt.savefig('./save/animations/'+target+'/frames/img' + str(j) + '.jpg', orientation='landscape')
 
-    print('saved' + str(j))
+    print('saving img' + str(j) + '...')
+    plt.savefig('./save/animations/'+target+'/frames/img' + str(j) + '.jpg', orientation='landscape')
+
+    print('saved ' + str(j))
 
     plt.close(fig)
 
 def save_frames(source, target, nx, ny):
 
     c = pd.read_csv(source).values
-    # c = np.zeros((5000, 40000))
     nx = nx
     ny = ny
+    c = np.reshape(c, (-1, nx, ny))
+    # c = multiprocessing.Array("i", c)
 
     # domains         
     x = np.linspace(-nx/2, nx/2, nx)    
@@ -58,19 +54,17 @@ def save_frames(source, target, nx, ny):
     X, Z = np.meshgrid(x, z) 
 
     print('saving frames...')
-    pool = Pool(processes=8)
-    for j in range(len(c)): #range(len(c)):
-        
+    pool = Pool(processes=10)
+    for j in range(len(c)):
         pool.apply_async(save_frame, args=(j,c,X,Y,Z))
-
     pool.close()
     pool.join()
         
 
 def save_video(target, fps):
     
-    file_to_save = './save/animations/'+target+'/movie/movie.avi'
-    frames_loc = './save/animations/'+target + '/frames/'
+    file_to_save = './save/animations/' + target + '/movie/movie.avi'
+    frames_loc = './save/animations/'   + target + '/frames/'
     
     frames = os.listdir(frames_loc)
     total_num = len(frames)
@@ -93,6 +87,10 @@ if __name__ == '__main__':
     nx = df.NumX.values[0]
     ny = df.NumY.values[0]
     fps = df.TargetFPS.values[0]
+
+    if not os.path.exists('./save/animations/'+target+'/frames/'):
+        os.makedirs('./save/animations/'+target+'/frames/')
+        os.makedirs('./save/animations/'+target+'/movie/')
 
     if frames_saved == 'False':
         save_frames(source, target, nx, ny)

@@ -1,6 +1,6 @@
 [{
-    "SourceFile": "../../save/data/calcium/c_200x200_100s_cb_fewer.csv",
-    "TargetFile": "200x200_100s_cb_fewer",
+    "SourceFile": "../../save/data/calcium/c_200x200_200s_bend_one_direction_v7_0015.csv",
+    "TargetFile": "200x200_200s_bend_one_direction_v7_0015",
     "NumX": 200,
     "NumY": 200,
     "FramesSaved": "False",
