@@ -92,6 +92,10 @@ class SlowCell:
         # Right-hand side formulation
         c, s, r, ip = y
 
+        # if 10<t<70:
+        #     ip = 0.1
+        # else:
+        #     ip = 0.01
         dcdt = self.i_ipr(c, s, ip, r) + self.i_leak(c, s) - self.i_serca(c) + self.i_in(ip) - self.i_pmca(c)
         dsdt = self.beta * (self.i_serca(c) - self.i_ipr(c, s, ip, r) - self.i_leak(c, s))
         drdt = self.v_r(c, r)
@@ -99,7 +103,7 @@ class SlowCell:
 
         return [dcdt, dsdt, drdt, dipdt]
 
-    def step(self, stims = [10, 30, 50, 70]):
+    def step(self, stims = [10]):
         # Time stepping    
 
         self.v8 = (self.i_deg(self.ip0) - self.i_plcd(self.c0)) / (1 / ((1 + self.kg)*(self.kg/(1+self.kg) + self.a0)) * self.a0)
