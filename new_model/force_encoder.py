@@ -49,7 +49,7 @@ class ForceEncoder(object):
         cls.time = np.linspace(0, cls.T, int(cls.T/cls.dt)+1)
 
         y0 = [cls.m0, cls.mp0, cls.amp0, cls.am0]
-        sol = odeint(cls.rhs, y0, cls.time, hmax = 0.005, args=(c,))
+        sol = odeint(cls._rhs, y0, cls.time, hmax = 0.005, args=(c,))
         return cls.K * (sol[:,2] + sol[:,3])
 
     

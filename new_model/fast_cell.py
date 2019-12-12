@@ -93,7 +93,7 @@ class FastCell(CellBase):
 
     '''BK channel terms (Corrias 2007)'''
     def i_kca(self, v, c):
-        if c<=0:
+        if isinstance(c, float) and c<=0:
             raise ValueError('[Ca2+] should be larger than 0')
         return self.g_kca * 1 / (1 + np.exp(v/(-17) - 2 * np.log(c))) * (v - self.e_k)
         # return 5 * self.g_kca * c**2 / (c**2 + 5**2) * (v - self.e_k)
@@ -101,12 +101,8 @@ class FastCell(CellBase):
     '''Background terms'''
     def i_bk(self, v):
         # Background voltage leak [mA/cm^2]
-        # g_bk = - (self.i_cal(self.v0, self.n0, self.hv0, self.hc0) \
-        g_bk = - (self.i_cal(self.v0, self.m0, self.h0) \
-        + self.i_cat(self.v0, self.bx0, self.cx0) \
-        + self.i_kca(self.v0, self.c0))/(self.v0 - self.e_bk)
 
-        return g_bk * (v - self.e_bk)
+        return self.g_bk * (v - self.e_bk)
 
     '''Calcium terms'''
     def r_ex(self, c):
@@ -153,25 +149,19 @@ class FastCell(CellBase):
         self.h0 = self.h_inf(self.v0)
         self.bx0 = self.bx_inf(self.v0)
         self.cx0 = self.cx_inf(self.v0)
+        self.ical0 = self.i_cal(self.v0, self.m0, self.h0)
+        self.icat0 = self.i_cat(self.v0, self.bx0, self.cx0)
+        self.ikca0 = self.i_kca(self.v0, self.c0)
+        self.g_bk = - (self.ical0 + self.icat0 + self.ikca0)/(self.v0 - self.e_bk)
 
-    def run(self, stims):
+    def run(self, stims_fast):
         # Run the model
 
         self.init_fast_cell()
 
         y0 = [self.c0, self.v0, self.m0, self.h0, self.bx0, self.cx0]
-        
-        y = y0
-        T = self.T
-        dt = self.dt
 
-        sol = np.zeros((int(T/dt)+1, len(y0)))
-
-        for j in np.arange(0, int(T/dt)+1):
-            t = j*dt
-            dydt = self.rhs(y, t, stims)
-            y += dydt * dt
-            sol[j, :] = y
+        sol = self.euler_odeint(self.rhs, y0, self.T, self.dt, stims_fast=stims_fast)
 
         return sol
 

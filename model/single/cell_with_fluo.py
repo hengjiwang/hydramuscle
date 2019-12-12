@@ -11,6 +11,7 @@ from fast_cell import FastCell
 from slow_cell import SlowCell
 from maggio_force_encoder import MHMEncoder
 from fluo_encoder import FluoEncoder
+from tqdm import tqdm
 
 
 class Cell(SlowCell, FastCell):
@@ -81,7 +82,18 @@ class Cell(SlowCell, FastCell):
         y0 = [self.c0, self.s0, self.r0, self.ip0, self.v0, self.m0, self.h0, self.bx0, self.cx0, 
         self.fluo_buffer.g0, self.fluo_buffer.c1g0, self.fluo_buffer.c2g0, self.fluo_buffer.c3g0, self.fluo_buffer.c4g0]
 
-        sol = odeint(self.rhs, y0, self.time, args = (stims_v, stims_ip, ), hmax = 0.005)
+        # sol = odeint(self.rhs, y0, self.time, args = (stims_v, stims_ip, ), hmax = 0.005)
+        y = y0
+        T = self.T
+        dt = 0.0002
+
+        sol = np.zeros((int(T/dt)+1, len(y0)))
+
+        for j in tqdm(np.arange(0, int(T/dt)+1)):
+            t = j*dt
+            dydt = self.rhs(y, t, stims_v, stims_ip)
+            y += np.array(dydt) * dt
+            sol[j, :] = y
 
         return sol
 

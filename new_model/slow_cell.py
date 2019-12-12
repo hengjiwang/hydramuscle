@@ -111,6 +111,8 @@ class SlowCell(CellBase):
     def init_slow_cell(self):
         # Reassign some parameters to make the resting state stationary
         self.v8 = (self.i_deg(self.ip0) - self.i_plcd(self.c0)) / (1 / ((1 + self.kg)*(self.kg/(1+self.kg) + self.a0)) * self.a0)
+        self.in_ip0 = self.v41 * self.ip0**2 / (self.kr**2 + self.ip0**2)
+        self.ipmca0 = self.i_pmca(self.c0)
 
     def run(self, stims=[10]):
         # Run the model

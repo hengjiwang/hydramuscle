@@ -22,17 +22,11 @@ class ProtoSMC(SlowCell, FastCell):
 
     '''Overload methods'''
     def i_in(self, ip):
+        return self.alpha * (self.ical0 + self.icat0) + self.ipmca0 + self.v41 * ip**2 / (self.kr**2 + ip**2) - self.in_ip0
 
-        return self.alpha * (self.i_cal(self.v0, self.m0, self.h0) + \
-        self.i_cat(self.v0, self.bx0, self.cx0)) + self.i_pmca(self.c0) + \
-        self.v41 * ip**2 / (self.kr**2 + ip**2) - self.v41 * self.ip0**2 / (self.kr**2 + self.ip0**2)
-
-    def i_bk(self, v):
-        # Background voltage leak [mA/cm^2]
-        g_bk = - (self.i_cal(self.v0, self.m0, self.h0) \
-        + self.i_cat(self.v0, self.bx0, self.cx0) \
-        + self.i_kca(self.v0, self.c0))/(self.v0 - self.e_bk)
-        return g_bk * (v - self.e_bk)
+    # def i_bk(self, v):
+    #     # Background voltage leak [mA/cm^2]
+    #     return self.g_bk * (v - self.e_bk)
 
     '''Numerical calculations'''
     def rhs(self, y, t, stims_fast, stims_slow):
@@ -46,6 +40,7 @@ class ProtoSMC(SlowCell, FastCell):
         dsdt = self.beta * (i_serca - i_ipr - i_leak)
         drdt = v_r
         dipdt = self.i_plcb(self.stim_slow(t, stims_slow)) + i_plcd - i_deg
+
         dvdt = - 1 / self.c_m * (i_cal + i_cat + i_kca + i_bk - 0.001 * self.stim_fast(t, stims_fast))
 
         return np.array([dcdt, dsdt, drdt, dipdt, dvdt, dmdt, dhdt, dbxdt, dcxdt])
@@ -58,23 +53,17 @@ class ProtoSMC(SlowCell, FastCell):
 
         y0 = [self.c0, self.s0, self.r0, self.ip0, self.v0, self.m0, self.h0, self.bx0, self.cx0]
 
-        y = y0
-        T = self.T
-        dt = self.dt
+        # y = y0
+        # T = self.T
+        # dt = self.dt
 
-        sol = np.zeros((int(T/dt)+1, len(y0)))
-
-        for j in np.arange(0, int(T/dt)+1):
-            t = j*dt
-            dydt = self.rhs(y, t, stims_fast, stims_slow)
-            y += dydt * dt
-            sol[j, :] = y
+        sol = self.euler_odeint(self.rhs, y0, self.T, self.dt, stims_fast=stims_fast, stims_slow=stims_slow)
 
         return sol
 
 
 if __name__ == '__main__':
-    model = ProtoSMC(T=200, dt = 0.0004, k2 = 0.01)
+    model = ProtoSMC(T=200, dt = 0.0002, k2 = 0.01)
     sol = model.run(stims_fast = [1,3,5,7,9,12,15,18,22,26,31,36,42], stims_slow = [100])
     c = sol[:,0]
     s = sol[:,1]
