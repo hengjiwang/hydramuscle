@@ -1,2 +1,2 @@
-# hydra_calcium_model
-Modeling calcium dynamics of Hydra
+# hydramuscle
+Modeling calcium dynamics of Hydra muscle cells
