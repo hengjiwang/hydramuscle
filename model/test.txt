@@ -1,7 +1,0 @@
-grid_slow, Lip3=scipy.sparse.kron, num2=20x20, T=100s, dt=0.1s, hmax=0.008, rtol=0.1, atol=0.1, total_time=574.7116594314575
-grid_slow, Lip3=scipy.sparse.kron, num2=20x20, T=100s, dt=0.1s, hmax=0.008, rtol=0.01, atol=0.01, total_time=612.8373510837555
-grid_slow, Lip3=scipy.sparse.kron, num2=20x20, T=100s, dt=0.1s, hmax=0.0005, rtol=0.01, atol=0.01, total_time=8309.801087379456
-grid_slow, Lip3=np.kron, num2=20x20, T=100s, dt=0.1s, hmax=0.008, rtol=0.01, atol=0.01, total_time=1417.4689745903015
-grid_slow_euler, Lip3=scipy.sparse.kron, num2=20x20, T=100s, dt=0.001s, total_time=9.253435134887695
-grid_slow_euler, Lip3=scipy.sparse.kron, num2=20x20, T=100s, dt=0.0001s, total_time=93.3830931186676
-grid_slow_euler, Lip3=scipy.sparse.kron, num2=200x200, T=100s, dt=0.0004s, total_time=464.4699516296387
