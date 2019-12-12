@@ -4,7 +4,7 @@ import setuptools
 from setuptools import setup 
 
 setup(
-        name='hydracalcium',     
+        name='hydramuscle',     
         version='0.0',   
         description='A biophysical model of calcium dynamics in Hydra epitheliomuscular cells.',
         author='Hengji Wang',
