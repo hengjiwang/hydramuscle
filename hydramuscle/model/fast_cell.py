@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
 from hydramuscle.model.cell_base import CellBase
+from hydramuscle.lib.euler_odeint import euler_odeint
 
 class FastCell(CellBase):
 
@@ -161,7 +162,7 @@ class FastCell(CellBase):
 
         y0 = [self.c0, self.v0, self.m0, self.h0, self.bx0, self.cx0]
 
-        sol = self.euler_odeint(self.rhs, y0, self.T, self.dt, stims_fast=stims_fast)
+        sol = euler_odeint(self.rhs, y0, self.T, self.dt, stims_fast=stims_fast)
 
         return sol
 

@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 
 from hydramuscle.model.fast_cell import FastCell
 from hydramuscle.model.slow_cell import SlowCell
+from hydramuscle.lib.euler_odeint import euler_odeint
 
 class ProtoSMC(SlowCell, FastCell):
 
@@ -52,7 +53,7 @@ class ProtoSMC(SlowCell, FastCell):
         # T = self.T
         # dt = self.dt
 
-        sol = self.euler_odeint(self.rhs, y0, self.T, self.dt, stims_fast=stims_fast, stims_slow=stims_slow)
+        sol = euler_odeint(self.rhs, y0, self.T, self.dt, stims_fast=stims_fast, stims_slow=stims_slow)
 
         return sol
 

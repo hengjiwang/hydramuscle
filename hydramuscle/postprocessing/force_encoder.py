@@ -1,8 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
 class ForceEncoder(object):
@@ -27,7 +23,7 @@ class ForceEncoder(object):
     am0 = 0
 
     @classmethod
-    def _rhs(cls, y, t, c):
+    def _rhs(cls, y, c):
         # Right-hand side formulation
 
         k1 = c**cls.nm / (c**cls.nm + cls.c_half**cls.nm)

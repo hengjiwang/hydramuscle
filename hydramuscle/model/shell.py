@@ -12,6 +12,7 @@ from scipy.sparse import spdiags
 from tqdm import tqdm
 
 from hydramuscle.model.smc import SMC
+from hydramuscle.lib.euler_odeint import euler_odeint
 
 class Shell:
 
@@ -126,7 +127,7 @@ class Shell:
         y0 = np.reshape(y0, len(inits)*self.num2)  
 
         # Begin counting time
-        sol = self.cell.euler_odeint(self.rhs, y0, self.T, self.dt, 
+        sol = euler_odeint(self.rhs, y0, self.T, self.dt, 
                                     save_interval=200, 
                                     stims_fast=stims_fast, 
                                     stims_slow=stims_slow)
