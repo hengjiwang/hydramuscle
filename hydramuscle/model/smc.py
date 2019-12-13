@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 from hydramuscle.model.proto_smc import ProtoSMC
 from hydramuscle.model.fluo_buffer import FluoBuffer
-from hydramuscle.lib.euler_odeint import euler_odeint
+from hydramuscle.model.euler_odeint import euler_odeint
 
 class SMC(ProtoSMC):
     """Smooth muscle cell with buffers"""

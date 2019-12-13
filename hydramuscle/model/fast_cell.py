@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
 from hydramuscle.model.cell_base import CellBase
-from hydramuscle.lib.euler_odeint import euler_odeint
+from hydramuscle.model.euler_odeint import euler_odeint
 
 class FastCell(CellBase):
 

@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 from hydramuscle.model.fast_cell import FastCell
 from hydramuscle.model.slow_cell import SlowCell
-from hydramuscle.lib.euler_odeint import euler_odeint
+from hydramuscle.model.euler_odeint import euler_odeint
 
 class ProtoSMC(SlowCell, FastCell):
 

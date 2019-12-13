@@ -7,7 +7,7 @@ import pandas as pd
 from scipy.integrate import odeint
 
 from hydramuscle.postprocessing.force_encoder import ForceEncoder
-from hydramuscle.lib.euler_odeint import euler_odeint
+from hydramuscle.model.euler_odeint import euler_odeint
 
 class ForceEncoder2D(ForceEncoder):
 
@@ -50,4 +50,4 @@ if __name__ == "__main__":
     c = pd.read_csv("../save/data/calcium/c_200x200_100s_elong.csv").values
     force = ForceEncoder2D.encode(c, 200, 200, 0.02)
     df = pd.DataFrame(force)
-    df.to_csv('../../save/data/force/force_200x200_100s_elong.csv', index = False)
+    df.to_csv('../save/data/force/force_200x200_100s_elong.csv', index = False)

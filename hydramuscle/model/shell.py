@@ -12,7 +12,7 @@ from scipy.sparse import spdiags
 from tqdm import tqdm
 
 from hydramuscle.model.smc import SMC
-from hydramuscle.lib.euler_odeint import euler_odeint
+from hydramuscle.model.euler_odeint import euler_odeint
 
 class Shell:
 
