@@ -49,18 +49,18 @@ class FastCell(CellBase):
         self.g_bk = 0
         self.e_bk = -53 # -55
 
-    '''General functions'''
+
     def sig(self, v, vstar, sstar):
-        # Sigmoidal function
+        "Sigmoidal function"
         return 1 / (1 + np.exp(-(v-vstar)/sstar))
 
     def bell(self, v, vstar, sstar, taustar, tau0):
-        # Bell-shape function
+        "Bell-shape function"
         return taustar/(np.exp(-(v-vstar)/sstar) + np.exp((v-vstar)/sstar)) + tau0
-
-    '''CaL channel terms (Diderichsen 2006)'''
+    
+    ### CaL channel terms (Diderichsen 2006)
     def i_cal(self, v, m, h):
-        # L-type calcium channel [mA/cm^2]
+        "L-type calcium channel [mA/cm^2]"
         return self.g_cal * m**2 * h * (v - self.e_cal)
 
     def m_inf(self, v):
@@ -75,8 +75,9 @@ class FastCell(CellBase):
     def tau_h(self, v):
         return self.bell(v, 0, 20, 0.03, 0.021)
 
-    '''T-type calcium channel terms (Mahapatra 2018)'''
+    ### T-type calcium channel terms (Mahapatra 2018)
     def i_cat(self, v, bx, cx):
+        "T-type calcium channel [mA/cm^2]"
         return self.g_cat * bx**2 * cx * (v - self.e_cat)
 
     def bx_inf(self, v):
@@ -91,28 +92,26 @@ class FastCell(CellBase):
     def tau_cx(self, v):
         return 0.15 - 0.15 / ((1 + np.exp((v-417.43)/203.18))*(1 + np.exp(-(v+61.11)/8.07)))
     
-
-    '''BK channel terms (Corrias 2007)'''
     def i_kca(self, v, c):
+        "BK channel (Corrias 2007)"
         if isinstance(c, float) and c<=0:
             raise ValueError('[Ca2+] should be larger than 0')
         return self.g_kca * 1 / (1 + np.exp(v/(-17) - 2 * np.log(c))) * (v - self.e_k)
         # return 5 * self.g_kca * c**2 / (c**2 + 5**2) * (v - self.e_k)
 
-    '''Background terms'''
-    def i_bk(self, v):
-        # Background voltage leak [mA/cm^2]
 
+    def i_bk(self, v):
+        "Background voltage leak [mA/cm^2]"
         return self.g_bk * (v - self.e_bk)
 
-    '''Calcium terms'''
+
     def r_ex(self, c):
-        # [uM/s]
+        "Calcium terms"
         return (c-self.c0)/self.tau_ex
 
-    '''Stimulation'''
+    
     def stim_fast(self, t, stims):
-
+        "Stimulation"
         condition = False
 
         for stim_t in stims:
@@ -120,7 +119,7 @@ class FastCell(CellBase):
 
        	return int(condition)
 
-    '''Numerical calculation'''
+    ### Numerical terms
     def calc_fast_terms(self, c, v, m, h, bx, cx):
         return (self.r_ex(c), 
                 self.i_cal(v, m, h), 
@@ -133,7 +132,7 @@ class FastCell(CellBase):
                 (self.cx_inf(v) - cx)/self.tau_cx(v))
 
     def rhs(self, y, t, stims_fast):
-        # Right-hand side equations
+        "Right-hand side equations"
         c, v, m, h, bx, cx = y
 
         r_ex, i_cal, i_cat, i_kca, i_bk, dmdt, dhdt, dbxdt, dcxdt = self.calc_fast_terms(c, v, m, h, bx, cx)
@@ -145,7 +144,7 @@ class FastCell(CellBase):
 
 
     def init_fast_cell(self):
-        # Reassign some parameters to make the resting state stationary
+        "Reassign some parameters to make the resting state stationary"
         self.m0 = self.m_inf(self.v0)
         self.h0 = self.h_inf(self.v0)
         self.bx0 = self.bx_inf(self.v0)
@@ -156,7 +155,7 @@ class FastCell(CellBase):
         self.g_bk = - (self.ical0 + self.icat0 + self.ikca0)/(self.v0 - self.e_bk)
 
     def run(self, stims_fast):
-        # Run the model
+        "Run the model"
 
         self.init_fast_cell()
 
