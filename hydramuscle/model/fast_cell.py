@@ -1,11 +1,12 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+import sys, os
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
-from cell_base import CellBase
+from hydramuscle.model.cell_base import CellBase
 
 class FastCell(CellBase):
 

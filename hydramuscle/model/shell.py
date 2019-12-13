@@ -1,3 +1,6 @@
+import sys, os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
 import time, random
 
 import numpy as np
@@ -8,7 +11,7 @@ from scipy.integrate import odeint
 from scipy.sparse import spdiags
 from tqdm import tqdm
 
-from smc import SMC
+from hydramuscle.model.smc import SMC
 
 class Shell:
 

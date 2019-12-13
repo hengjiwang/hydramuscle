@@ -9,6 +9,6 @@ setup(
         description='A biophysical model of calcium dynamics in Hydra epitheliomuscular cells.',
         author='Hengji Wang',
         author_email='hengjw@uw.edu',
-        url='https://github.com/hengjiwang/hydra_calcium_model',
+        url='https://github.com/hengjiwang/hydramuscle',
         packages=setuptools.find_packages()
 )

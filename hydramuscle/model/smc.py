@@ -1,13 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+import sys,os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.integrate import odeint
-from tqdm import tqdm
 
-from proto_smc import ProtoSMC
-from fluo_buffer import FluoBuffer
+from hydramuscle.model.proto_smc import ProtoSMC
+from hydramuscle.model.fluo_buffer import FluoBuffer
 
 class SMC(ProtoSMC):
     """Smooth muscle cell with buffers"""

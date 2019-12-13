@@ -1,12 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+import sys,os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.integrate import odeint
 
-from fast_cell import FastCell
-from slow_cell import SlowCell
+from hydramuscle.model.fast_cell import FastCell
+from hydramuscle.model.slow_cell import SlowCell
 
 class ProtoSMC(SlowCell, FastCell):
 
@@ -20,15 +19,11 @@ class ProtoSMC(SlowCell, FastCell):
         self.v7 = v7
         self.alpha = 1e9 / (2 * self.F * self.d)
 
-    '''Overload methods'''
+
     def i_in(self, ip):
         return self.alpha * (self.ical0 + self.icat0) + self.ipmca0 + self.v41 * ip**2 / (self.kr**2 + ip**2) - self.in_ip0
 
-    # def i_bk(self, v):
-    #     # Background voltage leak [mA/cm^2]
-    #     return self.g_bk * (v - self.e_bk)
 
-    '''Numerical calculations'''
     def rhs(self, y, t, stims_fast, stims_slow):
         # Right-hand side formulation
         c, s, r, ip, v, m, h, bx, cx = y
