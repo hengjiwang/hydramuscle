@@ -136,9 +136,14 @@ class FastCell(CellBase):
         "Right-hand side equations"
         c, v, m, h, bx, cx = y
 
+        # if 2<t<8:
+        #     self.e_bk = -30
+        # else:
+        #     self.e_bk = -53
+
         r_ex, i_cal, i_cat, i_kca, i_bk, dmdt, dhdt, dbxdt, dcxdt = self.calc_fast_terms(c, v, m, h, bx, cx)
 
-        dcdt = -r_ex + self.alpha*(-i_cal + self.i_cal(self.v0, self.m0, self.h0) - i_cat + self.i_cat(self.v0, self.bx0, self.cx0))
+        dcdt = -r_ex + self.alpha*(-i_cal + self.ical0 - i_cat + self.icat0)
         dvdt = - 1 / self.c_m * (i_cal + i_cat + i_kca + i_bk - 0.001 * self.stim_fast(t, stims_fast))
 
         return np.array([dcdt, dvdt, dmdt, dhdt, dbxdt, dcxdt])

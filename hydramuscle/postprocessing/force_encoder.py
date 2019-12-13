@@ -1,5 +1,12 @@
+import sys,os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 from scipy.integrate import odeint
+
+# from hydramuscle.model.euler_odeint import euler_odeint
 
 class ForceEncoder(object):
 
@@ -23,8 +30,11 @@ class ForceEncoder(object):
     am0 = 0
 
     @classmethod
-    def _rhs(cls, y, c):
+    def _rhs(cls, y, t, calcium):
         # Right-hand side formulation
+
+        if t < cls.T: c = calcium[int(t/cls.dt)][0]
+        else: c = calcium[-1][0]
 
         k1 = c**cls.nm / (c**cls.nm + cls.c_half**cls.nm)
         cls.k6 = k1
@@ -34,18 +44,26 @@ class ForceEncoder(object):
                           [0, cls.k3, -cls.k4-cls.k5, cls.k6],
                           [0, 0, cls.k5, - cls.k6 - cls.k7]])
 
+
         return list(trans@np.array(y))
 
     @classmethod
-    def encode(cls, c, dt):
+    def encode(cls, calcium, dt):
         # Encode c to active force
 
         cls.dt = dt
-        cls.T = len(c)*cls.dt
+        cls.T = (len(calcium)-1)*cls.dt
         cls.time = np.linspace(0, cls.T, int(cls.T/cls.dt)+1)
 
         y0 = [cls.m0, cls.mp0, cls.amp0, cls.am0]
-        sol = odeint(cls._rhs, y0, cls.time, hmax = 0.005, args=(c,))
+        sol = odeint(cls._rhs, y0, cls.time, args=(calcium,), hmax=0.005)
         return cls.K * (sol[:,2] + sol[:,3])
 
     
+if __name__ == "__main__":
+    calcium = pd.read_csv('../save/data/calcium/c_sin_ibk.csv').values
+    force = ForceEncoder.encode(calcium, 0.0002)
+
+    plt.figure()
+    plt.plot(np.linspace(0, 200, int(200/0.0002)+1), force)
+    plt.show()

@@ -3,6 +3,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 
 from hydramuscle.model.proto_smc import ProtoSMC
 from hydramuscle.model.fluo_buffer import FluoBuffer
@@ -30,6 +31,13 @@ class SMC(ProtoSMC):
         # Right-hand side formulation
         c, s, r, ip, v, m, h, bx, cx, g, c1g, c2g, c3g, c4g = y
 
+        # if 20<t<80:
+        #     self.e_bk = -52
+        # else:
+        #     self.e_bk = -53
+
+        self.e_bk = np.sin(np.pi*t/200) - 53
+
         i_ipr, i_leak, i_serca, i_in, i_pmca, v_r, i_plcd, i_deg = self.calc_slow_terms(c, s, r, ip)
         _, i_cal, i_cat, i_kca, i_bk, dmdt, dhdt, dbxdt, dcxdt = self.calc_fast_terms(c, v, m, h, bx, cx)
         ir1, ir2, ir3, ir4, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt = self.calc_fluo_terms(c, g, c1g, c2g, c3g, c4g)
@@ -56,8 +64,8 @@ class SMC(ProtoSMC):
         return sol
 
 if __name__ == '__main__':
-    model = SMC(T=200, dt = 0.0002, k2 = 0.01)
-    sol = model.run(stims_fast = [1,3,5,7,9,12,15,18,22,26,31,36,42], stims_slow = [100])
+    model = SMC(T=200, dt = 0.0002, k2 = 0.01, v7=0.02)
+    sol = model.run([-100], [-100]) #stims_fast = [1,3,5,7,9,12,15,18,22,26,31,36,42], stims_slow = [100])
     c = sol[:,0]
     s = sol[:,1]
     r = sol[:,2]
@@ -77,3 +85,6 @@ if __name__ == '__main__':
     plt.subplot(235)
     model.plot(v, ylabel = 'v[mV]')
     plt.show()
+
+    df = pd.DataFrame(c)
+    df.to_csv('../save/data/calcium/c_sin_ibk.csv', index = False)
