@@ -111,12 +111,12 @@ class FastCell(CellBase):
         return (c-self.c0)/self.tau_ex
 
     
-    def stim_fast(self, t, stims):
+    def stim_fast(self, t, stims, dur=0.01):
         "Stimulation"
         condition = False
 
         for stim_t in stims:
-            condition = condition or stim_t <= t < stim_t + 0.01
+            condition = condition or stim_t <= t < stim_t + dur
 
        	return int(condition)
 
@@ -135,11 +135,6 @@ class FastCell(CellBase):
     def rhs(self, y, t, stims_fast):
         "Right-hand side equations"
         c, v, m, h, bx, cx = y
-
-        # if 2<t<8:
-        #     self.e_bk = -30
-        # else:
-        #     self.e_bk = -53
 
         r_ex, i_cal, i_cat, i_kca, i_bk, dmdt, dhdt, dbxdt, dcxdt = self.calc_fast_terms(c, v, m, h, bx, cx)
 
@@ -172,7 +167,7 @@ class FastCell(CellBase):
         return sol
 
 if __name__ == '__main__':
-    model = FastCell(10, 0.0002)
+    model = FastCell(20, 0.0002)
     sol = model.run([1,3,5,7,9,11,13,15,17,19])
     c = sol[:, 0]
     v = sol[:, 1]

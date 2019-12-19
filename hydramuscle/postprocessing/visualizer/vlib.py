@@ -81,7 +81,7 @@ def plot_frame(x, t, dt):
     plt.colorbar()
     plt.show()
 
-def plot_frames(data, nx, ny, ts, dt, vmax):
+def plot_frames(data, nx, ny, ts, dt, vmin, vmax):
     ntime = len(data)
     data = np.reshape(data, (-1, nx, ny))
 
@@ -94,7 +94,7 @@ def plot_frames(data, nx, ny, ts, dt, vmax):
         t = ts[j]
         plt.subplot(nrow, ncol, j+1)
         frame = data[int(t/dt)]
-        plt.imshow(frame, vmin=0, vmax=vmax)
+        plt.imshow(frame, vmin=vmin, vmax=vmax)
         plt.colorbar()
         plt.title('t=' + str(t) + 's')
 

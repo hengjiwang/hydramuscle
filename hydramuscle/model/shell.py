@@ -28,6 +28,10 @@ class Shell:
         self.numy = numy
         self.num2 = self.numx*self.numy
         self.behavior = behavior
+
+        self.v_scale = 0.01
+        self.dur = 0.01
+
         self.init_connectivity_matrices()
         self.init_stimulation_pattern(behavior)
 
@@ -60,6 +64,27 @@ class Shell:
             self.s_ip = random.sample(self.s_ip, 4000)
         elif behavior == 'bending':
             self.s_ip = [(int(self.numx/2)-j)*self.numy for j in range(-20, 20)]
+        # elif behavior == 'electrical points, 1x':
+        #     self.s_v = [self.num2//2]
+        #     self.v_scale *= 10
+        #     self.dur = self.dt
+        # elif behavior == 'electrical points, 2x':
+        #     self.s_v = [self.num2//2]
+        #     self.v_scale *= 20
+        #     self.dur = self.dt
+        # elif behavior == 'electrical points, 4x':
+        #     self.s_v = [self.num2//2]
+        #     self.v_scale *= 40
+        #     self.dur = self.dt
+        # elif behavior == 'electrical points, 5x':
+        #     self.s_v = [self.num2//2]
+        #     self.v_scale *= 50
+        #     self.dur = self.dt
+        # elif behavior == 'electrical points, 10x':
+        #     self.s_v = [self.num2//2, self.num2//2+self.numx-1]
+        #     self.v_scale *= 100
+        #     self.dur = self.dt
+
 
     def rhs(self, y, t, stims_fast, stims_slow):
         # Right-hand side equations
@@ -92,7 +117,7 @@ class Shell:
             dipdt[self.s_ip] += self.cell.i_plcb(self.cell.stim_slow(t, stims_slow)) - self.cell.i_plcb(self.cell.v8)
 
         if self.s_v:
-            dvdt[self.s_v] += 1 / self.cell.c_m * 0.01 * self.cell.stim_fast(t, stims_fast)
+            dvdt[self.s_v] += 1 / self.cell.c_m * self.v_scale * self.cell.stim_fast(t, stims_fast, self.dur)
 
         deriv = np.array([dcdt, dsdt, drdt, dipdt, dvdt, dmdt, dhdt, dbxdt, dcxdt, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt])
 
@@ -128,7 +153,7 @@ class Shell:
 
         # Begin counting time
         sol = euler_odeint(self.rhs, y0, self.T, self.dt, 
-                                    save_interval=200, 
+                                    save_interval=1, 
                                     stims_fast=stims_fast, 
                                     stims_slow=stims_slow)
 
