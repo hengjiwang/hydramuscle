@@ -168,7 +168,7 @@ class FastCell(CellBase):
 
 if __name__ == '__main__':
     model = FastCell(20, 0.0002)
-    sol = model.run([1,3,5,7,9,11,13,15,17,19])
+    sol = model.run([1]) # [1,3,5,7,9,11,13,15,17,19])
     c = sol[:, 0]
     v = sol[:, 1]
     m = sol[:, 2]

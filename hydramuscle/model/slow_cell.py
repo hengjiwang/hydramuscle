@@ -125,7 +125,7 @@ class SlowCell(CellBase):
 
 if __name__ == "__main__":
     model = SlowCell(100)
-    sol = model.run()
+    sol = model.run(stims=[10])
     c = sol[:,0]
     s = sol[:,1]
     r = sol[:,2]

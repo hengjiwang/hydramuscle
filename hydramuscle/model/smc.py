@@ -14,6 +14,8 @@ class SMC(ProtoSMC):
     def __init__(self, T = 20, dt = 0.001, k2 = 0.05, s0 = 200, d = 40e-4, v7 = 0.03):
         super().__init__(T, dt, k2, s0, d, v7)
         self.fluo_buffer = FluoBuffer
+        # self.v7 = 0.04
+        # self.k5 = 0.05
 
     def calc_fluo_terms(self, c, g, c1g, c2g, c3g, c4g):
         ir1 = self.fluo_buffer.r_1(c, g, c1g)
@@ -31,18 +33,11 @@ class SMC(ProtoSMC):
         # Right-hand side formulation
         c, s, r, ip, v, m, h, bx, cx, g, c1g, c2g, c3g, c4g = y
 
-        # if 20<t<80:
-        #     self.e_bk = -52
-        # else:
-        #     self.e_bk = -53
-
-        self.e_bk = np.sin(np.pi*t/200) - 53
-
         i_ipr, i_leak, i_serca, i_in, i_pmca, v_r, i_plcd, i_deg = self.calc_slow_terms(c, s, r, ip)
         _, i_cal, i_cat, i_kca, i_bk, dmdt, dhdt, dbxdt, dcxdt = self.calc_fast_terms(c, v, m, h, bx, cx)
         ir1, ir2, ir3, ir4, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt = self.calc_fluo_terms(c, g, c1g, c2g, c3g, c4g)
 
-        dcdt = i_ipr + i_leak - i_serca + i_in - i_pmca - self.alpha * (i_cal + i_cat) - ir1 - ir2 - ir3 - ir4
+        dcdt = i_ipr + i_leak - i_serca + i_in - i_pmca - self.alpha * (i_cal + i_cat) # - ir1 - ir2 - ir3 - ir4
         dsdt = self.beta * (i_serca - i_ipr - i_leak)
         drdt = v_r
         dipdt = self.i_plcb(self.stim_slow(t, stims_slow)) + i_plcd - i_deg
@@ -64,13 +59,19 @@ class SMC(ProtoSMC):
         return sol
 
 if __name__ == '__main__':
-    model = SMC(T=200, dt = 0.0002, k2 = 0.01, v7=0.02)
-    sol = model.run([-100], [-100]) #stims_fast = [1,3,5,7,9,12,15,18,22,26,31,36,42], stims_slow = [100])
+    model = SMC(T=200, dt = 0.0004, k2 = 0.01, v7=0.02)
+    sol = model.run(stims_fast = [-100], stims_slow = [10])
     c = sol[:,0]
     s = sol[:,1]
     r = sol[:,2]
     ip = sol[:,3]
     v = sol[:,4]
+    g = sol[:,-5]
+    c1g = sol[:,-4]
+    c2g = sol[:,-3]
+    c3g = sol[:,-2]
+    c4g = sol[:,-1]
+    fluo = FluoBuffer.f_total(g, c1g, c2g, c3g, c4g)
 
     # Plot the results
     plt.figure()
@@ -84,7 +85,9 @@ if __name__ == '__main__':
     model.plot(ip, ylabel = 'IP3[uM]')
     plt.subplot(235)
     model.plot(v, ylabel = 'v[mV]')
+    plt.subplot(236)
+    model.plot(fluo, ylabel = 'Fluorescence')
     plt.show()
 
-    df = pd.DataFrame(c)
-    df.to_csv('../save/data/calcium/c_sin_ibk.csv', index = False)
+    # df = pd.DataFrame(c)
+    # df.to_csv('../save/data/calcium/c_sin_ibk.csv', index = False)
