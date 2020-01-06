@@ -8,6 +8,7 @@ import pandas as pd
 from hydramuscle.model.proto_smc import ProtoSMC
 from hydramuscle.model.fluo_buffer import FluoBuffer
 from hydramuscle.model.euler_odeint import euler_odeint
+from hydramuscle.model.force_encoder import ForceEncoder
 
 class SMC(ProtoSMC):
     """Smooth muscle cell with buffers"""
@@ -37,11 +38,11 @@ class SMC(ProtoSMC):
         _, i_cal, i_cat, i_kca, i_bk, dmdt, dhdt, dbxdt, dcxdt = self.calc_fast_terms(c, v, m, h, bx, cx)
         ir1, ir2, ir3, ir4, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt = self.calc_fluo_terms(c, g, c1g, c2g, c3g, c4g)
 
-        dcdt = i_ipr + i_leak - i_serca + i_in - i_pmca - self.alpha * (i_cal + i_cat) # - ir1 - ir2 - ir3 - ir4
+        dcdt = i_ipr + i_leak - i_serca + i_in - i_pmca - self.alpha * (i_cal + i_cat) - ir1 - ir2 - ir3 - ir4
         dsdt = self.beta * (i_serca - i_ipr - i_leak)
         drdt = v_r
         dipdt = self.i_plcb(self.stim_slow(t, stims_slow)) + i_plcd - i_deg
-        dvdt = - 1 / self.c_m * (i_cal + i_cat + i_kca + i_bk - 0.001 * self.stim_fast(t, stims_fast))
+        dvdt = - 1 / self.c_m * (i_cal + i_cat + i_kca + i_bk - 0.001 * self.stim_fast(t, stims_fast, dur=50))
 
         return np.array([dcdt, dsdt, drdt, dipdt, dvdt, dmdt, dhdt, dbxdt, dcxdt, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt])
 
@@ -59,8 +60,8 @@ class SMC(ProtoSMC):
         return sol
 
 if __name__ == '__main__':
-    model = SMC(T=200, dt = 0.0004, k2 = 0.01, v7=0.02)
-    sol = model.run(stims_fast = [-100], stims_slow = [10])
+    model = SMC(T=100, dt = 0.0002, k2 = 0.08, s0=100, v7=0.)
+    sol = model.run(stims_fast = [10], stims_slow = [-100])
     c = sol[:,0]
     s = sol[:,1]
     r = sol[:,2]
@@ -72,21 +73,24 @@ if __name__ == '__main__':
     c3g = sol[:,-2]
     c4g = sol[:,-1]
     fluo = FluoBuffer.f_total(g, c1g, c2g, c3g, c4g)
+    force = ForceEncoder.encode(c, model.dt)
 
     # Plot the results
     plt.figure()
-    plt.subplot(231)
+    plt.subplot(241)
     model.plot(c, ylabel = 'c[uM]')
-    plt.subplot(232)
+    plt.subplot(242)
     model.plot(s, ylabel = 'c_ER[uM]')
-    plt.subplot(233)
+    plt.subplot(243)
     model.plot(r, ylabel = 'Inactivation ratio of IP3R')
-    plt.subplot(234)
+    plt.subplot(244)
     model.plot(ip, ylabel = 'IP3[uM]')
-    plt.subplot(235)
+    plt.subplot(245)
     model.plot(v, ylabel = 'v[mV]')
-    plt.subplot(236)
+    plt.subplot(246)
     model.plot(fluo, ylabel = 'Fluorescence')
+    plt.subplot(247)
+    model.plot(force, ylabel = 'Active Force')
     plt.show()
 
     # df = pd.DataFrame(c)
