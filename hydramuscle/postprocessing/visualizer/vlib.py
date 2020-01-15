@@ -48,7 +48,7 @@ def save_pattern(x, filename, save = True, show = True, size = (20, 20)):
 def save_curve(x, filename, show = True, save = True):
     # Save the data as curve figure
     fig = plt.figure()
-    x = x.values
+    if type(x) != np.ndarray:    x = x.values
     plt.plot(x)
     plt.xlabel('t [ms]')
     # plt.ylabel('Fluorescence [A.U.]')
@@ -94,7 +94,7 @@ def plot_frames(data, nx, ny, ts, dt, vmin, vmax):
         t = ts[j]
         plt.subplot(nrow, ncol, j+1)
         frame = data[int(t/dt)]
-        plt.imshow(frame, vmin=vmin, vmax=vmax)
+        plt.imshow(frame, cmap='hot', vmin=vmin, vmax=vmax)
         plt.colorbar()
         plt.title('t=' + str(t) + 's')
 

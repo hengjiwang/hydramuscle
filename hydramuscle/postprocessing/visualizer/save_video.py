@@ -6,9 +6,8 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 from vlib import save_pattern, save_curve, plot_frame, plot_frames
 
-def save_frames(source, target, nx, ny):
+def save_frames(c, target, nx, ny):
 
-    c = pd.read_csv(source).values
     nx = nx
     ny = ny
 
@@ -79,6 +78,9 @@ if __name__ == '__main__':
     nx = df.NumX.values[0]
     ny = df.NumY.values[0]
     fps = df.TargetFPS.values[0]
+
+    c = pd.read_csv(source).values
+
     if frames_saved == 'False':
-        save_frames(source, target, nx, ny)
+        save_frames(c, target, nx, ny)
     save_video(target, fps)

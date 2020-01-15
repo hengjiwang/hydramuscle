@@ -1,20 +1,30 @@
+import sys, os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import cv2, tqdm, sys, os, time, multiprocessing
 import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
-from vlib import save_pattern, save_curve, plot_frame, plot_frames
+from hydramuscle.postprocessing.visualizer.vlib import save_pattern, save_curve, plot_frame, plot_frames
 from multiprocessing import Pool
+import multiprocessing
 
-def save_frame(j, c, X, Y, Z):
+def save_frame(j, c, X, Y, Z, filename):
 
-    fig = plt.figure(figsize=(10, 10))
+    # print(os.getpid())
+
+    fig = plt.figure(figsize=(5, 5))
+    fig.subplots_adjust(bottom=0, 
+                        top=1, 
+                        left=0, 
+                        right=1)
 
     color = c[j]
 
     norm = matplotlib.colors.Normalize(vmin=0, vmax=0.8)
-    m = plt.cm.ScalarMappable(norm=norm, cmap='jet')
+    m = plt.cm.ScalarMappable(norm=norm, cmap='hot')
     m.set_array([])
 
     fcolors = m.to_rgba(color)
@@ -31,15 +41,17 @@ def save_frame(j, c, X, Y, Z):
     ax.view_init(180, 100)
 
     print('saving img' + str(j) + '...')
-    plt.savefig('./save/animations/'+target+'/frames/img' + str(j) + '.jpg', orientation='landscape')
+    plt.savefig('/media/hengji/DATA/Data/Documents/hydramuscle/results/animations/'+filename+'/frames/img' + str(j) + '.jpg', 
+                orientation='landscape')
+                #bbox_inches='tight')
 
     print('saved ' + str(j))
 
     plt.close(fig)
 
-def save_frames(source, target, nx, ny):
+def save_frames(c, filename, nx, ny):
 
-    c = pd.read_csv(source).values
+    # c = pd.read_csv(source).values
     nx = nx
     ny = ny
     c = np.reshape(c, (-1, nx, ny))
@@ -53,24 +65,33 @@ def save_frames(source, target, nx, ny):
     X, Y = np.meshgrid(x, y) 
     X, Z = np.meshgrid(x, z) 
 
+    print("The number of CPU is:" + str(multiprocessing.cpu_count()))
     print('saving frames...')
-    pool = Pool(processes=10)
-    for j in range(len(c)):
-        pool.apply_async(save_frame, args=(j,c,X,Y,Z))
-    pool.close()
-    pool.join()
+    for j in range(0, len(c)-10, 10):
+        # pool.apply_async(save_frame, args=(j,c,X,Y,Z))
+
+        process_list = []
+
+        for k in range(10):
+            process_list.append(multiprocessing.Process(target = save_frame, args=(j+k,c,X,Y,Z,filename)))
+
+        for k in range(10):
+            process_list[k].start()
+
+        for k in range(10):
+            process_list[k].join()
         
 
-def save_video(target, fps):
+def save_video(filename, fps):
     
-    file_to_save = './save/animations/' + target + '/movie/movie.avi'
-    frames_loc = './save/animations/'   + target + '/frames/'
+    file_to_save = '/media/hengji/DATA/Data/Documents/hydramuscle/results/animations/'+filename+'/movie/movie.avi'
+    frames_loc = '/media/hengji/DATA/Data/Documents/hydramuscle/results/animations/'+filename+'/frames/'
     
     frames = os.listdir(frames_loc)
     total_num = len(frames)
 
     fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-    videoWriter = cv2.VideoWriter(file_to_save, fourcc, fps, (1000, 1000))
+    videoWriter = cv2.VideoWriter(file_to_save, fourcc, fps, (360, 360))
 
     for i in tqdm.tqdm(range(total_num)):
         frame = cv2.imread(frames_loc+'img'+str(i+1)+'.jpg')
@@ -88,10 +109,14 @@ if __name__ == '__main__':
     ny = df.NumY.values[0]
     fps = df.TargetFPS.values[0]
 
+    print("Reading data...")
+    c = pd.read_csv(source).values
+    print("Data read.")
+
     if not os.path.exists('./save/animations/'+target+'/frames/'):
         os.makedirs('./save/animations/'+target+'/frames/')
         os.makedirs('./save/animations/'+target+'/movie/')
 
     if frames_saved == 'False':
-        save_frames(source, target, nx, ny)
+        save_frames(c, target, nx, ny)
     save_video(target, fps)

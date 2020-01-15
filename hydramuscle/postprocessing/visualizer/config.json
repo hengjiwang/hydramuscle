@@ -1,6 +1,6 @@
 [{
-    "SourceFile": "../../save/data/calcium/c_200x200_200s_bend_one_direction_v7_0015.csv",
-    "TargetFile": "200x200_200s_bend_one_direction_v7_0015",
+    "SourceFile": "/media/hengji/DATA/Data/Documents/hydramuscle/results/data/calcium/c_200x200_100s_ele_random_no_conductance.csv",
+    "TargetFile": "c_200x200_100s_ele_random_no_conductance",
     "NumX": 200,
     "NumY": 200,
     "FramesSaved": "False",

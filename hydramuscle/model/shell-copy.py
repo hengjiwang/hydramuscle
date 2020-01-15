@@ -16,18 +16,17 @@ from hydramuscle.model.euler_odeint import euler_odeint
 
 class Shell:
 
-    def __init__(self, cell, behavior, numx=200, numy=200, save_interval=50):
+    def __init__(self, cell, behavior, numx=200, numy=200):
         self.cell = cell
         self.T = cell.T
         self.dt = cell.dt
-        self.gcx = 200 # 1000
-        self.gcy = 200 # 1000
+        self.gcx = 1000
+        self.gcy = 1000
         self.gip3x = 2
         self.gip3y = 2
         self.numx = numx
         self.numy = numy
         self.num2 = self.numx*self.numy
-        self.save_interval = save_interval
         self.behavior = behavior
 
         self.v_scale = 0.01
@@ -60,10 +59,10 @@ class Shell:
     def init_stimulation_pattern(self, behavior):
         if behavior == 'contraction burst':
             self.s_v = [self.numy*i for i in range(self.numx)]
-            # self.s_v += random.sample([j for j in range(self.num2)], 2000)
         elif behavior == 'elongation':
-            self.s_ip = [j for j in range(self.num2)]
-            self.s_ip = random.sample(self.s_ip, 4000)
+            self.v_scale = 0.005
+            self.dur = 50
+            self.s_v = random.sample([j for j in range(self.num2)], 2000)
         elif behavior == 'bending':
             self.s_ip = [(int(self.numx/2)-j)*self.numy for j in range(-20, 20)]
 
@@ -135,7 +134,7 @@ class Shell:
 
         # Begin counting time
         sol = euler_odeint(self.rhs, y0, self.T, self.dt, 
-                                    save_interval=self.save_interval, 
+                                    save_interval=50, 
                                     stims_fast=stims_fast, 
                                     stims_slow=stims_slow)
 
@@ -143,7 +142,7 @@ class Shell:
 
 if __name__ == "__main__":
     model = Shell(SMC(T=100, dt=0.0002, k2=0.1, s0=400, d=40e-4, v7=0.01), 
-    'contraction burst', numx=200, numy=200)
-    sol = model.run([1,3,5,7,9,12,15,18,22,26,31,36,42])
+    'elongation', numx=200, numy=200)
+    sol = model.run([10])
     df = pd.DataFrame(sol[:,0:model.numx*model.numy])
-    df.to_csv('../../results/data/calcium/c_200x200_100s_ele_bottom_200_conductance.csv', index = False)
+    df.to_csv('../../results/data/calcium/c_200x200_100s_test_elongation.csv', index = False)
