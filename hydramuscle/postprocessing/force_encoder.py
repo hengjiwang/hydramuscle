@@ -65,5 +65,5 @@ if __name__ == "__main__":
     force = ForceEncoder.encode(calcium, 0.0002)
 
     plt.figure()
-    plt.plot(np.linspace(0, 200, int(200/0.0002)+1), force)
+    plt.plot(np.linspace(0, 200, int(200/0.0002)), force)
     plt.show()

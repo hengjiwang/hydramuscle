@@ -8,7 +8,7 @@ class CellBase(metaclass=ABCMeta):
     def __init__(self, T, dt):
         self.T = T
         self.dt = dt
-        self.time = np.linspace(0, T, int(T/dt)+1)
+        self.time = np.linspace(0, T-dt, int(T/dt))
         self.c0=0.05
 
     @abstractmethod

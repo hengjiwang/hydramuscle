@@ -45,14 +45,15 @@ def save_pattern(x, filename, save = True, show = True, size = (20, 20)):
     cb.set_label("Fluorescence [A.U.]")
     if show:    plt.show()
 
-def save_curve(x, filename, show = True, save = True):
+def save_curve(x, dt, xlabel, ylabel, title, filename, show = True, save = True):
     # Save the data as curve figure
     fig = plt.figure()
     if type(x) != np.ndarray:    x = x.values
-    plt.plot(x)
-    plt.xlabel('t [ms]')
-    # plt.ylabel('Fluorescence [A.U.]')
-    # plt.title('Fluorescence of Cell 10')
+    t = np.arange(0, len(x)*dt, dt)
+    plt.plot(t, x, color='k')
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.title(title)
     if save:    fig.savefig(filename)
     if show:    plt.show()
 
@@ -109,4 +110,4 @@ if __name__ == '__main__':
     x = pd.read_csv('../save/data/c_20x20_100s.csv')
     # save_pattern(x, '../save/figures/chain_fluo_pattern.png')
     # save_anim(x, 1, '../save/animations/grid_fluo_movie.mp4')
-    plot_frames(x.values, [11, 20, 30], 0.1, 1.0)
+    # plot_frames(x.values, [11, 20, 30], 0.1, 1.0)

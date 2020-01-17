@@ -12,8 +12,12 @@ from hydramuscle.model.euler_odeint import euler_odeint
 class ForceEncoder2D(ForceEncoder):
 
     @classmethod
-    def _rhs(cls, y, c, num2):
-        k1 = c**cls.nm / (c**cls.nm + cls.c_half**cls.nm)
+    def _rhs(cls, y, t, c, num2):
+
+        j = int(t/cls.dt)
+        # print(j)
+
+        k1 = c[j]**cls.nm / (c[j]**cls.nm + cls.c_half**cls.nm)
         cls.k6 = k1
 
         m, mp, amp, am = y[0:num2], y[num2:2*num2], y[2*num2:3*num2], y[3*num2:4*num2]
@@ -41,7 +45,13 @@ class ForceEncoder2D(ForceEncoder):
         y0 = np.array([x*base_mat for x in inits])
         y0 = np.reshape(y0, 4*num2) 
         
-        sol = euler_odeint(cls._rhs, y0, cls.T, cls.dt, num2=num2)
+        sol = euler_odeint(rhs=cls._rhs, 
+                           y=y0, 
+                           T=cls.T, 
+                           dt=cls.dt,
+                           save_interval=1,
+                           c=c, 
+                           num2=num2)
 
 
         return cls.K * (sol[:,2*num2:3*num2] + sol[:,3*num2:4*num2])
