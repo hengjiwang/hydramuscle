@@ -2,9 +2,10 @@ import sys, os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 import time, random
+import multiprocessing
 
 import numpy as np
-import pandas as pd
+import modin.pandas as pd
 import scipy
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
@@ -20,8 +21,8 @@ class Shell:
         self.cell = cell
         self.T = cell.T
         self.dt = cell.dt
-        self.gcx = 200 # 1000
-        self.gcy = 200 # 1000
+        self.gcx = 20 # 1000
+        self.gcy = 20 # 1000
         self.gip3x = 2
         self.gip3y = 2
         self.numx = numx
@@ -82,10 +83,36 @@ class Shell:
         y[9*num2:10*num2], y[10*num2:11*num2], y[11*num2:12*num2], y[12*num2:13*num2],
         y[13*num2:14*num2])
 
-        # Calculate terms
-        i_ipr, i_leak, i_serca, i_in, i_pmca, v_r, i_plcd, i_deg = self.cell.calc_slow_terms(c, s, r, ip)
-        _, i_cal, i_cat, i_kca, i_bk, dmdt, dhdt, dbxdt, dcxdt = self.cell.calc_fast_terms(c, v, m, h, bx, cx)
-        ir1, ir2, ir3, ir4, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt = self.cell.calc_fluo_terms(c, g, c1g, c2g, c3g, c4g)
+        # # Calculate terms
+        # i_ipr, i_leak, i_serca, i_in, i_pmca, v_r, i_plcd, i_deg = self.cell.calc_slow_terms(c, s, r, ip)
+        # _, i_cal, i_cat, i_kca, i_bk, dmdt, dhdt, dbxdt, dcxdt = self.cell.calc_fast_terms(c, v, m, h, bx, cx)
+        # ir1, ir2, ir3, ir4, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt = self.cell.calc_fluo_terms(c, g, c1g, c2g, c3g, c4g)
+
+        #######################################################
+        manager = multiprocessing.Manager()
+
+        res = manager.list(range(26))
+        # self.cell.calc_slow_terms(c, s, r, ip, res1)
+        p1 = multiprocessing.Process(target = self.cell.calc_slow_terms, args=(c, s, r, ip, res))
+        # self.cell.calc_fast_terms(c, v, m, h, bx, cx, res2)
+        p2 = multiprocessing.Process(target = self.cell.calc_fast_terms, args=(c, v, m, h, bx, cx, res))
+        # self.cell.calc_fluo_terms(c, g, c1g, c2g, c3g, c4g, res3)
+        p3 = multiprocessing.Process(target = self.cell.calc_fluo_terms, args=(c, g, c1g, c2g, c3g, c4g, res))
+
+        p1.start()
+        p2.start()
+        p3.start()
+
+        p1.join()
+        p2.join()
+        p3.join()
+
+
+        (i_ipr, i_leak, i_serca, i_in, i_pmca, v_r, i_plcd, i_deg,
+        _, i_cal, i_cat, i_kca, i_bk, dmdt, dhdt, dbxdt, dcxdt,
+        ir1, ir2, ir3, ir4, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt) = res
+
+        #######################################################
 
         # Update dynamical variables
         dcdt = i_ipr + i_leak - i_serca + i_in - i_pmca - self.cell.alpha * (i_cal + i_cat) - ir1 - ir2 - ir3 - ir4
@@ -146,4 +173,4 @@ if __name__ == "__main__":
     'contraction burst', numx=200, numy=200)
     sol = model.run([1,3,5,7,9,12,15,18,22,26,31,36,42])
     df = pd.DataFrame(sol[:,0:model.numx*model.numy])
-    df.to_csv('../../results/data/calcium/c_200x200_100s_ele_bottom_200_conductance.csv', index = False)
+    df.to_csv('../../results/data/calcium/c_200x200_100s_ele_bottom_20_conductance.csv', index = False)
