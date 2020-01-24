@@ -86,25 +86,15 @@ class SlowCell(CellBase):
         return 1 if condition else self.v8 
 
     '''Numerical calculation'''
-    def calc_slow_terms(self, c, s, r, ip, res=None):
-        if res is None:
-            return (self.i_ipr(c, s, ip, r), 
-                    self.i_leak(c, s), 
-                    self.i_serca(c), 
-                    self.i_in(ip), 
-                    self.i_pmca(c), 
-                    self.v_r(c, r),
-                    self.i_plcd(c),
-                    self.i_deg(ip))
-        else:
-            res[0:8] = [self.i_ipr(c, s, ip, r), 
-                        self.i_leak(c, s), 
-                        self.i_serca(c), 
-                        self.i_in(ip), 
-                        self.i_pmca(c), 
-                        self.v_r(c, r),
-                        self.i_plcd(c),
-                        self.i_deg(ip)]
+    def calc_slow_terms(self, c, s, r, ip):
+        return (self.i_ipr(c, s, ip, r), 
+                self.i_leak(c, s), 
+                self.i_serca(c), 
+                self.i_in(ip), 
+                self.i_pmca(c), 
+                self.v_r(c, r),
+                self.i_plcd(c),
+                self.i_deg(ip))
 
 
     def rhs(self, y, t, stims_slow):

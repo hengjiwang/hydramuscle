@@ -121,27 +121,16 @@ class FastCell(CellBase):
        	return int(condition)
 
     ### Numerical terms
-    def calc_fast_terms(self, c, v, m, h, bx, cx, res=None):
-        if res is None:
-            return (self.r_ex(c), 
-                    self.i_cal(v, m, h), 
-                    self.i_cat(v, bx, cx),
-                    self.i_kca(v, c),
-                    self.i_bk(v),
-                    (self.m_inf(v) - m)/self.tau_m(v),
-                    (self.h_inf(v) - h)/self.tau_h(v),
-                    (self.bx_inf(v) - bx)/self.tau_bx(v),
-                    (self.cx_inf(v) - cx)/self.tau_cx(v))
-        else:
-            res[8:17] = [self.r_ex(c), 
-                        self.i_cal(v, m, h), 
-                        self.i_cat(v, bx, cx),
-                        self.i_kca(v, c),
-                        self.i_bk(v),
-                        (self.m_inf(v) - m)/self.tau_m(v),
-                        (self.h_inf(v) - h)/self.tau_h(v),
-                        (self.bx_inf(v) - bx)/self.tau_bx(v),
-                        (self.cx_inf(v) - cx)/self.tau_cx(v)]
+    def calc_fast_terms(self, c, v, m, h, bx, cx):
+        return (self.r_ex(c), 
+                self.i_cal(v, m, h), 
+                self.i_cat(v, bx, cx),
+                self.i_kca(v, c),
+                self.i_bk(v),
+                (self.m_inf(v) - m)/self.tau_m(v),
+                (self.h_inf(v) - h)/self.tau_h(v),
+                (self.bx_inf(v) - bx)/self.tau_bx(v),
+                (self.cx_inf(v) - cx)/self.tau_cx(v))
 
     def rhs(self, y, t, stims_fast):
         "Right-hand side equations"

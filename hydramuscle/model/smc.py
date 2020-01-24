@@ -18,7 +18,7 @@ class SMC(ProtoSMC):
         # self.v7 = 0.04
         # self.k5 = 0.05
 
-    def calc_fluo_terms(self, c, g, c1g, c2g, c3g, c4g, res):
+    def calc_fluo_terms(self, c, g, c1g, c2g, c3g, c4g):
         ir1 = self.fluo_buffer.r_1(c, g, c1g)
         ir2 = self.fluo_buffer.r_2(c, c1g, c2g)
         ir3 = self.fluo_buffer.r_3(c, c2g, c3g)
@@ -28,10 +28,7 @@ class SMC(ProtoSMC):
         dc2gdt = ir2 - ir3
         dc3gdt = ir3 - ir4
         dc4gdt = ir4
-        if res is None:
-            return ir1, ir2, ir3, ir4, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt
-        else:
-            res[17:26] = [ir1, ir2, ir3, ir4, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt]
+        return ir1, ir2, ir3, ir4, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt
 
     def rhs(self, y, t, stims_fast, stims_slow):
         # Right-hand side formulation

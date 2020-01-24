@@ -5,7 +5,7 @@ import time, random
 import multiprocessing
 
 import numpy as np
-import pandas as pd
+import modin.pandas as pd
 import scipy
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
@@ -21,8 +21,8 @@ class Shell:
         self.cell = cell
         self.T = cell.T
         self.dt = cell.dt
-        self.gcx = 20 # 1000
-        self.gcy = 20 # 1000
+        self.gcx = 5 # 1000
+        self.gcy = 5 # 1000
         self.gip3x = 2
         self.gip3y = 2
         self.numx = numx
@@ -61,7 +61,7 @@ class Shell:
     def init_stimulation_pattern(self, behavior):
         if behavior == 'contraction burst':
             self.s_v = [self.numy*i for i in range(self.numx)]
-            self.s_v += random.sample([j for j in range(self.num2)], 2000)
+            # self.s_v += random.sample([j for j in range(self.num2)], 2000)
         elif behavior == 'elongation':
             self.s_ip = [j for j in range(self.num2)]
             self.s_ip = random.sample(self.s_ip, 4000)
@@ -144,7 +144,7 @@ class Shell:
 
 if __name__ == "__main__":
     model = Shell(SMC(T=100, dt=0.0002, k2=0.1, s0=400, d=40e-4, v7=0.01), 
-    'contraction burst', numx=200, numy=200)
-    sol = model.run([1,3,5,7,9,12,15,18,22,26,31,36,42])
+    'elongation', numx=200, numy=200)
+    sol = model.run([-100], [10])
     df = pd.DataFrame(sol[:,0:model.numx*model.numy])
-    df.to_csv('../../results/data/calcium/c_200x200_100s_ele_random_20_conductance.csv', index = False)
+    df.to_csv('../../results/data/calcium/200x200_100s_elongation_single_stim.csv', index = False)

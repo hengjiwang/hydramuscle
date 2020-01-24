@@ -5,7 +5,7 @@ import time, random
 import multiprocessing
 
 import numpy as np
-import pandas as pd
+import modin.pandas as pd
 import scipy
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
@@ -21,8 +21,8 @@ class Shell:
         self.cell = cell
         self.T = cell.T
         self.dt = cell.dt
-        self.gcx = 20 # 1000
-        self.gcy = 20 # 1000
+        self.gcx = 5 # 1000
+        self.gcy = 5 # 1000
         self.gip3x = 2
         self.gip3y = 2
         self.numx = numx
@@ -147,4 +147,4 @@ if __name__ == "__main__":
     'contraction burst', numx=200, numy=200)
     sol = model.run([1,3,5,7,9,12,15,18,22,26,31,36,42])
     df = pd.DataFrame(sol[:,0:model.numx*model.numy])
-    df.to_csv('../../results/data/calcium/c_200x200_100s_ele_random_20_conductance.csv', index = False)
+    df.to_csv('../../results/data/calcium/c_200x200_100s_ele_random_5_conductance.csv', index = False)
