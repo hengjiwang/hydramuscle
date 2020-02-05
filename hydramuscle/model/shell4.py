@@ -5,7 +5,7 @@ import time, random
 import multiprocessing
 
 import numpy as np
-import modin.pandas as pd
+import pandas as pd
 import scipy
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
@@ -17,12 +17,12 @@ from hydramuscle.model.euler_odeint import euler_odeint
 
 class Shell:
 
-    def __init__(self, cell, behavior, numx=200, numy=200, save_interval=50):
+    def __init__(self, cell, behavior=None, numx=200, numy=200, save_interval=50):
         self.cell = cell
         self.T = cell.T
         self.dt = cell.dt
-        self.gcx = 5 # 1000
-        self.gcy = 5 # 1000
+        self.gcx = 1000
+        self.gcy = 1000
         self.gip3x = 2
         self.gip3y = 2
         self.numx = numx
@@ -58,6 +58,15 @@ class Shell:
         self.Lc = self.gcx * scipy.sparse.kron(Dx, Iy) + self.gcy * scipy.sparse.kron(Ix, Dy)
         self.Lip3 = self.gip3x * scipy.sparse.kron(Dx, Iy) + self.gip3y * scipy.sparse.kron(Ix, Dy)
 
+    def generate_indices(self, xmin, xmax, ymin, ymax):
+        res = []
+
+        for i in range(ymin, ymax):
+            for j in range(xmin, xmax):
+                res.append(i*self.numx+j)
+
+        return res
+
     def init_stimulation_pattern(self, behavior):
         if behavior == 'contraction burst':
             self.s_v = [self.numy*i for i in range(self.numx)]
@@ -66,7 +75,9 @@ class Shell:
             self.s_ip = [j for j in range(self.num2)]
             self.s_ip = random.sample(self.s_ip, 4000)
         elif behavior == 'bending':
-            self.s_ip = [(int(self.numx/2)-j)*self.numy for j in range(-20, 20)]
+            self.s_ip = self.generate_indices(0, 10, 80, 120)
+        else:
+            return
 
 
     def rhs(self, y, t, stims_fast, stims_slow):
@@ -143,8 +154,8 @@ class Shell:
         return sol
 
 if __name__ == "__main__":
-    model = Shell(SMC(T=100, dt=0.0002, k2=0.1, s0=400, d=40e-4, v7=0.01), 
-    'elongation', numx=200, numy=200)
+    model = Shell(SMC(T=100, dt=0.0002, k2=0.2, s0=600, d=40e-4, v7=0.005), 
+    'bending', numx=200, numy=200)
     sol = model.run([-100], [10])
     df = pd.DataFrame(sol[:,0:model.numx*model.numy])
-    df.to_csv('../../results/data/calcium/200x200_100s_elongation_single_stim.csv', index = False)
+    df.to_csv('../../results/data/calcium/200x200_100s_bending3.csv', index = False)

@@ -1,0 +1,10 @@
+import os, time
+print("Sleeping...")
+time.sleep(7200)
+print("Running task1...")
+os.system("python ./shell4.py")
+print("Sleeping...")
+time.sleep(1000)
+print("Running task2...")
+os.system("python ./shell.py")
+print("Completed.")

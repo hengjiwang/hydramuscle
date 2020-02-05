@@ -17,25 +17,30 @@ from hydramuscle.model.euler_odeint import euler_odeint
 
 class Shell:
 
-    def __init__(self, cell, behavior, numx=200, numy=200, save_interval=50):
+    def __init__(self, cell, pathway, stim_coordinates, numx=200, numy=200, save_interval=50):
         self.cell = cell
         self.T = cell.T
         self.dt = cell.dt
-        self.gcx = 10 # 1000
-        self.gcy = 10 # 1000
+        self.gcx = 1000
+        self.gcy = 1000
         self.gip3x = 2
         self.gip3y = 2
         self.numx = numx
         self.numy = numy
         self.num2 = self.numx*self.numy
         self.save_interval = save_interval
-        self.behavior = behavior
 
         self.v_scale = 0.01
         self.dur = 0.01
 
         self.init_connectivity_matrices()
-        self.init_stimulation_pattern(behavior)
+        if pathway:
+            self.init_stimulation_pattern(pathway, 
+                                        stim_coordinates[0], 
+                                        stim_coordinates[1], 
+                                        stim_coordinates[2], 
+                                        stim_coordinates[3], 
+                                        0)
 
 
     def init_connectivity_matrices(self):
@@ -58,15 +63,28 @@ class Shell:
         self.Lc = self.gcx * scipy.sparse.kron(Dx, Iy) + self.gcy * scipy.sparse.kron(Ix, Dy)
         self.Lip3 = self.gip3x * scipy.sparse.kron(Dx, Iy) + self.gip3y * scipy.sparse.kron(Ix, Dy)
 
-    def init_stimulation_pattern(self, behavior):
-        if behavior == 'contraction burst':
-            self.s_v = [self.numy*i for i in range(self.numx)]
-            self.s_v += random.sample([j for j in range(self.num2)], 2000)
-        elif behavior == 'elongation':
-            self.s_ip = [j for j in range(self.num2)]
-            self.s_ip = random.sample(self.s_ip, 4000)
-        elif behavior == 'bending':
-            self.s_ip = [(int(self.numx/2)-j)*self.numy for j in range(-20, 20)]
+    def generate_indices(self, xmin, xmax, ymin, ymax):
+        res = []
+
+        for i in range(ymin, ymax):
+            for j in range(xmin, xmax):
+                res.append(i*self.numx+j)
+
+        return res
+
+    def init_stimulation_pattern(self, pathway, xmin, xmax, ymin, ymax, randomnum=0):
+
+        if pathway == "fast":
+            self.s_v = self.generate_indices(xmin, xmax, ymin, ymax)
+            self.s_v += random.sample([j for j in range(self.num2)], randomnum)
+        elif pathway == "slow":
+            self.s_ip = self.generate_indices(xmin, xmax, ymin, ymax)
+            self.s_ip += random.sample([j for j in range(self.num2)], randomnum)
+        elif pathway == None:
+            return
+        else:
+            print("Pathway wrong.")
+            sys.exit(1)
 
 
     def rhs(self, y, t, stims_fast, stims_slow):
@@ -143,8 +161,11 @@ class Shell:
         return sol
 
 if __name__ == "__main__":
-    model = Shell(SMC(T=100, dt=0.0002, k2=0.1, s0=400, d=40e-4, v7=0.01), 
-    'contraction burst', numx=200, numy=200)
-    sol = model.run([1,3,5,7,9,12,15,18,22,26,31,36,42])
+    model = Shell(cell=SMC(T=100, dt=0.0002, k2=0.2, s0=600, d=40e-4, v7=0.005), 
+                  pathway='fast', 
+                  stim_coordinates=[0, 1, 0, 200], 
+                  numx=200, 
+                  numy=200)
+    sol = model.run([10], [-100])
     df = pd.DataFrame(sol[:,0:model.numx*model.numy])
-    df.to_csv('../../results/data/calcium/c_200x200_100s_ele_random_10_conductance.csv', index = False)
+    df.to_csv('../../results/data/calcium/200x200_100s_contract_test.csv', index = False)
