@@ -1,0 +1,10 @@
+import os, time
+print("Sleeping...")
+# time.sleep(3600)
+print("Running task1...")
+os.system("python ./shell_double_layers3.py")
+print("Sleeping...")
+time.sleep(3600)
+print("Running task2...")
+os.system("python ./shell_double_layers4.py")
+print("Completed.")

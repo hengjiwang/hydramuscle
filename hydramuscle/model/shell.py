@@ -17,14 +17,14 @@ from hydramuscle.model.euler_odeint import euler_odeint
 
 class Shell:
 
-    def __init__(self, cell, pathway, stim_coordinates, numx=200, numy=200, save_interval=50):
+    def __init__(self, cell, pathway, stim_coordinates, numx=200, numy=200, gip3x=2, gip3y=2, save_interval=50):
         self.cell = cell
         self.T = cell.T
         self.dt = cell.dt
         self.gcx = 1000
         self.gcy = 1000
-        self.gip3x = 2
-        self.gip3y = 2
+        self.gip3x = gip3x
+        self.gip3y = gip3y
         self.numx = numx
         self.numy = numy
         self.num2 = self.numx*self.numy
