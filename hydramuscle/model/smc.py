@@ -60,7 +60,7 @@ class SMC(ProtoSMC):
         return sol
 
 if __name__ == '__main__':
-    model = SMC(T=100, dt = 0.0002, k2 = 0.08, s0=100, v7=0.)
+    model = SMC(T=100, dt = 0.0002, k2 = 0.08, s0=100, v7=0.01)
     sol = model.run(stims_fast = [10], stims_slow = [-100])
     c = sol[:,0]
     s = sol[:,1]

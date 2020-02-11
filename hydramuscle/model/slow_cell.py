@@ -75,7 +75,7 @@ class SlowCell(CellBase):
         return self.k9 * ip
 
     '''Stimulation'''
-    def stim_slow(self, t, stims):
+    def stim_slow(self, t, stims, active_v8=1):
         # Stimulation
 
         condition = False
@@ -83,7 +83,7 @@ class SlowCell(CellBase):
         for stim_t in stims:
             condition = condition or stim_t <= t < stim_t + 4
 
-        return 1 if condition else self.v8 
+        return active_v8 if condition else self.v8 
 
     '''Numerical calculation'''
     def calc_slow_terms(self, c, s, r, ip):
