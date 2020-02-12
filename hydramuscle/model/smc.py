@@ -12,9 +12,11 @@ from hydramuscle.model.force_encoder import ForceEncoder
 
 class SMC(ProtoSMC):
     """Smooth muscle cell with buffers"""
-    def __init__(self, T = 20, dt = 0.001, k2 = 0.05, s0 = 200, d = 40e-4, v7 = 0.03):
-        super().__init__(T, dt, k2, s0, d, v7)
+    def __init__(self, T = 20, dt = 0.001, k2 = 0.05, s0 = 200, d = 40e-4, v7 = 0.03, active_v8=1, fluo_ratio=0):
+        super().__init__(T, dt, k2, s0, d, v7, active_v8)
         self.fluo_buffer = FluoBuffer
+        self.fluo_ratio = fluo_ratio
+
         # self.v7 = 0.04
         # self.k5 = 0.05
 
@@ -38,11 +40,11 @@ class SMC(ProtoSMC):
         _, i_cal, i_cat, i_kca, i_bk, dmdt, dhdt, dbxdt, dcxdt = self.calc_fast_terms(c, v, m, h, bx, cx)
         ir1, ir2, ir3, ir4, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt = self.calc_fluo_terms(c, g, c1g, c2g, c3g, c4g)
 
-        dcdt = i_ipr + i_leak - i_serca + i_in - i_pmca - self.alpha * (i_cal + i_cat) - ir1 - ir2 - ir3 - ir4
+        dcdt = i_ipr + i_leak - i_serca + i_in - i_pmca - self.alpha * (i_cal + i_cat) + self.fluo_ratio * (- ir1 - ir2 - ir3 - ir4)
         dsdt = self.beta * (i_serca - i_ipr - i_leak)
         drdt = v_r
-        dipdt = self.i_plcb(self.stim_slow(t, stims_slow)) + i_plcd - i_deg
-        dvdt = - 1 / self.c_m * (i_cal + i_cat + i_kca + i_bk - 0.001 * self.stim_fast(t, stims_fast, dur=50))
+        dipdt = self.i_plcb(self.stim_slow(t, stims_slow, self.active_v8)) + i_plcd - i_deg
+        dvdt = - 1 / self.c_m * (i_cal + i_cat + i_kca + i_bk - 0.001 * self.stim_fast(t, stims_fast, dur=0.01))
 
         return np.array([dcdt, dsdt, drdt, dipdt, dvdt, dmdt, dhdt, dbxdt, dcxdt, dgdt, dc1gdt, dc2gdt, dc3gdt, dc4gdt])
 
@@ -60,8 +62,8 @@ class SMC(ProtoSMC):
         return sol
 
 if __name__ == '__main__':
-    model = SMC(T=100, dt = 0.0002, k2 = 0.08, s0=100, v7=0.01)
-    sol = model.run(stims_fast = [10], stims_slow = [-100])
+    model = SMC(T=100, dt = 0.0002, k2 = 0.08, s0=60, v7=0., fluo_ratio=1)
+    sol = model.run(stims_fast = [1,4,7,10,13,17,21,26,31,37,45], stims_slow = [-100])
     c = sol[:,0]
     s = sol[:,1]
     r = sol[:,2]

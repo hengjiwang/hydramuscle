@@ -110,7 +110,7 @@ class Shell:
 
         # Add stimulation
         if self.s_ip:
-            dipdt[self.s_ip] += self.cell.i_plcb(self.cell.stim_slow(t, stims_slow, 5)) - self.cell.i_plcb(self.cell.v8)
+            dipdt[self.s_ip] += self.cell.i_plcb(self.cell.stim_slow(t, stims_slow, self.cell.active_v8)) - self.cell.i_plcb(self.cell.v8)
 
         if self.s_v:
             dvdt[self.s_v] += 1 / self.cell.c_m * self.v_scale * self.cell.stim_fast(t, stims_fast, self.dur)
@@ -121,7 +121,7 @@ class Shell:
 
         return dydt
 
-    def run(self, stims_fast = [1,4,9,13,17,21,25,30,35,40,46,53,61,70], stims_slow = [60]):
+    def run(self, stims_fast = [1,5,9,13,17,21,25,30,35,40,46,53,61,70], stims_slow = [60]):
         # Time stepping
         
         self.cell.init_fast_cell()
@@ -159,7 +159,7 @@ class Shell:
         return sol
 
 if __name__ == "__main__":
-    model = Shell(SMC(T=100, dt=0.0002, k2=0.1, s0=200, d=40e-4, v7=0.02), numx=50, numy=50)
+    model = Shell(SMC(T=100, dt=0.0002, k2=0.1, s0=200, d=40e-4, v7=0.02, active_v8=5), numx=50, numy=50)
     sol = model.run()
     df = pd.DataFrame(sol[:,0:model.numx*model.numy])
     df.to_csv('/media/hengji/DATA/Data/Documents/hydramuscle/results/data/calcium/50x50_100s_cycle_k2_01_s0_200_v7_002_activev8_5.csv', index = False)
