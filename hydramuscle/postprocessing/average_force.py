@@ -23,7 +23,7 @@ def compress_frame(frame, size_x, size_y, to_size_x, to_size_y):
     return np.reshape(new_mat, (to_size_x*to_size_y))
 
 if __name__ == "__main__":
-    force = load_data('/media/hengji/DATA/Data/Documents/hydramuscle/results/data/force/200x200_200s_bending.csv')
+    force = load_data('/media/hengji/DATA/Data/Documents/hydramuscle/results/data/force/200x200_100s_cycle.csv')
     new_force = np.zeros((len(force), 400))
 
     for j in range(len(force)):
@@ -31,4 +31,4 @@ if __name__ == "__main__":
         new_force[j,:] = compress_frame(frame, 200, 200, 20, 20)
 
     df = pd.DataFrame(new_force)
-    df.to_csv('/media/hengji/DATA/Data/Documents/hydramuscle/results/data/force/200x200_200s_bending_averaged.csv', index = False)
+    df.to_csv('/media/hengji/DATA/Data/Documents/hydramuscle/results/data/force/200x200_100s_cycle_averaged.csv', index = False)

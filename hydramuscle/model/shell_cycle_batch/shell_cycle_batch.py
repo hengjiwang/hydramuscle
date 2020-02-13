@@ -121,7 +121,7 @@ class Shell:
 
         return dydt
 
-    def run(self, stims_fast = [-100], stims_slow = [50]):
+    def run(self, stims_fast = [1,7,10,13,16,19,22,25,29,34,40,50], stims_slow = [30]):
         # Time stepping
         
         self.cell.init_fast_cell()
@@ -165,7 +165,8 @@ if __name__ == "__main__":
                       s0=int(sys.argv[2]), 
                       d=float(sys.argv[3]), 
                       v7=float(sys.argv[4]), 
-                      active_v8=int(sys.argv[5])), 
+                      active_v8=int(sys.argv[5]),
+                      fluo_ratio=1), 
                   numx=int(sys.argv[6]), 
                   numy=int(sys.argv[7]), 
                   save_interval=50)

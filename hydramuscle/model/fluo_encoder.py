@@ -85,7 +85,9 @@ class FluoEncoder:
     # right-hand side 
     def rhs(self, y, t):      
 
-        if t < self.T: c = self.c[int(t/self.dt)]
+        if t < self.T: 
+            c = self.c[int(t/self.dt)]
+            # print(t, self.dt)
         else: c = self.c[0]
 
         g, c1g, c2g, c3g, c4g = y

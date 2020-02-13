@@ -66,9 +66,9 @@ class SlowCell(CellBase):
         # Agonist-controlled PLC-beta activity [uM/s]
         return v8 * 1 / ((1 + self.kg)*(self.kg/(1+self.kg) + self.a0)) * self.a0
 
-    def i_plcd(self, c):
+    def i_plcd(self, c, ip):
         # PLC-delta activity [uM/s]
-        return self.v7 * c**2 / (self.kca**2 + c**2)
+        return self.v7 * c**2 / (self.kca**2 + c**2) * ip**4 / (0.05**4 + ip**4)
 
     def i_deg(self, ip):
         # IP3 degradion [uM/s]
@@ -93,7 +93,7 @@ class SlowCell(CellBase):
                 self.i_in(ip), 
                 self.i_pmca(c), 
                 self.v_r(c, r),
-                self.i_plcd(c),
+                self.i_plcd(c, ip),
                 self.i_deg(ip))
 
 
@@ -111,7 +111,7 @@ class SlowCell(CellBase):
 
     def init_slow_cell(self):
         # Reassign some parameters to make the resting state stationary
-        self.v8 = (self.i_deg(self.ip0) - self.i_plcd(self.c0)) / (1 / ((1 + self.kg)*(self.kg/(1+self.kg) + self.a0)) * self.a0)
+        self.v8 = (self.i_deg(self.ip0) - self.i_plcd(self.c0, self.ip0)) / (1 / ((1 + self.kg)*(self.kg/(1+self.kg) + self.a0)) * self.a0)
         self.in_ip0 = self.v41 * self.ip0**2 / (self.kr**2 + self.ip0**2)
         self.ipmca0 = self.i_pmca(self.c0)
 

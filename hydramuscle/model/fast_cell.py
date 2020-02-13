@@ -139,7 +139,7 @@ class FastCell(CellBase):
         r_ex, i_cal, i_cat, i_kca, i_bk, dmdt, dhdt, dbxdt, dcxdt = self.calc_fast_terms(c, v, m, h, bx, cx)
 
         dcdt = -r_ex + self.alpha*(-i_cal + self.ical0 - i_cat + self.icat0)
-        dvdt = - 1 / self.c_m * (i_cal + i_cat + i_kca + i_bk - 0.002 * self.stim_fast(t, stims_fast, dur=5))
+        dvdt = - 1 / self.c_m * (i_cal + i_cat + i_kca + i_bk - 0.002 * self.stim_fast(t, stims_fast, dur=0.01))
 
         return np.array([dcdt, dvdt, dmdt, dhdt, dbxdt, dcxdt])
 
@@ -167,7 +167,7 @@ class FastCell(CellBase):
         return sol
 
 if __name__ == '__main__':
-    model = FastCell(20, 0.0002)
+    model = FastCell(2, 0.0002)
     sol = model.run([1])
     c = sol[:, 0]
     v = sol[:, 1]
@@ -191,7 +191,7 @@ if __name__ == '__main__':
     plt.subplot(426)
     model.plot(model.i_kca(v, c), ylabel = 'i_kca[mA/cm^2]')
     plt.subplot(427)
-    model.plot([0.002 * model.stim_fast(t, [1], dur=5) for t in model.time], ylabel='i_stim[mA/cm^2]', color = 'r')
+    model.plot([0.002 * model.stim_fast(t, [1], dur=0.01) for t in model.time], ylabel='i_stim[mA/cm^2]', color = 'r')
     plt.show()
     
 
