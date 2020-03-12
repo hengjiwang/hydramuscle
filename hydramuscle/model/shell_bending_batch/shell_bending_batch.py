@@ -23,7 +23,7 @@ class Shell:
         self.dt = cell.dt
         self.gcx = 1000
         self.gcy = 1000
-        self.gip3x = 10
+        self.gip3x = 5
         self.gip3y = 40
         self.numx = numx
         self.numy = numy
@@ -159,7 +159,7 @@ class Shell:
         return sol
 
 if __name__ == "__main__":
-    model = Shell(SMC(T=100, 
+    model = Shell(SMC(T=200, 
                       dt=0.0002, 
                       k2=float(sys.argv[1]), 
                       s0=int(sys.argv[2]), 
@@ -168,7 +168,7 @@ if __name__ == "__main__":
                       active_v8=int(sys.argv[5])), 
                   numx=int(sys.argv[6]), 
                   numy=int(sys.argv[7]), 
-                  save_interval=50)
+                  save_interval=100)
 
     sol = model.run()
     df = pd.DataFrame(sol[:,0:model.numx*model.numy])

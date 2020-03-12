@@ -10,9 +10,9 @@ from hydramuscle.model.euler_odeint import euler_odeint
 
 class ProtoSMC(SlowCell, FastCell):
 
-    def __init__(self, T = 20, dt = 0.001, k2 = 0.05, s0 = 60, d = 20e-4, v7 = 0.04, active_v8=1):
+    def __init__(self, T = 20, dt = 0.001, k2 = 0.05, s0 = 60, d = 20e-4, v7 = 0.04, active_v8=1, gkca=10e-9):
         SlowCell.__init__(self, T, dt)
-        FastCell.__init__(self, T, dt)
+        FastCell.__init__(self, T, dt, gkca)
 
         self.k2 = k2
         self.s0 = s0

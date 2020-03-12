@@ -12,8 +12,8 @@ from hydramuscle.model.force_encoder import ForceEncoder
 
 class SMC(ProtoSMC):
     """Smooth muscle cell with buffers"""
-    def __init__(self, T = 20, dt = 0.001, k2 = 0.05, s0 = 200, d = 40e-4, v7 = 0.03, active_v8=1, fluo_ratio=1, k9=0.08):
-        super().__init__(T, dt, k2, s0, d, v7, active_v8)
+    def __init__(self, T = 20, dt = 0.001, k2 = 0.05, s0 = 200, d = 40e-4, v7 = 0.03, active_v8=1, fluo_ratio=1, k9=0.08, gkca=10e-9):
+        super().__init__(T, dt, k2, s0, d, v7, active_v8, gkca)
         self.fluo_buffer = FluoBuffer
         self.fluo_ratio = fluo_ratio
 
@@ -66,8 +66,9 @@ class SMC(ProtoSMC):
         return sol
 
 if __name__ == '__main__':
-    model = SMC(T=100, dt = 0.0002, k2 = 0.02, s0=200, d=10e-4, v7=0., active_v8=0.05, fluo_ratio=1, k9=0.01)
-    sol = model.run(stims_fast = [1,4,7,10,13,17,21,26,31,37,45,55], stims_slow = [30])
+    model = SMC(T=100, dt = 0.0002, k2 = 0.05, s0=200, d=10e-4, v7=0., active_v8=0.05, fluo_ratio=1, k9=0.01, gkca=0) # Endo
+    # model = SMC(T=100, dt = 0.0002, k2 = 0.01, s0=60, d=10e-4, v7=0.02, fluo_ratio=0) # Ecto
+    sol = model.run(stims_fast = [1,7,10,13,16,19,22,25,29,34,40,50], stims_slow = [35])
     c = sol[:,0]
     s = sol[:,1]
     r = sol[:,2]

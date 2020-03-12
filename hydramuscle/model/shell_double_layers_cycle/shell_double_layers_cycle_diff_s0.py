@@ -23,7 +23,8 @@ class DoubleLayerShell:
         self.ectoderm = Shell(SMC(T=200, dt=0.0002, k2=0.05, s0=60, d=10e-4, v7=0.02), 
                               None, None, numx=numx, numy=numy, 
                               gip3x=10, gip3y=40, save_interval=None)
-        self.endoderm = Shell(SMC(T=200, dt=0.0002, k2=0.05, s0=400, d=10e-4, v7=0.01), 
+        self.endoderm = Shell(SMC(T=200, dt=0.0002, k2=0.05, s0=200, d=10e-4, v7=0., 
+                                  active_v8=0.05, k9=0.01, gkca=0), 
                               None, None, numx=numx, numy=numy, 
                               gip3x=10, gip3y=10, save_interval=None)
 
@@ -109,7 +110,7 @@ class DoubleLayerShell:
 
         return dydt
 
-    def run(self, stims_fast_ecto=[1,7,10,13,16,19,22,25,29,34,40,50], stims_slow_ecto=[30], stims_fast_endo=[], stims_slow_endo=[55]):
+    def run(self, stims_fast_ecto=[1,7,10,13,16,19,22,25,29,34,40,50], stims_slow_ecto=[30], stims_fast_endo=[], stims_slow_endo=[35]):
 
         self.ectoderm.cell.init_fast_cell()
         self.ectoderm.cell.init_slow_cell()
@@ -168,6 +169,6 @@ if __name__ == "__main__":
     sol = model.run()
     df1 = pd.DataFrame(sol[:,0:model.num2])
     df2 = pd.DataFrame(sol[:,model.num2:2*model.num2])
-    df1.to_csv('/media/hengji/DATA/Data/Documents/hydramuscle/results/data/calcium/200x200_200s_cycle_diff_s0.csv', index = False)
+    df1.to_csv('/media/hengji/DATA/Data/Documents/hydramuscle/results/data/calcium/200x200_200s_cycle_diff_s0_gkca_ecto.csv', index = False)
     time.sleep(600)
-    df2.to_csv('/media/hengji/DATA/Data/Documents/hydramuscle/results/data/calcium/200x200_200s_cycle_diff_s0.csv', index = False)
+    df2.to_csv('/media/hengji/DATA/Data/Documents/hydramuscle/results/data/calcium/200x200_200s_cycle_diff_s0_gkca_endo.csv', index = False)

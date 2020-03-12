@@ -11,7 +11,7 @@ from hydramuscle.model.euler_odeint import euler_odeint
 
 class FastCell(CellBase):
 
-    def __init__(self, T = 20, dt = 0.001):
+    def __init__(self, T = 20, dt = 0.001, gkca=10e-9):
 
         super().__init__(T,dt)
 
@@ -43,7 +43,8 @@ class FastCell(CellBase):
         self.e_cat = 51
 
         # BK parameters
-        self.g_kca = 10e-9 / self.A_cyt # 45.7e-9 / self.A_cyt
+        self.gkca = gkca
+        self.g_kca = self.gkca / self.A_cyt # 10e-9 / self.A_cyt # 45.7e-9 / self.A_cyt
         self.e_k = -75 
 
         # Background parameters
@@ -98,7 +99,7 @@ class FastCell(CellBase):
         if isinstance(c, float) and c<=0:
             raise ValueError('[Ca2+] should be larger than 0')
         return self.g_kca * 1 / (1 + np.exp(v/(-17) - 2 * np.log(c))) * (v - self.e_k)
-        # return 5 * self.g_kca * c**2 / (c**2 + 5**2) * (v - self.e_k)
+        # return self.g_kca * c**2 / (c**2 + 0.8**2) * (v - self.e_k)
 
 
     def i_bk(self, v):
@@ -167,8 +168,8 @@ class FastCell(CellBase):
         return sol
 
 if __name__ == '__main__':
-    model = FastCell(2, 0.0002)
-    sol = model.run([1])
+    model = FastCell(20, 0.0002)
+    sol = model.run([1,3,5,7,9,11,13,15])
     c = sol[:, 0]
     v = sol[:, 1]
     m = sol[:, 2]
@@ -191,7 +192,7 @@ if __name__ == '__main__':
     plt.subplot(426)
     model.plot(model.i_kca(v, c), ylabel = 'i_kca[mA/cm^2]')
     plt.subplot(427)
-    model.plot([0.002 * model.stim_fast(t, [1], dur=0.01) for t in model.time], ylabel='i_stim[mA/cm^2]', color = 'r')
+    model.plot([0.002 * model.stim_fast(t, [1,3,5,7,9,11,13,15], dur=0.01) for t in model.time], ylabel='i_stim[mA/cm^2]', color = 'r')
     plt.show()
     
 

@@ -17,7 +17,7 @@ from hydramuscle.model.euler_odeint import euler_odeint
 
 class Shell:
 
-    def __init__(self, cell, pathway, stim_coordinates, numx=200, numy=200, gip3x=2, gip3y=2, save_interval=50):
+    def __init__(self, cell, pathway, stim_coordinates, numx=200, numy=200, gip3x=2, gip3y=2, save_interval=50, v_scale=0.01):
         self.cell = cell
         self.T = cell.T
         self.dt = cell.dt
@@ -30,7 +30,7 @@ class Shell:
         self.num2 = self.numx*self.numy
         self.save_interval = save_interval
 
-        self.v_scale = 0.01
+        self.v_scale = v_scale
         self.dur = 0.01
 
         self.init_connectivity_matrices()
