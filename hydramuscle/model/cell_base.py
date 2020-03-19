@@ -18,10 +18,3 @@ class CellBase(metaclass=ABCMeta):
     @abstractmethod
     def run(self):
         raise NotImplementedError
-
-    def plot(self, a, tmin=0, tmax=None, xlabel = 'time[s]', ylabel = None, color = 'b'):
-        # Plot the time evolution of a
-        tmax = self.T
-        plt.plot(self.time[int(tmin/self.dt):int(tmax/self.dt)], a[int(tmin/self.dt):int(tmax/self.dt)], color)
-        if xlabel:  plt.xlabel(xlabel)
-        if ylabel:  plt.ylabel(ylabel)
