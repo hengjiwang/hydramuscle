@@ -43,7 +43,7 @@ def plot_single_spike(model, sol, tmin1, tmax1, tmin2, tmax2, full_cell=False, f
     ax3.plot(model.time[index_min:index_max]*1000, model.i_ca(v, m, h)[index_min:index_max], linewidth=5, color="r", label=r"I$_{Ca}$")
     ax3.plot(model.time[index_min:index_max]*1000, model.i_k(v, n)[index_min:index_max], linewidth=5, color="b", label=r"I$_{K}$")
     ax3.plot(model.time[index_min:index_max]*1000, model.i_bk(v)[index_min:index_max], linewidth=5, color="purple", linestyle="--", label=r"I$_{L}$")
-    ax3.legend(fontsize=fontsize)
+    ax3.legend(fontsize=fontsize, loc='upper right')
     ax3.tick_params(labelsize=fontsize)
     ax3.set_xlabel("time(ms)", fontsize=fontsize)
     ax3.set_ylabel(r"Membrane current(mA/cm$^2$)", fontsize=fontsize)
@@ -93,12 +93,12 @@ def plot_slow_transient(model, sol, tmin, tmax, full_cell=False, fontsize=30, te
         v = sol[:,4]
         m = sol[:,5]
         h = sol[:,6]
-        ax2.plot(model.time[index_min:index_max], -model.alpha*model.i_ca(v, m, h)[index_min:index_max] + model.i_in(ip)[index_min:index_max], linewidth=5, color="purple", label=r"-$\alpha$I$_{Ca}$+J$_{in}$")
+        ax2.plot(model.time[index_min:index_max], -model._alpha*model.i_ca(v, m, h)[index_min:index_max] + model.i_in(ip)[index_min:index_max], linewidth=5, color="purple", label=r"-$\alpha$I$_{Ca}$+J$_{in}$")
     ax2.tick_params(labelsize=fontsize)
     ax2.set_xlabel("time(s)", fontsize=fontsize)
     ax2.set_ylabel(r"Ca$^{2+}$ Fluxes ($\mu$M/s)", fontsize=fontsize)
     ax2.text(-0.01, 1.05, 'B', size=textsize, weight="bold", transform=ax2.transAxes)
-    ax2.legend(fontsize=fontsize)
+    ax2.legend(fontsize=fontsize, loc='upper right')
 
     # ax3 = plt.subplot2grid((1,3), (0,1), colspan=1)
     # ax3.plot(model.time[index_min:index_max], ip[index_min:index_max], linewidth=5, color="k", linestyle="--")
@@ -127,7 +127,6 @@ def plot_multiple_spikes(model, sol, force_ecto, force_endo, tmin1, tmax1, tmin2
     fluo = (fluo - min(fluo))/(max(fluo) - min(fluo))
 
     plt.figure(figsize=(30,10), tight_layout=True)
-
 
     # Plot [Ca2+] and fluoresence in one subplot
     ax1 = plt.subplot2grid((1,3), (0,1), colspan=1)
@@ -158,7 +157,7 @@ def plot_multiple_spikes(model, sol, force_ecto, force_endo, tmin1, tmax1, tmin2
     ax3 = plt.subplot2grid((1,3), (0,2), colspan=1)
     ax3.plot(model.time[index_min:index_max], force_ecto[index_min:index_max], linewidth=5, color="g", label=r"Ectoderm")
     ax3.plot(model.time[index_min:index_max], force_endo[index_min:index_max], linewidth=5, color="r", label=r"Endoderm")
-    ax3.legend(fontsize=fontsize)
+    ax3.legend(fontsize=fontsize, loc='upper right')
     ax3.tick_params(labelsize=fontsize)
     ax3.set_xlabel("time(s)", fontsize=fontsize)
     ax3.set_ylabel("Active force(a.u.)", fontsize=fontsize)

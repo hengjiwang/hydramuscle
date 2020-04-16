@@ -2,8 +2,6 @@ import sys,os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
 
 from hydramuscle.model.fast_cell import FastCell
 from hydramuscle.model.slow_cell import SlowCell
@@ -11,59 +9,56 @@ from hydramuscle.model.force_encoder_ecto import ForceEncoderEcto
 from hydramuscle.model.force_encoder_endo import ForceEncoderEndo
 from hydramuscle.model.euler_odeint import euler_odeint
 from hydramuscle.model import plot
+from hydramuscle.model import helper
 
 class SMC(SlowCell, FastCell):
 
-    def __init__(self, T = 20, dt = 0.001, k_ipr = 0.05, s0 = 60, d = 20e-4, v_delta = 0.04, active_v_beta=1):
-        SlowCell.__init__(self, T, dt)
-        FastCell.__init__(self, T, dt)
+    def __init__(self, **kwargs):
+        SlowCell.__init__(self, kwargs['T'], kwargs['dt'])
+        FastCell.__init__(self, kwargs['T'], kwargs['dt'])
 
-        self.k_ipr = k_ipr
-        self.s0 = s0
-        self.d = d
-        self.v_delta = v_delta
-        self.alpha = 1e9 / (2 * self.F * self.d)
-        self.active_v_beta = active_v_beta
+        for attr in kwargs:
+            helper.set_attr(self, attr, kwargs[attr])
+
+        self._alpha = 1e9 / (2 * self._F * self._d)
+        self._active_v_beta = 1
 
 
     def i_in(self, ip):
-        return self.alpha * (self.ica0) + self.ipmca0 + self.v_inr * ip**2 / (self.kr**2 + ip**2) - self.in_ip0
+        return self._alpha * (self._ica0) + self._ipmca0 + self._v_inr * ip**2 / (self._kr**2 + ip**2) - self._in_ip0
 
-
-    def rhs(self, y, t, stims_fast, stims_slow):
-        # Right-hand side formulation
+    def _rhs(self, y, t, stims_fast, stims_slow):
+        "Right-hand side formulation"
         c, s, r, ip, v, m, h, n = y
 
-        i_ipr, i_leak, i_serca, i_in, i_pmca, v_r, i_plcd, i_deg = self.calc_slow_terms(c, s, r, ip)
-        _, i_ca, i_k, i_bk, dmdt, dhdt, dndt = self.calc_fast_terms(c, v, m, h, n)
+        i_ipr, i_leak, i_serca, i_in, i_pmca, v_r, i_plcd, i_deg = self._calc_slow_terms(c, s, r, ip)
+        _, i_ca, i_k, i_bk, dmdt, dhdt, dndt = self._calc_fast_terms(c, v, m, h, n)
 
-        dcdt = i_ipr + i_leak - i_serca + i_in - i_pmca - self.alpha * i_ca
-        dsdt = self.beta * (i_serca - i_ipr - i_leak)
+        dcdt = i_ipr + i_leak - i_serca + i_in - i_pmca - self._alpha * i_ca
+        dsdt = self._beta * (i_serca - i_ipr - i_leak)
         drdt = v_r
-        dipdt = self.i_plcb(self.stim_slow(t, stims_slow, self.active_v_beta)) + i_plcd - i_deg
+        dipdt = self.i_plcb(self._stim_slow(t, stims_slow, self._active_v_beta)) + i_plcd - i_deg
 
-        dvdt = - 1 / self.c_m * (i_ca + i_k + i_bk - 0.001 * self.stim_fast(t, stims_fast, dur=0.01))
+        dvdt = - 1 / self._c_m * (i_ca + i_k + i_bk - 0.001 * self._stim_fast(t, stims_fast, dur=0.01))
 
         return np.array([dcdt, dsdt, drdt, dipdt, dvdt, dmdt, dhdt, dndt])
 
 
     def run(self, stims_fast, stims_slow, T=None, dt=None):
-        # Run the model
-        self.init_fast_cell()
-        self.init_slow_cell()
+        "Run the model"
+        self._init_fast_cell()
+        self._init_slow_cell()
 
-        y0 = [self.c0, self.s0, self.r0, self.ip0, self.v0, self.m0, self.h0, self.n0]
-
-        # y = y0
-        # T = self.T
-        # dt = self.dt]
+        y0 = [self._c0, self._s0, self._r0, self._ip0, self._v0, self._m0, self._h0, self._n0]
         
-        if not T:   T = self.T
-        if not dt:  dt = self.dt
+        if not T:
+            T = self.T
+        if not dt:
+            dt = self.dt
 
-        sol = euler_odeint(self.rhs, y0, T, dt, stims_fast=stims_fast, stims_slow=stims_slow)
+        sol_ = euler_odeint(self._rhs, y0, T, dt, stims_fast=stims_fast, stims_slow=stims_slow)
 
-        return sol
+        return sol_
 
 if __name__ == '__main__':
     model = SMC(T=200, dt=0.0002, k_ipr=0.02, s0=100, d=20e-4, v_delta=0.03)
