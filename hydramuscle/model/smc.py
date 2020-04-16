@@ -3,9 +3,12 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 
 from hydramuscle.model.fast_cell import FastCell
 from hydramuscle.model.slow_cell import SlowCell
+from hydramuscle.model.force_encoder_ecto import ForceEncoderEcto
+from hydramuscle.model.force_encoder_endo import ForceEncoderEndo
 from hydramuscle.model.euler_odeint import euler_odeint
 from hydramuscle.model import plot
 
@@ -39,12 +42,12 @@ class SMC(SlowCell, FastCell):
         drdt = v_r
         dipdt = self.i_plcb(self.stim_slow(t, stims_slow, self.active_v_beta)) + i_plcd - i_deg
 
-        dvdt = - 1 / self.c_m * (i_ca + i_k + i_bk - 0.001 * self.stim_fast(t, stims_fast))
+        dvdt = - 1 / self.c_m * (i_ca + i_k + i_bk - 0.001 * self.stim_fast(t, stims_fast, dur=0.01))
 
         return np.array([dcdt, dsdt, drdt, dipdt, dvdt, dmdt, dhdt, dndt])
 
 
-    def run(self, stims_fast, stims_slow):
+    def run(self, stims_fast, stims_slow, T=None, dt=None):
         # Run the model
         self.init_fast_cell()
         self.init_slow_cell()
@@ -53,14 +56,17 @@ class SMC(SlowCell, FastCell):
 
         # y = y0
         # T = self.T
-        # dt = self.dt
+        # dt = self.dt]
+        
+        if not T:   T = self.T
+        if not dt:  dt = self.dt
 
-        sol = euler_odeint(self.rhs, y0, self.T, self.dt, stims_fast=stims_fast, stims_slow=stims_slow)
+        sol = euler_odeint(self.rhs, y0, T, dt, stims_fast=stims_fast, stims_slow=stims_slow)
 
         return sol
 
 if __name__ == '__main__':
-    model = SMC(T=100, dt=0.0002, k_ipr=0.02, s0=100, d=20e-4, v_delta=0.03)
+    model = SMC(T=200, dt=0.0002, k_ipr=0.02, s0=100, d=20e-4, v_delta=0.03)
 
     ### One Fast Spike ###
     # sol = model.run(stims_fast = [0], stims_slow = [-100])
@@ -72,5 +78,11 @@ if __name__ == '__main__':
     # plot.plot_slow_transient(model, sol, 0, 100, full_cell=True)
 
     ### Multiple Fast Spikes ###
-    sol = model.run(stims_fast = list(range(0, 50, 3)), stims_slow = [-100])
-    plot.plot_single_spike(model, sol, 0, 60, 0, 60, full_cell=True)
+    sol = model.run(stims_fast=[0, 5.2, 8.2, 10.6, 12.8, 15, 17.3, 19.4, 21.9, 25.1, 29.5, 34.3,
+                                100, 105.7, 108.8, 111.6, 113.8, 116.1, 118.3, 121, 124.2, 129, 135.4], 
+                    stims_slow=[-100])
+    force_ecto = ForceEncoderEcto.encode(sol[:, 0], model.dt);
+    force_endo = ForceEncoderEndo.encode(sol[:, 0], model.dt);
+    plot.plot_multiple_spikes(model, sol, force_ecto, force_endo, 0, 100, 0, 500)
+    # df_ecto = pd.DataFrame(force_ecto)
+    # df_endo = pd.DataFrame(force_endo)

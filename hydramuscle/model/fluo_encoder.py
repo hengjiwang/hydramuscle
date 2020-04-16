@@ -16,20 +16,20 @@ class FluoEncoder:
         '''
         self.r_inc = 200
         self.tau_ex = 1.0
-        self.k1p = 2.5
+        self.k1p = 20 # 2.5
         self.k1n = 0.1
         self.k2p = 16.9
         self.k2n = 205
-        self.k3p = 1.1
+        self.k3p = 30 # 1.1
         self.k3n = 11.8
         self.k4p = 1069
-        self.k4n = 5.8
+        self.k4n = 2 # 3 # 5.8
         self.c = c
-        self.g0 = 3.28088468
-        self.c1g0 = 4.10110585
-        self.c2g0 = 0.01690456
-        self.c3g0 = 7.87924326e-05
-        self.c4g0 = 0.00072611
+        self.g0 = 0.6614852922934815 # 3.28088468
+        self.c1g0 = 6.614852922934705 # 4.10110585
+        self.c2g0 = 0.027266101072584505 # 0.01690456
+        self.c3g0 = 0.0034660297973623183 # 7.87924326e-05
+        self.c4g0 = 0.09262964633450728 # 0.00072611
         self.phi0 = 1
         self.phi1 = 1
         self.phi2 = 1
@@ -114,7 +114,7 @@ class FluoEncoder:
         c4g = sol[:, 4]
         f_total = self.f_total(g, c1g, c2g, c3g, c4g)
 
-        print(g, c1g, c2g, c3g, c4g)
+        # print(g[-1], c1g[-1], c2g[-1], c3g[-1], c4g[-1])
 
         return f_total
 
