@@ -126,7 +126,7 @@ class Shell:
 
         return dydt
 
-    def run(self, stims_fast = [101,103,105,107,109,112,115,118,122,126,131,136,142,148], stims_slow = [-100]):
+    def run(self, stims_fast=[101, 103, 105, 107, 109, 112, 115, 118, 122, 126, 131, 136, 142, 148], stims_slow=[-100]):
         # Time stepping
         
         self.cell.init_fast_cell()

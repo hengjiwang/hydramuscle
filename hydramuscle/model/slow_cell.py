@@ -27,14 +27,14 @@ class SlowCell(CellBase):
         self._kg = 0.1 # unknown
         self._a0 = 1 # 1e-3 - 10
         self._v_delta = 0.04 # 0 - 0.05
-        self._v_beta = None
+        self.v_beta = None
         self._kca = 0.3
         self._k_deg = 0.08
         self._beta = 20
 
-        self._s0 = 60
-        self._r0 = 0.9411764705882353
-        self._ip0 = 0.01
+        self.s0 = 60
+        self.r0 = 0.9411764705882353
+        self.ip0 = 0.01
 
         self._in_ip0 = None
         self._ipmca0 = None
@@ -49,7 +49,7 @@ class SlowCell(CellBase):
         return self._k_serca * c
 
     def i_leak(self, c, s):
-        k_leak = (self.i_serca(self._c0) - self.i_ipr(self._c0, self._s0, self._ip0, self._r0)) / (self._s0 - self._c0)
+        k_leak = (self.i_serca(self.c0) - self.i_ipr(self.c0, self.s0, self.ip0, self.r0)) / (self.s0 - self.c0)
         return k_leak * (s - c)
 
     def i_pmca(self, c):
@@ -58,7 +58,7 @@ class SlowCell(CellBase):
 
     def i_in(self, ip):
         "Calcium entry rate [uM/s]"
-        return self.i_pmca(self._c0) + self._v_inr * ip**2 / (self._kr**2 + ip**2) - self._v_inr * self._ip0**2 / (self._kr**2 + self._ip0**2)
+        return self.i_pmca(self.c0) + self._v_inr * ip**2 / (self._kr**2 + ip**2) - self._v_inr * self.ip0**2 / (self._kr**2 + self.ip0**2)
 
     # IP3R terms
     def v_r(self, c, r):
@@ -87,10 +87,10 @@ class SlowCell(CellBase):
         for stim_t in stims:
             condition = condition or stim_t <= t < stim_t + 4
 
-        return active_v_beta if condition else self._v_beta
+        return active_v_beta if condition else self.v_beta
 
     # Numerical calculation
-    def _calc_slow_terms(self, c, s, r, ip):
+    def calc_slow_terms(self, c, s, r, ip):
         return (self.i_ipr(c, s, ip, r), 
                 self.i_leak(c, s), 
                 self.i_serca(c), 
@@ -104,7 +104,7 @@ class SlowCell(CellBase):
     def _rhs(self, y, t, stims_slow):
         "Right-hand side equations"
         c, s, r, ip = y
-        i_ipr, i_leak, i_serca, i_in, i_pmca, v_r, i_plcd, i_deg = self._calc_slow_terms(c, s, r, ip)
+        i_ipr, i_leak, i_serca, i_in, i_pmca, v_r, i_plcd, i_deg = self.calc_slow_terms(c, s, r, ip)
 
         dcdt = i_ipr + i_leak - i_serca + i_in - i_pmca
         dsdt = self._beta*(i_serca - i_ipr -i_leak)
@@ -115,19 +115,19 @@ class SlowCell(CellBase):
 
     def _init_slow_cell(self):
         "Reassign some parameters to make the resting state stationary"
-        self._v_beta = ((self.i_deg(self._ip0) -
-                        self.i_plcd(self._c0, self._ip0)) /
+        self.v_beta = ((self.i_deg(self.ip0) -
+                        self.i_plcd(self.c0, self.ip0)) /
                         (1 / ((1 + self._kg) *
                             (self._kg/(1 + self._kg) +
                             self._a0)) *
                         self._a0))
-        self._in_ip0 = self._v_inr * self._ip0**2 / (self._kr**2 + self._ip0**2)
-        self._ipmca0 = self.i_pmca(self._c0)
+        self._in_ip0 = self._v_inr * self.ip0**2 / (self._kr**2 + self.ip0**2)
+        self._ipmca0 = self.i_pmca(self.c0)
 
     def run(self, stims_slow=[10]):
         "Run the model"
         self._init_slow_cell()
-        y0 = [self._c0, self._s0, self._r0, self._ip0]
+        y0 = [self.c0, self.s0, self.r0, self.ip0]
         sol_ = odeint(self._rhs, y0, self.time, args=(stims_slow,), hmax=0.005)
 
         return sol_

@@ -23,12 +23,12 @@ class FastCell(CellBase):
         self._d = 20e-4 # [cm]
         self._F = 96485332.9 # [mA*s/mol]
 
-        self._alpha = 1e9 / (2 * self._F * self._d)
+        self.alpha = 1e9 / (2 * self._F * self._d)
 
-        self._v0 = -50 # (-40 to -60)
-        self._m0 = 0
-        self._h0 = 0
-        self._n0 = 0
+        self.v0 = -50 # (-40 to -60)
+        self.m0 = 0
+        self.h0 = 0
+        self.n0 = 0
         self._ica0 = 0
         self._ik0 = 0
 
@@ -84,7 +84,7 @@ class FastCell(CellBase):
 
     def _r_ex(self, c):
         "Calcium terms"
-        return (c - self._c0) / self._tau_ex
+        return (c - self.c0) / self._tau_ex
     
     def _stim_fast(self, t, stims, dur=0.01):
         "Stimulation"
@@ -96,7 +96,7 @@ class FastCell(CellBase):
         return int(condition)
 
     # Numerical terms
-    def _calc_fast_terms(self, c, v, m, h, n):
+    def calc_fast_terms(self, c, v, m, h, n):
         return (self._r_ex(c), 
                 self.i_ca(v, m, h), 
                 self.i_k(v, n),
@@ -109,9 +109,9 @@ class FastCell(CellBase):
         "Right-hand side equations"
         c, v, m, h, n = y
 
-        r_ex, i_ca, i_k, i_bk, dmdt, dhdt, dndt = self._calc_fast_terms(c, v, m, h, n)
+        r_ex, i_ca, i_k, i_bk, dmdt, dhdt, dndt = self.calc_fast_terms(c, v, m, h, n)
 
-        dcdt = -r_ex + self._alpha*(-i_ca + self._ica0)
+        dcdt = -r_ex + self.alpha*(-i_ca + self._ica0)
         dvdt = - 1 / self._c_m * (i_ca+ i_k + i_bk - 0.002 * self._stim_fast(t, stims_fast, dur=0.005))
 
         return np.array([dcdt, dvdt, dmdt, dhdt, dndt])
@@ -119,18 +119,18 @@ class FastCell(CellBase):
 
     def _init_fast_cell(self):
         "Reassign some parameters to make the resting state stationary"
-        self._m0 = self._m_inf(self._v0)
-        self._h0 = self._h_inf(self._v0)
-        self._n0 = self._n_inf(self._v0)
-        self._ica0 = self.i_ca(self._v0, self._m0, self._h0)
-        self._ik0 = self.i_k(self._v0, self._n0)
-        self._g_bk = - (self._ica0 + self._ik0)/(self._v0 - self._e_bk)
+        self.m0 = self._m_inf(self.v0)
+        self.h0 = self._h_inf(self.v0)
+        self.n0 = self._n_inf(self.v0)
+        self._ica0 = self.i_ca(self.v0, self.m0, self.h0)
+        self._ik0 = self.i_k(self.v0, self.n0)
+        self._g_bk = - (self._ica0 + self._ik0)/(self.v0 - self._e_bk)
 
     def run(self, stims_fast):
         "Run the model"
 
         self._init_fast_cell()
-        y0 = [self._c0, self._v0, self._m0, self._h0, self._n0]
+        y0 = [self.c0, self.v0, self.m0, self.h0, self.n0]
         sol_ = euler_odeint(self._rhs, y0, self.T, self.dt, stims_fast=stims_fast)
 
         return sol_

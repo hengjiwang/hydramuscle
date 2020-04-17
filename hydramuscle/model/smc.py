@@ -20,21 +20,21 @@ class SMC(SlowCell, FastCell):
         for attr in kwargs:
             helper.set_attr(self, attr, kwargs[attr])
 
-        self._alpha = 1e9 / (2 * self._F * self._d)
+        self.alpha = 1e9 / (2 * self._F * self._d)
         self._active_v_beta = 1
 
 
     def i_in(self, ip):
-        return self._alpha * (self._ica0) + self._ipmca0 + self._v_inr * ip**2 / (self._kr**2 + ip**2) - self._in_ip0
+        return self.alpha * (self._ica0) + self._ipmca0 + self._v_inr * ip**2 / (self._kr**2 + ip**2) - self._in_ip0
 
     def _rhs(self, y, t, stims_fast, stims_slow):
         "Right-hand side formulation"
         c, s, r, ip, v, m, h, n = y
 
-        i_ipr, i_leak, i_serca, i_in, i_pmca, v_r, i_plcd, i_deg = self._calc_slow_terms(c, s, r, ip)
-        _, i_ca, i_k, i_bk, dmdt, dhdt, dndt = self._calc_fast_terms(c, v, m, h, n)
+        i_ipr, i_leak, i_serca, i_in, i_pmca, v_r, i_plcd, i_deg = self.calc_slow_terms(c, s, r, ip)
+        _, i_ca, i_k, i_bk, dmdt, dhdt, dndt = self.calc_fast_terms(c, v, m, h, n)
 
-        dcdt = i_ipr + i_leak - i_serca + i_in - i_pmca - self._alpha * i_ca
+        dcdt = i_ipr + i_leak - i_serca + i_in - i_pmca - self.alpha * i_ca
         dsdt = self._beta * (i_serca - i_ipr - i_leak)
         drdt = v_r
         dipdt = self.i_plcb(self._stim_slow(t, stims_slow, self._active_v_beta)) + i_plcd - i_deg
@@ -49,7 +49,7 @@ class SMC(SlowCell, FastCell):
         self._init_fast_cell()
         self._init_slow_cell()
 
-        y0 = [self._c0, self._s0, self._r0, self._ip0, self._v0, self._m0, self._h0, self._n0]
+        y0 = [self.c0, self.s0, self.r0, self.ip0, self.v0, self.m0, self.h0, self.n0]
         
         if not T:
             T = self.T

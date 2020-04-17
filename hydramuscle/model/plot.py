@@ -93,7 +93,7 @@ def plot_slow_transient(model, sol, tmin, tmax, full_cell=False, fontsize=30, te
         v = sol[:,4]
         m = sol[:,5]
         h = sol[:,6]
-        ax2.plot(model.time[index_min:index_max], -model._alpha*model.i_ca(v, m, h)[index_min:index_max] + model.i_in(ip)[index_min:index_max], linewidth=5, color="purple", label=r"-$\alpha$I$_{Ca}$+J$_{in}$")
+        ax2.plot(model.time[index_min:index_max], -model.alpha*model.i_ca(v, m, h)[index_min:index_max] + model.i_in(ip)[index_min:index_max], linewidth=5, color="purple", label=r"-$\alpha$I$_{Ca}$+J$_{in}$")
     ax2.tick_params(labelsize=fontsize)
     ax2.set_xlabel("time(s)", fontsize=fontsize)
     ax2.set_ylabel(r"Ca$^{2+}$ Fluxes ($\mu$M/s)", fontsize=fontsize)

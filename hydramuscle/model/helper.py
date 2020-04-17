@@ -19,3 +19,13 @@ def set_attr(obj, attr, val):
             setattr(obj, '_'+attr, val)
     else:
         setattr(obj, attr, val)
+
+def generate_indices(numx, xmin, xmax, ymin, ymax):
+    "Generate indices from coordinates range"
+    res = []
+
+    for i in range(ymin, ymax):
+        for j in range(xmin, xmax):
+            res.append(i * numx + j)
+
+    return res
