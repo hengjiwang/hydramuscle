@@ -17,7 +17,7 @@ class FastCell(CellBase):
         super().__init__(T, dt)
 
         # General parameters
-        self._c_m = 1e-6 # [F/cm^2]
+        self.c_m = 1e-6 # [F/cm^2]
         self._A_cyt = 4e-5 # [cm^2]
         self._V_cyt = 6e-9 # [cm^3]
         self._d = 20e-4 # [cm]
@@ -86,7 +86,7 @@ class FastCell(CellBase):
         "Calcium terms"
         return (c - self.c0) / self._tau_ex
     
-    def _stim_fast(self, t, stims, dur=0.01):
+    def stim_fast(self, t, stims, dur=0.01):
         "Stimulation"
         condition = False
 
@@ -112,12 +112,12 @@ class FastCell(CellBase):
         r_ex, i_ca, i_k, i_bk, dmdt, dhdt, dndt = self.calc_fast_terms(c, v, m, h, n)
 
         dcdt = -r_ex + self.alpha*(-i_ca + self._ica0)
-        dvdt = - 1 / self._c_m * (i_ca+ i_k + i_bk - 0.002 * self._stim_fast(t, stims_fast, dur=0.005))
+        dvdt = - 1 / self.c_m * (i_ca+ i_k + i_bk - 0.002 * self.stim_fast(t, stims_fast, dur=0.005))
 
         return np.array([dcdt, dvdt, dmdt, dhdt, dndt])
 
 
-    def _init_fast_cell(self):
+    def init_fast_cell(self):
         "Reassign some parameters to make the resting state stationary"
         self.m0 = self._m_inf(self.v0)
         self.h0 = self._h_inf(self.v0)
@@ -129,7 +129,7 @@ class FastCell(CellBase):
     def run(self, stims_fast):
         "Run the model"
 
-        self._init_fast_cell()
+        self.init_fast_cell()
         y0 = [self.c0, self.v0, self.m0, self.h0, self.n0]
         sol_ = euler_odeint(self._rhs, y0, self.T, self.dt, stims_fast=stims_fast)
 

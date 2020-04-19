@@ -35,19 +35,19 @@ class SMC(SlowCell, FastCell):
         _, i_ca, i_k, i_bk, dmdt, dhdt, dndt = self.calc_fast_terms(c, v, m, h, n)
 
         dcdt = i_ipr + i_leak - i_serca + i_in - i_pmca - self.alpha * i_ca
-        dsdt = self._beta * (i_serca - i_ipr - i_leak)
+        dsdt = self.beta * (i_serca - i_ipr - i_leak)
         drdt = v_r
-        dipdt = self.i_plcb(self._stim_slow(t, stims_slow, self._active_v_beta)) + i_plcd - i_deg
+        dipdt = self.i_plcb(self.stim_slow(t, stims_slow, self._active_v_beta)) + i_plcd - i_deg
 
-        dvdt = - 1 / self._c_m * (i_ca + i_k + i_bk - 0.001 * self._stim_fast(t, stims_fast, dur=0.01))
+        dvdt = - 1 / self.c_m * (i_ca + i_k + i_bk - 0.001 * self.stim_fast(t, stims_fast, dur=0.01))
 
         return np.array([dcdt, dsdt, drdt, dipdt, dvdt, dmdt, dhdt, dndt])
 
 
     def run(self, stims_fast, stims_slow, T=None, dt=None):
         "Run the model"
-        self._init_fast_cell()
-        self._init_slow_cell()
+        self.init_fast_cell()
+        self.init_slow_cell()
 
         y0 = [self.c0, self.s0, self.r0, self.ip0, self.v0, self.m0, self.h0, self.n0]
         

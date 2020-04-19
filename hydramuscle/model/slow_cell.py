@@ -30,7 +30,7 @@ class SlowCell(CellBase):
         self.v_beta = None
         self._kca = 0.3
         self._k_deg = 0.08
-        self._beta = 20
+        self.beta = 20
 
         self.s0 = 60
         self.r0 = 0.9411764705882353
@@ -79,7 +79,7 @@ class SlowCell(CellBase):
         return self._k_deg * ip
 
     # Stimulation
-    def _stim_slow(self, t, stims, active_v_beta=1):
+    def stim_slow(self, t, stims, active_v_beta=1):
         "Stimulation"
 
         condition = False
@@ -107,13 +107,13 @@ class SlowCell(CellBase):
         i_ipr, i_leak, i_serca, i_in, i_pmca, v_r, i_plcd, i_deg = self.calc_slow_terms(c, s, r, ip)
 
         dcdt = i_ipr + i_leak - i_serca + i_in - i_pmca
-        dsdt = self._beta*(i_serca - i_ipr -i_leak)
+        dsdt = self.beta*(i_serca - i_ipr -i_leak)
         drdt = v_r
-        dipdt = self.i_plcb(self._stim_slow(t, stims_slow)) + i_plcd - i_deg
+        dipdt = self.i_plcb(self.stim_slow(t, stims_slow)) + i_plcd - i_deg
 
         return [dcdt, dsdt, drdt, dipdt]
 
-    def _init_slow_cell(self):
+    def init_slow_cell(self):
         "Reassign some parameters to make the resting state stationary"
         self.v_beta = ((self.i_deg(self.ip0) -
                         self.i_plcd(self.c0, self.ip0)) /
@@ -126,7 +126,7 @@ class SlowCell(CellBase):
 
     def run(self, stims_slow=[10]):
         "Run the model"
-        self._init_slow_cell()
+        self.init_slow_cell()
         y0 = [self.c0, self.s0, self.r0, self.ip0]
         sol_ = odeint(self._rhs, y0, self.time, args=(stims_slow,), hmax=0.005)
 

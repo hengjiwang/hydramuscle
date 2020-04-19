@@ -1,4 +1,4 @@
-import sys,os
+import sys, os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 import numpy as np
@@ -7,7 +7,7 @@ import scipy, random
 
 from hydramuscle.model.smc import SMC
 from hydramuscle.model.pop_base import PopBase
-from hydramuscle.model.euler_odeint import euler_odeint
+from hydramuscle.model.euler_odeint2 import euler_odeint
 from hydramuscle.model import helper
 
 class Layer(PopBase):
@@ -91,11 +91,11 @@ class Layer(PopBase):
 
         # Add stimulation
         for indices in self._stims_ip_map:
-            dipdt[indices] += (self.cell.i_plcb(self.cell.stim_slow(t, self._stims_ip_map[indices])) -
+            dipdt[list(indices)] += (self.cell.i_plcb(self.cell.stim_slow(t, self._stims_ip_map[indices])) -
                                self.cell.i_plcb(self.cell.v_beta))
 
         for indices in self._stims_v_map:
-            dvdt[indices] += 1 / (self.cell.c_m * 0.01 * 
+            dvdt[list(indices)] += (1 / self.cell.c_m * 0.01 *
                                   self.cell.stim_fast(t, self._stims_v_map[indices], 0.01))
 
         deriv = np.array([dcdt, dsdt, drdt, dipdt, dvdt, dmdt, dhdt, dndt])
@@ -124,7 +124,9 @@ class Layer(PopBase):
         y0 = np.reshape(y0, len(inits)*self._num2)  
 
         # Begin counting time
-        sol_ = euler_odeint(self._rhs, y0, self.T, self.dt, save_interval=self._save_interval)
+        sol_ = euler_odeint(self._rhs, y0, self.T, self.dt, 
+                            save_interval=self._save_interval,
+                            layer_num=1)
 
         return sol_
 
