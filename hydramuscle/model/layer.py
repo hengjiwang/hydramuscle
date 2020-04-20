@@ -45,14 +45,14 @@ class Layer(PopBase):
                      np.array([-1, 0, 1]), self._numy, self._numy).toarray()
         Dx[0, self._numx-1] = 1
         Dx[self._numx-1, 0] = 1
-        Dy[0,0] = -1
+        Dy[0, 0] = -1
         Dy[self._numy-1, self._numy-1] = -1
         Dx = scipy.sparse.csr_matrix(Dx)
         Dy = scipy.sparse.csr_matrix(Dy)
         Ix = scipy.sparse.csr_matrix(Ix)
         Iy = scipy.sparse.csr_matrix(Iy)
         self._Lc = self._gcx * scipy.sparse.kron(Dx, Iy) + self._gcy * scipy.sparse.kron(Ix, Dy)
-        self._Lip3 = (self._gip3x * scipy.sparse.kron(Dx, Iy) + 
+        self._Lip3 = (self._gip3x * scipy.sparse.kron(Dx, Iy) +
                       self._gip3y * scipy.sparse.kron(Ix, Dy))
 
     def set_stim_pattern(self, pathway, xmin, xmax, ymin, ymax, stim_times, randomnum=0):

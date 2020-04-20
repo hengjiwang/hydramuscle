@@ -7,7 +7,7 @@ import argparse
 from hydramuscle.model.smc import SMC
 from hydramuscle.model.layer import Layer
 
-def run_layer(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000, 
+def run_layer(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000,
               save_interval=100, save_dir="../results/data/calcium", **kargs):
     "Run the Layer"
 
@@ -36,14 +36,14 @@ def run_layer(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000,
 
     # Generate filename and corresponding metadata
     filename = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S-%f")
-    filemeta = "numx=" + str(numx) + ", "
+    filemeta = "numx=" + str(numx) + ","
     filemeta += "numy=" + str(numy)
 
     for key in kargs:
-        filemeta += ", " + key + '=' + str(kargs[key])
+        filemeta += "," + key + '=' + str(kargs[key])
 
     # Save the results
-    sol.to_csv(save_dir + filename, index=False)
+    sol.to_csv(save_dir + filename + '.csv', index=False)
 
     # Document the metadata
     with open(save_dir+"meta.txt", "a+") as metafile:
