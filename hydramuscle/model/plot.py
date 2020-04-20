@@ -156,7 +156,7 @@ def plot_multiple_spikes(model, sol, force_ecto, force_endo, tmin1, tmax1, tmin2
 
     ax3 = ax1.twinx()
     ax3.plot(model.time[index_min:index_max], fluo[index_min:index_max],
-                        linewidth=5, color="purple")
+             linewidth=5, color="purple")
     ax3.tick_params(axis='y', labelsize=fontsize, labelcolor='purple')
     ax3.set_ylim(0, 1)
     ax3.set_ylabel("Fluorescence(a.u.)", fontsize=fontsize, color='purple')
@@ -207,6 +207,38 @@ def plot_frame_patterns(data, time_pts, vmin, vmax, dt=1):
         frame = np.flip(data[int(timep/dt)].T, 0)
         ax.imshow(frame, cmap='hot', vmin=vmin, vmax=vmax)
         ax.set_title('t=' + str(timep) + 's')
-    
+
     plt.show()
+
+def plot_1d_traces(data, interval, dt):
+    "Plot calcium traces in different directions"
+
+    import matplotlib as mpl
+    from cycler import cycler
+    mpl.rcParams['axes.prop_cycle'] = cycler(color='bgrcmyk')
+
+    # Get the data dimensions
+    nframes = len(data)
+    numx = len(data[0])
+    # numy = len(data[0][0])
+
+    # Get data traces
+    datax = data[:, numx//2:numx:interval, 0]
+    datay = data[:, numx//2, ::interval]
+
+    # Plot
+    fig = plt.figure(figsize=(20, 5))
+    ax1 = fig.add_subplot(1, 2, 1)
+    ax1.plot([x*dt for x in range(nframes)], datax)
+    ax1.set_xlabel("time (s)")
+    ax1.set_ylabel(r"[Ca$^{2+}$] ($\mu$M)")
+    ax1.set_title("x direction")
+
+    ax2 = fig.add_subplot(1, 2, 2)
+    ax2.plot([x*dt for x in range(nframes)], datay)
+    ax2.set_xlabel("time (s)")
+    ax2.set_ylabel(r"[Ca$^{2+}$] ($\mu$M)")
+    ax2.set_title("y direction")
+
+    
 

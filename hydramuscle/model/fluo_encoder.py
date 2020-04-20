@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
 class FluoEncoder:
-    
+
     # Init
     def __init__(self, c, T=100, dt=0.001):
         '''
@@ -38,8 +38,8 @@ class FluoEncoder:
         self.T = T
         self.dt = dt
         self.time = np.linspace(0, self.T, int(self.T/self.dt))
-        
-    
+   
+
     # Fluorescence
     def f_total(self, g, c1g, c2g, c3g, c4g):
         f_cyt = self.phi0*g + self.phi1*c1g + self.phi2*c2g + \
@@ -48,23 +48,23 @@ class FluoEncoder:
         self.phi2*self.c2g0 + self.phi3*self.c3g0 + self.phi4*self.c4g0
         f_bg = f_cyt0 * 2.5
         return (f_cyt + f_bg) / (f_cyt0 + f_bg)
-    
+
     # rate 1
     def r_1(self, c, g, c1g):
         return self.k1p * c * g - self.k1n * c1g
-    
+
     # rate 2
     def r_2(self, c, c1g, c2g):
         return self.k2p * c * c1g - self.k2n * c2g
-    
+
     # rate_3
     def r_3(self, c, c2g, c3g):
         return self.k3p * c * c2g - self.k3n * c3g
-    
+
     # rate_4
     def r_4(self, c, c3g, c4g):
         return self.k4p * c * c3g - self.k4n * c4g
-    
+
     # Stimulation rate
     def stim(self, t):
         if t >= 10 and t < 10.01:

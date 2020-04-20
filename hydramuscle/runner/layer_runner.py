@@ -27,7 +27,7 @@ def run_layer(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000,
     stims_slow = [14]
 
     # Set stimulation patterns
-    layer.set_stim_pattern("fast", xmin=0, xmax=numx, ymin=0, ymax=1, stim_times=stims_fast)
+    # layer.set_stim_pattern("fast", xmin=0, xmax=numx, ymin=0, ymax=1, stim_times=stims_fast)
     layer.set_stim_pattern("slow", xmin=int(2/5*numx), xmax=int(3/5*numx), ymin=0, ymax=numy//10,
                            stim_times=stims_slow)
 
@@ -41,6 +41,8 @@ def run_layer(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000,
 
     for key in kargs:
         filemeta += "," + key + '=' + str(kargs[key])
+
+    filemeta += ",slow"
 
     # Save the results
     sol.to_csv(save_dir + filename + '.csv', index=False)

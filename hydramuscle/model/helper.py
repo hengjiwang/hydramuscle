@@ -13,10 +13,9 @@ def set_attr(obj, attr, val):
     if not hasattr(obj, attr):
         if not hasattr(obj, '_'+attr):
             raise AttributeError(obj.__class__.__name__ +
-                                " has no attribute " +
-                                attr)
-        else:
-            setattr(obj, '_'+attr, val)
+                                 " has no attribute " +
+                                 attr)
+        setattr(obj, '_'+attr, val)
     else:
         setattr(obj, attr, val)
 
@@ -29,4 +28,26 @@ def generate_indices(numy, xmin, xmax, ymin, ymax):
             res.append(i * numy + j)
 
     return res
+
+def track_wavefront(data, thres):
+    "Track the wavefront of trace data"
+
+    ntime = len(data)
+    numcell = len(data[0])
+
+    wavefront = np.zeros(ntime)
+    activated = np.zeros(numcell)
+
+    for j in range(ntime):
+        for k in range(numcell-1, -1, -1):
+            if data[j][k] > thres:
+                wavefront[j] = k
+                break
+
+    return wavefront
+
+        
+
+
+
     
