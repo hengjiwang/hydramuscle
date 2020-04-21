@@ -3,6 +3,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
 import pandas as pd
 import argparse
+import h5py
 
 from hydramuscle.model.smc import SMC
 from hydramuscle.model.layer import Layer
@@ -27,12 +28,12 @@ def run_layer(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000,
     stims_slow = [14]
 
     # Set stimulation patterns
-    # layer.set_stim_pattern("fast", xmin=0, xmax=numx, ymin=0, ymax=1, stim_times=stims_fast)
-    layer.set_stim_pattern("slow", xmin=int(2/5*numx), xmax=int(3/5*numx), ymin=0, ymax=numy//10,
+    layer.set_stim_pattern("fast", xmin=0, xmax=numx, ymin=0, ymax=1, stim_times=stims_fast)
+    layer.set_stim_pattern("slow", xmin=90, xmax=110, ymin=0, ymax=10,
                            stim_times=stims_slow)
 
     # Run the model
-    sol = pd.DataFrame(layer.run())
+    sol = layer.run()
 
     # Generate filename and corresponding metadata
     filename = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S-%f")
@@ -42,10 +43,12 @@ def run_layer(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000,
     for key in kargs:
         filemeta += "," + key + '=' + str(kargs[key])
 
-    filemeta += ",slow"
+    # filemeta += ",slow"
 
     # Save the results
-    sol.to_csv(save_dir + filename + '.csv', index=False)
+    hf = h5py.File(save_dir + filename + '.h5', 'w')
+    hf.create_dataset('calcium', data=sol)
+    hf.close()
 
     # Document the metadata
     with open(save_dir+"meta.txt", "a+") as metafile:

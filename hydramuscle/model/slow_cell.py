@@ -1,10 +1,7 @@
 import sys, os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
-import numpy as np
-import matplotlib.pyplot as plt
 from scipy.integrate import odeint
-from abc import abstractmethod
 
 from hydramuscle.model.cell_base import CellBase
 from hydramuscle.model import plot
@@ -91,11 +88,11 @@ class SlowCell(CellBase):
 
     # Numerical calculation
     def calc_slow_terms(self, c, s, r, ip):
-        return (self.i_ipr(c, s, ip, r), 
-                self.i_leak(c, s), 
-                self.i_serca(c), 
-                self.i_in(ip), 
-                self.i_pmca(c), 
+        return (self.i_ipr(c, s, ip, r),
+                self.i_leak(c, s),
+                self.i_serca(c),
+                self.i_in(ip),
+                self.i_pmca(c),
                 self.v_r(c, r),
                 self.i_plcd(c, ip),
                 self.i_deg(ip))
@@ -111,6 +108,8 @@ class SlowCell(CellBase):
         drdt = v_r
         dipdt = self.i_plcb(self.stim_slow(t, stims_slow)) + i_plcd - i_deg
 
+        # printf(self.)
+
         return [dcdt, dsdt, drdt, dipdt]
 
     def init_slow_cell(self):
@@ -123,6 +122,8 @@ class SlowCell(CellBase):
                         self._a0))
         self._in_ip0 = self._v_inr * self.ip0**2 / (self._kr**2 + self.ip0**2)
         self._ipmca0 = self.i_pmca(self.c0)
+
+        print(self.v_beta)
 
     def run(self, stims_slow=[10]):
         "Run the model"
