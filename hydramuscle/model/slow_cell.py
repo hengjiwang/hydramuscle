@@ -123,7 +123,7 @@ class SlowCell(CellBase):
         self._in_ip0 = self._v_inr * self.ip0**2 / (self._kr**2 + self.ip0**2)
         self._ipmca0 = self.i_pmca(self.c0)
 
-        print(self.v_beta)
+        # print(self.v_beta)
 
     def run(self, stims_slow=[10]):
         "Run the model"

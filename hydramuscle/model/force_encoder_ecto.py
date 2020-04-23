@@ -57,7 +57,7 @@ class ForceEncoderEcto(object):
 
         y0 = [cls.m0, cls.mp0, cls.amp0, cls.am0]
         sol = odeint(cls._rhs, y0, cls.time, args=(calcium,), hmax=0.005)
-        return cls.K * (sol[:,2] + sol[:,3])
+        return cls.K * (sol[:, 2] + sol[:, 3])
 
     
 if __name__ == "__main__":

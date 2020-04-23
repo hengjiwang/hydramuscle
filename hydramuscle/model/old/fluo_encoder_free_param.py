@@ -5,7 +5,7 @@ from scipy.integrate import odeint
 class FluoEncoder:
 
     # Init
-    def __init__(self, c, T=100, dt=0.001):
+    def __init__(self, c, k1p, k1n, k2p, k2n, k3p, k3n, k4p, k4n, T=100, dt=0.001):
         '''
         :param c: [Ca2+] as input
         :param T: Total time
@@ -13,14 +13,14 @@ class FluoEncoder:
         '''
         self.r_inc = 200
         self.tau_ex = 1.0
-        self.k1p = 20 # 2.5
-        self.k1n = 0.1
-        self.k2p = 16.9
-        self.k2n = 205
-        self.k3p = 30 # 1.1
-        self.k3n = 11.8
-        self.k4p = 1069
-        self.k4n = 2 # 3 # 5.8
+        self.k1p = k1p
+        self.k1n = k1n
+        self.k2p = k2p
+        self.k2n = k2n
+        self.k3p = k3p
+        self.k3n = k3n
+        self.k4p = k4p
+        self.k4n = k4n
         self.c = c
         self.g0 = 0.6614852922934815 # 3.28088468
         self.c1g0 = 6.614852922934705 # 4.10110585
@@ -116,6 +116,4 @@ class FluoEncoder:
         return f_total
 
 if __name__ == "__main__":
-    c = np.zeros((100000))+0.05
-    encoder = FluoEncoder(c)
-    fluo = encoder.step()
+    pass

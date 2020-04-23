@@ -21,7 +21,7 @@ class ForceEncoderEndo(object):
     # General parameters
     nm = 4 # 4.7135
     c_half = 0.15 # 0.4640758
-    K = 1 
+    K = 1
 
     # Initial variables
     m0 = 1
@@ -57,7 +57,7 @@ class ForceEncoderEndo(object):
 
         y0 = [cls.m0, cls.mp0, cls.amp0, cls.am0]
         sol = odeint(cls._rhs, y0, cls.time, args=(calcium,), hmax=0.005)
-        return cls.K * (sol[:,2] + sol[:,3])
+        return cls.K * (sol[:, 2] + sol[:, 3])
 
     
 if __name__ == "__main__":
