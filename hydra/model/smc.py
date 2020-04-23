@@ -3,13 +3,13 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
 import numpy as np
 
-from hydramuscle.model.fast_cell import FastCell
-from hydramuscle.model.slow_cell import SlowCell
-from hydramuscle.model.force_encoder_ecto import ForceEncoderEcto
-from hydramuscle.model.force_encoder_endo import ForceEncoderEndo
-from hydramuscle.model.euler_odeint import euler_odeint
-from hydramuscle.model import plot
-from hydramuscle.model import helper
+from hydra.model.fast_cell import FastCell
+from hydra.model.slow_cell import SlowCell
+from hydra.model.force_encoder_ecto import ForceEncoderEcto
+from hydra.model.force_encoder_endo import ForceEncoderEndo
+from hydra.model.euler_odeint import euler_odeint
+from hydra.model import plot
+from hydra.model import helper
 
 class SMC(SlowCell, FastCell):
 

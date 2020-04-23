@@ -5,10 +5,10 @@ import numpy as np
 from scipy.sparse import spdiags
 import scipy, random
 
-from hydramuscle.model.smc import SMC
-from hydramuscle.model.pop_base import PopBase
-from hydramuscle.model.euler_odeint2 import euler_odeint
-from hydramuscle.model import helper
+from hydra.model.smc import SMC
+from hydra.model.pop_base import PopBase
+from hydra.model.euler_odeint2 import euler_odeint
+from hydra.model import helper
 
 class Layer(PopBase):
     """ A class for simulating layer-level dynamics """

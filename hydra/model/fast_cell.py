@@ -4,10 +4,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
 import numpy as np
 
-from hydramuscle.model.cell_base import CellBase
-from hydramuscle.model.euler_odeint import euler_odeint
-from hydramuscle.model import plot
-from hydramuscle.model import helper
+from hydra.model.cell_base import CellBase
+from hydra.model.euler_odeint import euler_odeint
+from hydra.model import plot
+from hydra.model import helper
 
 
 class FastCell(CellBase):

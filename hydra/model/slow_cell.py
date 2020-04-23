@@ -3,8 +3,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
 from scipy.integrate import odeint
 
-from hydramuscle.model.cell_base import CellBase
-from hydramuscle.model import plot
+from hydra.model.cell_base import CellBase
+from hydra.model import plot
 
 class SlowCell(CellBase):
 

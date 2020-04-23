@@ -6,9 +6,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
-# from hydramuscle.model.euler_odeint import euler_odeint
+# from hydra.model.euler_odeint import euler_odeint
 
-class ForceEncoderEcto(object):
+class ForceEncoderEndo(object):
 
     # Attachment & Detachment rates
     k2 = 0.25 # 0.1399
@@ -16,12 +16,12 @@ class ForceEncoderEcto(object):
     k4 = 0.05 # 3.6124
     k5 = k2
     k6 = 0
-    k7 = 0.07 # 0.1 # 0.05 # 0.1340
+    k7 = 0.003
 
     # General parameters
     nm = 4 # 4.7135
-    c_half = 0.5 # 0.4640758 # 1
-    K = 4
+    c_half = 0.15 # 0.4640758
+    K = 1
 
     # Initial variables
     m0 = 1
@@ -62,7 +62,7 @@ class ForceEncoderEcto(object):
     
 if __name__ == "__main__":
     calcium = pd.read_csv('../save/data/calcium/c_sin_ibk.csv').values
-    force = ForceEncoderEcto.encode(calcium, 0.0002)
+    force = ForceEncoderEndo.encode(calcium, 0.0002)
 
     plt.figure()
     plt.plot(np.linspace(0, 200, int(200/0.0002)+1), force)

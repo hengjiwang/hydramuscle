@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from hydramuscle.model.fluo_encoder import FluoEncoder
+from hydra.model.fluo_encoder import FluoEncoder
 
 def plot_single_spike(model, sol, tmin1, tmax1, tmin2, tmax2, full_cell=False, 
                       fontsize=30, textsize=50, save_fig=True, 

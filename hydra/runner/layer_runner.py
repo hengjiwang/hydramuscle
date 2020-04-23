@@ -5,8 +5,8 @@ import pandas as pd
 import argparse
 import h5py
 
-from hydramuscle.model.smc import SMC
-from hydramuscle.model.layer import Layer
+from hydra.model.smc import SMC
+from hydra.model.layer import Layer
 
 def run_layer(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000, pathway="Both",
               save_interval=100, save_dir="../results/data/calcium", **kargs):
