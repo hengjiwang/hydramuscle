@@ -31,12 +31,12 @@ def run_layer(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000, pathway="Both",
     if pathway == "Both":
         layer.set_stim_pattern("fast", xmin=0, xmax=numx, ymin=0, ymax=1, stim_times=stims_fast)
         layer.set_stim_pattern("slow", xmin=90, xmax=110, ymin=0, ymax=10,
-                            stim_times=stims_slow)
+                               stim_times=stims_slow)
     elif pathway == "Fast":
         layer.set_stim_pattern("fast", xmin=0, xmax=numx, ymin=0, ymax=1, stim_times=stims_fast)
     elif pathway == "Slow":
         layer.set_stim_pattern("slow", xmin=90, xmax=110, ymin=0, ymax=10,
-                            stim_times=stims_slow)
+                               stim_times=stims_slow)
 
     # Run the model
     sol = layer.run()

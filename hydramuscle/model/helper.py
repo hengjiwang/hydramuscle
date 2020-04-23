@@ -36,7 +36,6 @@ def track_wavefront(data, thres):
     numcell = len(data[0])
 
     wavefront = np.zeros(ntime)
-    activated = np.zeros(numcell)
 
     for j in range(ntime):
         for k in range(numcell-1, -1, -1):
