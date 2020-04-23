@@ -1,2 +1,2 @@
-# hydramuscle
-Modeling calcium dynamics of Hydra muscle cells
+# Neuromechanical Modeling of _Hydra_
+A complete mechanistic model of _Hydra_ from neural network stimulation to behaviors.
