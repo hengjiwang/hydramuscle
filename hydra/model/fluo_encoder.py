@@ -102,7 +102,7 @@ class FluoEncoder:
         y0 = [self.g0, self.c1g0, self.c2g0, self.c3g0, self.c4g0]
 
         # integrate
-        sol = odeint(self.rhs, y0, self.time, hmax = 0.005)
+        sol = odeint(self.rhs, y0, self.time, hmax=0.005)
     
         g = sol[:, 0]
         c1g = sol[:, 1]

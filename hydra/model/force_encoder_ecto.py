@@ -20,7 +20,7 @@ class ForceEncoderEcto(object):
 
     # General parameters
     nm = 4 # 4.7135
-    c_half = 0.5 # 0.4640758 # 1
+    c_half = 0.5 # 0.5 # 0.4640758 # 1
     K = 4
 
     # Initial variables

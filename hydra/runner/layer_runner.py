@@ -45,12 +45,14 @@ def run_layer(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000, pathway="Both",
     # Generate filename and corresponding metadata
     filename = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S-%f")
     filemeta = "numx=" + str(numx) + ","
-    filemeta += "numy=" + str(numy)
+    filemeta += "numy=" + str(numy) + ","
+    filemeta += "gip3x=" + str(gip3x) + ","
+    filemeta += "gip3y=" + str(gip3y)
 
     for key in kargs:
         filemeta += "," + key + '=' + str(kargs[key])
 
-    # filemeta += ",slow"
+    # filemeta += ",endo"
 
     # Save the results
     # hf = h5py.File(save_dir + filename + '.h5', 'w')
@@ -59,7 +61,7 @@ def run_layer(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000, pathway="Both",
     sol.to_hdf(save_dir + filename + '.h5', 'calcium')
 
     # Document the metadata
-    with open(save_dir+"meta.txt", "a+") as metafile:
+    with open("../results/data/meta.txt", "a+") as metafile:
         metafile.write(filename + "    " + filemeta + '\n')
 
 if __name__ == "__main__":
@@ -79,9 +81,10 @@ if __name__ == "__main__":
     parser.add_argument('--s0', type=float, default=None)
     parser.add_argument('--d', type=float, default=20e-4)
     parser.add_argument('--v_delta', type=float, default=None)
+    parser.add_argument('--k_deg', type=float, default=None)
     args = parser.parse_args()
 
     run_layer(args.numx, args.numy, args.gip3x, args.gip3y,
               args.gcx, args.gcy, args.pathway, args.save_interval, args.save_dir,
               T=args.T, dt=args.dt, k_ipr=args.k_ipr, s0=args.s0,
-              d=args.d, v_delta=args.v_delta)
+              d=args.d, v_delta=args.v_delta, k_deg=args.k_deg)

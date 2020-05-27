@@ -14,19 +14,23 @@ class SlowCell(CellBase):
         self._k_ipr = 0.08
         self._ka = 0.2
         self._kip = 0.3
-        self._k_serca = 0.5
+        self._k_serca = 0.3 # 0.2 # 0.3 # 0.5
+        # self._v_serca = 0.2
+        # self._kserca = 0.3 # 0.1
         self._v_in = 0.025
         self._v_inr = 0.2
         self._kr = 1
-        self._k_pmca = 0.4 # 0.5
+        self._k_pmca = 0.8 # 1.0 # 1.5 # 0.8
+        # self._v_pmca = 0.9
+        # self._kpmca = 0.1
         self._k_r = 4
         self._ki = 0.2
-        self._kg = 0.1 # unknown
-        self._a0 = 1 # 1e-3 - 10
+        # self._kg = 0.1 # unknown
+        # self._a0 = 1 # 1e-3 - 10
         self._v_delta = 0.04 # 0 - 0.05
         self.v_beta = None
         self._kca = 0.3
-        self._k_deg = 0.08
+        self._k_deg = 0.2 # 0.08
         self.beta = 20
 
         self.s0 = 60
@@ -44,6 +48,8 @@ class SlowCell(CellBase):
     def i_serca(self, c):
         "SERCA [uM/s]"
         return self._k_serca * c
+        # return self._v_serca * c**2 / (c**2 + self._kserca**2)
+        # return self._v_serca * c / (c + self._kserca)
 
     def i_leak(self, c, s):
         k_leak = (self.i_serca(self.c0) - self.i_ipr(self.c0, self.s0, self.ip0, self.r0)) / (self.s0 - self.c0)
@@ -52,6 +58,8 @@ class SlowCell(CellBase):
     def i_pmca(self, c):
         "Additional eflux [uM/s]"
         return self._k_pmca * c
+        # return self._v_pmca * c**2 / (c**2 + self._kpmca**2)
+        # return self._v_pmca * c / (c + self._kpmca)
 
     def i_in(self, ip):
         "Calcium entry rate [uM/s]"
@@ -65,7 +73,7 @@ class SlowCell(CellBase):
     # IP3 terms
     def i_plcb(self, v_beta):
         "Agonist-controlled PLC-beta activity [uM/s]"
-        return v_beta * 1 / ((1 + self._kg)*(self._kg/(1+self._kg) + self._a0)) * self._a0
+        return v_beta # * 1 / ((1 + self._kg)*(self._kg/(1+self._kg) + self._a0)) * self._a0
 
     def i_plcd(self, c, ip):
         "PLC-delta activity [uM/s]"
@@ -115,11 +123,11 @@ class SlowCell(CellBase):
     def init_slow_cell(self):
         "Reassign some parameters to make the resting state stationary"
         self.v_beta = ((self.i_deg(self.ip0) -
-                        self.i_plcd(self.c0, self.ip0)) /
-                        (1 / ((1 + self._kg) *
-                            (self._kg/(1 + self._kg) +
-                            self._a0)) *
-                        self._a0))
+                        self.i_plcd(self.c0, self.ip0)))
+                        # (1 / ((1 + self._kg) *
+                        #     (self._kg/(1 + self._kg) +
+                        #     self._a0)) *
+                        # self._a0))
         self._in_ip0 = self._v_inr * self.ip0**2 / (self._kr**2 + self.ip0**2)
         self._ipmca0 = self.i_pmca(self.c0)
 

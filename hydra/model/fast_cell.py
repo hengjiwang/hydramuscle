@@ -136,11 +136,11 @@ class FastCell(CellBase):
         return sol_
 
 if __name__ == '__main__':
-    model = FastCell(20, 0.0002)
+    model = FastCell(100, 0.0002)
     # sol = model.run([1,3,5,7,9,11,13,15])
-    sol = model.run([0])
+    sol = model.run([0, 5.2, 8.2, 10.6, 12.8, 15, 17.3, 19.4, 21.9, 25.1, 29.5, 34.3])
 
     # Plot the results
-    plot.plot_single_spike(model, sol, 0, 0.5, 0, 0.05)
+    plot.plot_single_spike(model, sol, 0, 100, 0, 0.05)
 
     

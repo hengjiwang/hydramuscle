@@ -2,6 +2,7 @@ import sys,os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 import numpy as np
+import pandas as pd
 
 from hydra.model.fast_cell import FastCell
 from hydra.model.slow_cell import SlowCell
@@ -61,11 +62,14 @@ class SMC(SlowCell, FastCell):
         return sol_
 
 if __name__ == '__main__':
-    model = SMC(T=200, dt=0.0002, k_ipr=0.02, s0=100, d=20e-4, v_delta=0.03)
+    model = SMC(T=100, dt=0.0002, k_ipr=0.08, s0=60, d=10e-4, v_delta=0.04, k_deg=0.4)
 
     ### One Fast Spike ###
     # sol = model.run(stims_fast = [0], stims_slow = [-100])
-    # plot.plot_single_spike(model, sol, 0, 2, 0, 0.05, full_cell=True)
+    # plot.plot_single_spike(model, sol, 0, 100, 0, 0.05, full_cell=True)
+
+    sol = model.run(stims_fast=[0, 5.2, 8.2, 10.6, 12.8, 15, 17.3, 19.4, 21.9, 25.1, 29.5, 34.3], stims_slow=[-100])
+    plot.plot_single_spike(model, sol, 0, 200, 0, 0.05, full_cell=True) 
 
 
     ### One Slow Transient ###
@@ -73,11 +77,9 @@ if __name__ == '__main__':
     # plot.plot_slow_transient(model, sol, 0, 100, full_cell=True)
 
     ### Multiple Fast Spikes ###
-    sol = model.run(stims_fast=[0, 5.2, 8.2, 10.6, 12.8, 15, 17.3, 19.4, 21.9, 25.1, 29.5, 34.3,
-                                100, 105.7, 108.8, 111.6, 113.8, 116.1, 118.3, 121, 124.2, 129, 135.4], 
-                    stims_slow=[-100])
-    force_ecto = ForceEncoderEcto.encode(sol[:, 0], model.dt);
-    force_endo = ForceEncoderEndo.encode(sol[:, 0], model.dt);
-    plot.plot_multiple_spikes(model, sol, force_ecto, force_endo, 0, 100, 0, 500)
-    # df_ecto = pd.DataFrame(force_ecto)
-    # df_endo = pd.DataFrame(force_endo)
+    # sol = model.run(stims_fast=[0, 5.2, 8.2, 10.6, 12.8, 15, 17.3, 19.4, 21.9, 25.1, 29.5, 34.3,
+    #                             100, 105.7, 108.8, 111.6, 113.8, 116.1, 118.3, 121, 124.2, 129, 135.4], 
+    #                 stims_slow=[-100])
+    # force_ecto = ForceEncoderEcto.encode(sol[:, 0], model.dt);
+    # force_endo = ForceEncoderEndo.encode(sol[:, 0], model.dt);
+    # plot.plot_multiple_spikes(model, sol, force_ecto, force_endo, 0, 100, 0, 500)

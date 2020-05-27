@@ -1,4 +1,11 @@
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+try:
+    from cv2 import cv2
+except:
+    import cv2
+from tqdm import tqdm
 
 def sig(v, vstar, sstar):
     "Sigmoidal function"
@@ -115,4 +122,43 @@ def encode_force_2d(encoder, c, numx, numy, dt):
     force = encoder.K * (sol[:, 2*num2:3*num2] + sol[:, 3*num2:4*num2])
 
     return force.reshape(-1, numx, numy)
+
+def save_video(filename, savepath, numx=200, numy=200, flip=True, dpi=50, fps=200):
+    "Convert data to video"
+    data = pd.read_hdf(filename)
+    data = data.values.reshape(-1, numx, numy)
+    
+    plt.figure(figsize=(numx/dpi, numy/dpi))
+
+    for iframe in tqdm(range(len(data))):
+
+        plt.clf()
+
+        frame = data[iframe]
+        # if flip:
+        #     frame = np.flip(frame.T, 0)
+
+        plt.imshow(frame.T, cmap='hot', vmin=0, vmax=2)
+
+        plt.axis('off')
+
+        plt.gca().xaxis.set_major_locator(plt.NullLocator())
+        plt.gca().yaxis.set_major_locator(plt.NullLocator())
+
+        plt.xlim(0, numx)
+        plt.ylim(0, numy)
+        plt.subplots_adjust(top=1, bottom=0, left=0, right=1, hspace=0, wspace=0)
+        plt.margins(0, 0)
+
+        plt.savefig(savepath + 'frames/img' + str(iframe) + '.jpg', dpi=dpi)
+
+    # Save video
+    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    videoWriter = cv2.VideoWriter(savepath + '/video.avi', fourcc, fps, (numx, numy))
+
+    for iframe in tqdm(range(len(data))):
+        frame = cv2.imread(savepath + 'frames/img' + str(iframe) + '.jpg')
+        videoWriter.write(frame)
+    videoWriter.release()
+    cv2.destroyAllWindows()
     
