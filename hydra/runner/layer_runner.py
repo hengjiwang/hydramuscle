@@ -24,19 +24,26 @@ def run_layer(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000, pathway="Both",
                   gcx=gcx, gcy=gcy, save_interval=save_interval)
 
     # Define stimulation times
-    stims_fast = [0, 5.2, 8.2, 10.6, 12.8, 15, 17.3, 19.4, 21.9, 25.1, 29.5, 34.3]
-    stims_slow = [14]
+    stims_fast = [0, 4.4, 7.1, 9.3, 11.2, 13.2, 15.7, 18.4, 21.2, 24.7,
+                  100, 105.2, 108.2, 110.6, 112.8, 115, 117.3, 119.4, 121.9, 125.1, 129.5, 134.3,
+                  200, 205.7, 208.8, 211.6, 213.8, 216.1, 218.3, 221, 224.2, 229, 235.4]
+    stims_slow1 = [114]
+    stims_slow2 = [214]
 
     # Set stimulation patterns
     if pathway == "Both":
         layer.set_stim_pattern("fast", xmin=0, xmax=numx, ymin=0, ymax=1, stim_times=stims_fast)
         layer.set_stim_pattern("slow", xmin=90, xmax=110, ymin=0, ymax=10,
-                               stim_times=stims_slow)
+                               stim_times=stims_slow1)
+        layer.set_stim_pattern("slow", xmin=0, xmax=10, ymin=0, ymax=10,
+                               stim_times=stims_slow2)
+        layer.set_stim_pattern("slow", xmin=numx-10, xmax=numx, ymin=0, ymax=10,
+                               stim_times=stims_slow2)
     elif pathway == "Fast":
         layer.set_stim_pattern("fast", xmin=0, xmax=numx, ymin=0, ymax=1, stim_times=stims_fast)
     elif pathway == "Slow":
         layer.set_stim_pattern("slow", xmin=90, xmax=110, ymin=0, ymax=10,
-                               stim_times=stims_slow)
+                               stim_times=stims_slow1)
 
     # Run the model
     sol = layer.run()
