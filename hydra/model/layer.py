@@ -64,11 +64,10 @@ class Layer(PopBase):
         elif pathway == "slow":
             self._stims_ip_map[tuple(indices)] = stim_times
 
-    def _rhs(self, y, t):
-        "Right-hand side"
-        num2 = self._num2
-
+    def calc_derivs(self, y, t):
+        "Calculate the derivatives based on the current-state variables"
         # Unpack dynamical variables
+        num2 = self._num2
         c, s, r, ip, v, m, h, n = (y[0:num2],
                                    y[num2:2*num2],
                                    y[2*num2:3*num2],
@@ -98,9 +97,16 @@ class Layer(PopBase):
             dvdt[list(indices)] += (1 / self.cell.c_m * 0.01 *
                                   self.cell.stim_fast(t, self._stims_v_map[indices], 0.01))
 
-        deriv = np.array([dcdt, dsdt, drdt, dipdt, dvdt, dmdt, dhdt, dndt])
+        return (dcdt, dsdt, drdt, dipdt, dvdt, dmdt, dhdt, dndt)
 
-        dydt = np.reshape(deriv, len(deriv)*num2)
+
+    def _rhs(self, y, t):
+        "Right-hand side"
+
+        (dcdt, dsdt, drdt, dipdt, dvdt, dmdt, dhdt, dndt) = self.calc_derivs(y, t)
+
+        deriv = np.array([dcdt, dsdt, drdt, dipdt, dvdt, dmdt, dhdt, dndt])
+        dydt = np.reshape(deriv, len(deriv)*self._num2)
 
         return dydt
 
@@ -124,7 +130,7 @@ class Layer(PopBase):
         y0 = np.reshape(y0, len(inits)*self._num2)  
 
         # Begin counting time
-        sol_ = euler_odeint(self._rhs, y0, self.T, self.dt, 
+        sol_ = euler_odeint(self._rhs, y0, self.T, self.dt,
                             save_interval=self._save_interval,
                             layer_num=1)
 

@@ -77,7 +77,7 @@ def average_force(force, numx, numy):
 
     return np.reshape(force_averaged, (-1, 20, 20))
 
-def encode_force_2d(encoder, c, numx, numy, dt):
+def encode_force_2d(encoder, c, numx, numy, dt, save_interval=1):
     "Encode calcium concentration matrix c into force"
 
     from hydra.model.euler_odeint import euler_odeint
@@ -115,7 +115,7 @@ def encode_force_2d(encoder, c, numx, numy, dt):
                         y=y0,
                         T=T,
                         dt=dt,
-                        save_interval=1,
+                        save_interval=save_interval,
                         c=c,
                         num2=num2)
 

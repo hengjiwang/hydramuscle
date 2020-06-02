@@ -41,7 +41,7 @@ def run_layer(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000, pathway="Both",
                                stim_times=stims_slow2)
     elif pathway == "Fast":
         layer.set_stim_pattern("fast", xmin=0, xmax=numx, ymin=0, ymax=1, stim_times=stims_fast)
-    elif pathway == "Slow":
+    elif pathway == "Slow":  
         layer.set_stim_pattern("slow", xmin=90, xmax=110, ymin=0, ymax=10,
                                stim_times=stims_slow1)
 
@@ -59,7 +59,8 @@ def run_layer(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000, pathway="Both",
     for key in kargs:
         filemeta += "," + key + '=' + str(kargs[key])
 
-    # filemeta += ",endo"
+    if pathway == "Fast":
+        filemeta += ",endo"
 
     # Save the results
     # hf = h5py.File(save_dir + filename + '.h5', 'w')
