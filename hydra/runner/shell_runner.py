@@ -49,7 +49,7 @@ def run_shell(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000, sparsity=0.1, gc=100
 
     # Run the model
     sol = shell.run()
-    sol = pd.DataFrame(shell)
+    sol = pd.DataFrame(sol)
 
     # Generate filename and corresponding metadata
     filename = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S-%f")
