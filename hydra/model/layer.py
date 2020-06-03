@@ -91,7 +91,7 @@ class Layer(PopBase):
         # Add stimulation
         for indices in self._stims_ip_map:
             dipdt[list(indices)] += (self.cell.i_plcb(self.cell.stim_slow(t, self._stims_ip_map[indices])) -
-                               self.cell.i_plcb(self.cell.v_beta))
+                                     self.cell.i_plcb(self.cell.v_beta))
 
         for indices in self._stims_v_map:
             dvdt[list(indices)] += (1 / self.cell.c_m * 0.01 *

@@ -3,7 +3,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
 import pandas as pd
 import argparse
-import h5py
 
 from hydra.model.smc import SMC
 from hydra.model.layer import Layer
@@ -14,7 +13,7 @@ def run_layer(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000, pathway="Both",
 
     # Check the existence of the saving directory
     if not save_dir.endswith('/'):
-        save_dir += '/'
+        save_dir += '/'  
     if not os.path.isdir(save_dir):
         raise FileExistsError("Target directory " + save_dir + " does not exist. ")
 
@@ -63,9 +62,6 @@ def run_layer(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000, pathway="Both",
         filemeta += ",endo"
 
     # Save the results
-    # hf = h5py.File(save_dir + filename + '.h5', 'w')
-    # hf.create_dataset('calcium', data=sol)
-    # hf.close()
     sol.to_hdf(save_dir + filename + '.h5', 'calcium')
 
     # Document the metadata
