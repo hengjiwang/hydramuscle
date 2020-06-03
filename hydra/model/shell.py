@@ -21,15 +21,15 @@ class Shell:
 
         self.ectoderm = ectoderm
         self.endoderm = endoderm
-        
-        self._numx = self.ectoderm.numx
-        self._numy = self.ectoderm.numy
+
+        self._numx = self.ectoderm._numx
+        self._numy = self.ectoderm._numy
         self._num2 = self._numx * self._numy
 
         # Numerical settings (follow layer model)
         self.T = self.ectoderm.T
         self.dt = self.endoderm.dt
-        self._save_interval = self.ectoderm.save_interval
+        self._save_interval = self.ectoderm._save_interval
 
         # Init cross-layer gap junctions
         self.cross_layer_pattern = np.random.uniform(0, 1, size=self._num2)
