@@ -97,7 +97,8 @@ class Shell:
                             save_interval=self._save_interval,
                             numx=self._numx,
                             numy=self._numy,
-                            layer_num=2)
+                            layer_num=2,
+                            numvar=8)
 
         return sol_
 
