@@ -49,8 +49,8 @@ class Shell:
         ip1, ip2 = y[3*self._num2:4*self._num2], y[11*self._num2:12*self._num2]
         dip1dt += self.gip3 * (ip2 - ip1)
         dip2dt += self.gip3 * (ip1 - ip2)
-        dv1dt += self.gip3 * (v2 - v1)
-        dv2dt += self.gip3 * (v1 - v2)
+        dv1dt += self.gc * (v2 - v1)
+        dv2dt += self.gc * (v1 - v2)
 
         # Re-pack the derivatives
         deriv = np.array([dc1dt, ds1dt, dr1dt, dip1dt, dv1dt, dm1dt, dh1dt, dn1dt,
