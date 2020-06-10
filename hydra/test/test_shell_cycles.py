@@ -40,7 +40,7 @@ def run_shell(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000, sparsity=0.1, gc=100
                                   stim_times=stims_slow2)
     elif pathway == "Fast":
         ectoderm.set_stim_pattern("fast", xmin=0, xmax=numx, ymin=0, ymax=1, stim_times=stims_fast)
-    elif pathway == "Slow":  
+    elif pathway == "Slow":
         ectoderm.set_stim_pattern("slow", xmin=90, xmax=110, ymin=0, ymax=10,
                                   stim_times=stims_slow1)
 

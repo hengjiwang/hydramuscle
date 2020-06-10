@@ -206,8 +206,9 @@ def plot_frame_patterns(data, time_pts, vmin, vmax, dt=1):
         timep = time_pts[j]
         frame = np.flip(data[int(timep/dt)].T, 0)
         ax.imshow(frame, cmap='hot', vmin=vmin, vmax=vmax)
-        ax.set_title('t=' + str(timep) + 's')
+        ax.set_title('t=' + str(round(timep,2)) + 's')
 
+    plt.tight_layout()
     plt.show()
 
 def plot_1d_traces(data, interval, dt):
