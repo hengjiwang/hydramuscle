@@ -27,18 +27,16 @@ def run_shell(numx, numy, gip3x, gip3y, gcx, gcy, sparsity, gc, gip3,
     # Define stimulation times
     stims_fast = []
     stims_slow1 = [10]
-    stims_slow2 = [15]
-    stims_slow3 = [20]
+    # stims_slow2 = [15]
+    # stims_slow3 = [20]
 
     # Set stimulation patterns
     ectoderm.set_stim_pattern("slow", xmin=0, xmax=-1, ymin=0, ymax=-1,
                               stim_times=stims_slow1, randomnum=randomnum)
-    ectoderm.set_stim_pattern("slow", xmin=0, xmax=-1, ymin=0, ymax=-1,
-                              stim_times=stims_slow2, randomnum=randomnum)
-    ectoderm.set_stim_pattern("slow", xmin=0, xmax=-1, ymin=0, ymax=-1,
-                              stim_times=stims_slow3, randomnum=randomnum)
-
-    print(ectoderm._stims_ip_map)
+    # ectoderm.set_stim_pattern("slow", xmin=0, xmax=-1, ymin=0, ymax=-1,
+    #                           stim_times=stims_slow2, randomnum=randomnum)
+    # ectoderm.set_stim_pattern("slow", xmin=0, xmax=-1, ymin=0, ymax=-1,
+    #                           stim_times=stims_slow3, randomnum=randomnum)
 
     # Build shell
     shell = Shell(ectoderm, endoderm, sparsity, gc, gip3)
@@ -51,6 +49,8 @@ def run_shell(numx, numy, gip3x, gip3y, gcx, gcy, sparsity, gc, gip3,
     filename = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S-%f")
     filemeta = "numx=" + str(numx) + ","
     filemeta += "numy=" + str(numy) + ","
+    filemeta += "gip3x=" + str(gip3x) + ","
+    filemeta += "gip3y=" + str(gip3y) + ","
     filemeta += "randomnum=" + str(randomnum)
 
     for key in kargs:

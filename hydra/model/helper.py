@@ -36,6 +36,28 @@ def generate_indices(numy, xmin, xmax, ymin, ymax):
 
     return res
 
+def generate_random_indices(numx, numy, randomnum, neighborsize):
+    "Generate <=9*randomnum indices in a numx*numy matrix"
+    res = []
+    for _ in range(randomnum):
+
+        # Middle point
+        indx = np.random.randint(0, numx)
+        indy = np.random.randint(0, numy)
+
+        # Neighboring points
+        for dx in range(-neighborsize//2+1, neighborsize//2+1):
+            for dy in range(-neighborsize//2+1, neighborsize//2+1):
+                indx_ = indx + dx
+                indy_ = indy + dy
+
+                if 0 <= indx_ < numx and 0 <= indy_ < numy:
+                    res.append(indx_*numy + indy_)
+
+    return list(set(res))
+
+
+
 def track_wavefront(data, thres):
     "Track the wavefront of trace data"
 
