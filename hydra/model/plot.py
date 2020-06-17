@@ -22,7 +22,7 @@ def plot_single_spike(model, sol, tmin1, tmax1, tmin2, tmax2, full_cell=False,
         h = sol[:, 6]
         n = sol[:, 7]
 
-    plt.figure(figsize=(30, 10), tight_layout=True)
+    plt.figure(figsize=(18, 5), tight_layout=True)
 
     ax1 = plt.subplot2grid((1, 3), (0, 1), colspan=1)
     ax1.plot(model.time[index_min:index_max]*1000, c[index_min:index_max], linewidth=5, color="k")
@@ -71,7 +71,7 @@ def plot_slow_transient(model, sol, tmin, tmax, full_cell=False, fontsize=30, te
     r = sol[:, 2]
     ip = sol[:, 3]
 
-    plt.figure(figsize=(25, 10), tight_layout=True)
+    plt.figure(figsize=(14, 5), tight_layout=True)
 
     ax1 = plt.subplot2grid((1, 2), (0, 0), colspan=1)
     ax1.plot(model.time[index_min:index_max], c[index_min:index_max], linewidth=5, color="k")
@@ -144,11 +144,11 @@ def plot_multiple_spikes(model, sol, force_ecto, force_endo, tmin1, tmax1, tmin2
     fluo = fluo_encoder.step()
     fluo = (fluo - min(fluo))/(max(fluo) - min(fluo))
 
-    plt.figure(figsize=(30, 10), tight_layout=True)
+    plt.figure(figsize=(20, 5), tight_layout=True)
 
     # Plot [Ca2+] and fluoresence in one subplot
     ax1 = plt.subplot2grid((1, 3), (0, 1), colspan=1)
-    ax1.plot(model.time[index_min:index_max], c[index_min:index_max], linewidth=5, color="k")
+    ax1.plot(model.time[index_min:index_max], c[index_min:index_max], linewidth=3, color="k")
     ax1.tick_params(labelsize=fontsize)
     ax1.set_xlabel("time(s)", fontsize=fontsize)
     ax1.set_ylabel(r"[Ca$^{2+}$](uM)", fontsize=fontsize)
@@ -156,10 +156,10 @@ def plot_multiple_spikes(model, sol, force_ecto, force_endo, tmin1, tmax1, tmin2
 
     ax3 = ax1.twinx()
     ax3.plot(model.time[index_min:index_max], fluo[index_min:index_max],
-             linewidth=5, color="purple")
-    ax3.tick_params(axis='y', labelsize=fontsize, labelcolor='purple')
+             linewidth=5, color="green")
+    ax3.tick_params(axis='y', labelsize=fontsize, labelcolor='green')
     ax3.set_ylim(0, 1)
-    ax3.set_ylabel("Fluorescence(a.u.)", fontsize=fontsize, color='purple')
+    ax3.set_ylabel("Fluorescence(a.u.)", fontsize=fontsize, color='green')
 
     # Plot membrane potential
     ax2 = plt.subplot2grid((1, 3), (0, 0), colspan=1)
@@ -175,7 +175,7 @@ def plot_multiple_spikes(model, sol, force_ecto, force_endo, tmin1, tmax1, tmin2
 
     ax3 = plt.subplot2grid((1, 3), (0, 2), colspan=1)
     ax3.plot(model.time[index_min:index_max], force_ecto[index_min:index_max],
-             linewidth=5, color="g", label=r"Ectoderm")
+             linewidth=5, color="darkgreen", label=r"Ectoderm")
     ax3.plot(model.time[index_min:index_max], force_endo[index_min:index_max],
              linewidth=5, color="r", label=r"Endoderm")
     ax3.legend(fontsize=fontsize, loc='upper right')
@@ -241,5 +241,48 @@ def plot_1d_traces(data, interval, dt):
     ax2.set_ylabel(r"[Ca$^{2+}$] ($\mu$M)")
     ax2.set_title("y direction")
 
-    
+def plot_slowwave_stills(data, times, dt, init_time=10,
+                         save_fig=True, save_path="../results/figures/simulate-slow-wave.png"):
+    "Plot the stills of the slow wave"
+    fig = plt.figure(figsize=(20, 5))
 
+    for j in range(len(times)):
+        ax = fig.add_subplot(1, len(times), j+1)
+        im = ax.imshow(np.flip(data[int(times[j]/dt)].T, 0), cmap='hot', vmin=0, vmax=1)
+        ax.text(10, 20, str(times[j]-init_time) + 's', color='white', fontsize=20)
+        ax.set_xticks([0, 50, 100, 150, 200])
+        ax.set_yticks([0, 50, 100, 150, 200])
+        ax.tick_params(labelsize=15, labelcolor='k')
+
+    cax = fig.add_axes([0.92, 0.15, 0.01, 0.7])
+    cb = plt.colorbar(im, cax=cax)
+    font = {'size':15}
+    cb.ax.tick_params(labelsize=15)
+    cb.set_label(r"[Ca$^{2+}$] ($\mu$M)", fontdict=font)
+    # plt.tight_layout()
+    if save_fig:
+        plt.savefig(save_path, bbox_inches='tight')
+    plt.show()
+
+def plot_fastwave_stills(data, times, dt,
+                         save_fig=True, save_path="../results/figures/simulate-fast-wave.png"):
+    "Plot the stills of the slow wave"
+    fig = plt.figure(figsize=(20, 5))
+
+    for j in range(len(times)):
+        ax = fig.add_subplot(1, len(times), j+1)
+        im = ax.imshow(np.flip(data[int(times[j]/dt)].T, 0), cmap='hot', vmin=0, vmax=1)
+        ax.text(10, 20, str(int(times[j]*1000)) + 'ms', color='white', fontsize=20)
+        ax.set_xticks([0, 50, 100, 150, 200])
+        ax.set_yticks([0, 50, 100, 150, 200])
+        ax.tick_params(labelsize=15, labelcolor='k')
+
+    cax = fig.add_axes([0.92, 0.15, 0.01, 0.7])
+    cb = plt.colorbar(im, cax=cax)
+    font = {'size':15}
+    cb.ax.tick_params(labelsize=15)
+    cb.set_label(r"[Ca$^{2+}$] ($\mu$M)", fontdict=font)
+    # plt.tight_layout()
+    if save_fig:
+        plt.savefig(save_path, bbox_inches='tight')
+    plt.show()

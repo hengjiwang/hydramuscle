@@ -8,7 +8,7 @@ from hydra.model.smc import SMC
 from hydra.model.layer import Layer
 from hydra.model.shell import Shell
 
-def run_shell(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000, sparsity=0.1, gc=1000, gip3=5, pathway="Both",
+def run_shell(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000, sparsity=0.002, gc=1000, gip3=5, pathway="Both",
               save_interval=100, save_dir="../results/data/calcium", **kargs):
     
     # Check the existence of the saving directory
@@ -79,7 +79,7 @@ if __name__ == "__main__":
     parser.add_argument('--gip3y', type=float, default=40)
     parser.add_argument('--gcx', type=float, default=1000)
     parser.add_argument('--gcy', type=float, default=1000)
-    parser.add_argument('--sparsity', type=float, default=0.1)
+    parser.add_argument('--sparsity', type=float, default=0.002)
     parser.add_argument('--gc', type=float, default=1000)
     parser.add_argument('--gip3', type=float, default=5)
     parser.add_argument('--pathway', type=str, default="Both")
