@@ -25,9 +25,14 @@ def run_shell(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000, sparsity=0.002, gc=1
                      gcx=gcx, gcy=gcy, save_interval=save_interval)
     
     # Define stimulation times
-    stims_fast = [0, 4.4, 7.1, 9.3, 11.2, 13.2, 15.7, 18.4, 21.2, 24.7]
-    stims_slow1 = [14]
-    stims_slow2 = []
+    # stims_fast = [0, 4.4, 7.1, 9.3, 11.2, 13.2, 15.7, 18.4, 21.2, 24.7]
+    # stims_slow1 = [14]
+    # stims_slow2 = []
+    stims_fast = [0, 4.4, 7.1, 9.3, 11.2, 13.2, 15.7, 18.4, 21.2, 24.7,
+                  100, 105.2, 108.2, 110.6, 112.8, 115, 117.3, 119.4, 121.9, 125.1, 129.5, 134.3,
+                  200, 205.7, 208.8, 211.6, 213.8, 216.1, 218.3, 221, 224.2, 229, 235.4]
+    stims_slow1 = [114]
+    stims_slow2 = [214]
 
     # Set stimulation patterns
     if pathway == "Both":
