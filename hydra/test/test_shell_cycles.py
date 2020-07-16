@@ -37,11 +37,11 @@ def run_shell(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000, sparsity=0.002, gc=1
     # Set stimulation patterns
     if pathway == "Both":
         ectoderm.set_stim_pattern("fast", xmin=0, xmax=numx, ymin=0, ymax=1, stim_times=stims_fast)
-        ectoderm.set_stim_pattern("slow", xmin=90, xmax=110, ymin=0, ymax=10,
+        ectoderm.set_stim_pattern("slow", xmin=20, xmax=30, ymin=0, ymax=10,
                                   stim_times=stims_slow1)
-        ectoderm.set_stim_pattern("slow", xmin=0, xmax=10, ymin=0, ymax=10,
+        ectoderm.set_stim_pattern("slow", xmin=0, xmax=5, ymin=0, ymax=10,
                                   stim_times=stims_slow2)
-        ectoderm.set_stim_pattern("slow", xmin=numx-10, xmax=numx, ymin=0, ymax=10,
+        ectoderm.set_stim_pattern("slow", xmin=numx-5, xmax=numx, ymin=0, ymax=10,
                                   stim_times=stims_slow2)
     elif pathway == "Fast":
         ectoderm.set_stim_pattern("fast", xmin=0, xmax=numx, ymin=0, ymax=1, stim_times=stims_fast)
@@ -62,6 +62,8 @@ def run_shell(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000, sparsity=0.002, gc=1
     filemeta += "numy=" + str(numy) + ","
     filemeta += "gc=" + str(gc) + ","
     filemeta += "gip3=" + str(gip3) + ","
+    filemeta += "gip3x=" + str(gip3x) + ","
+    filemeta += "gip3y=" + str(gip3y) + ","
     filemeta += "sparsity=" + str(sparsity)
 
     for key in kargs:

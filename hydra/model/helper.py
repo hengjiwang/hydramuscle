@@ -87,17 +87,17 @@ def compress_frame(frame, size_x, size_y, to_size_x, to_size_y):
 
     return np.reshape(new_mat, (to_size_x*to_size_y))
 
-def average_force(force, numx, numy):
+def average_force(force, numx, numy, to_numx, to_numy):
     "Average the force to 20x20"
 
-    force_averaged = np.zeros((len(force), 400))
+    force_averaged = np.zeros((len(force), to_numx*to_numy))
 
     for j in range(len(force)):
         frame = force[j]
 
-        force_averaged[j, :] = compress_frame(frame, numx, numy, 20, 20)
+        force_averaged[j, :] = compress_frame(frame, numx, numy, to_numx, to_numy)
 
-    return np.reshape(force_averaged, (-1, 20, 20))
+    return np.reshape(force_averaged, (-1, to_numx, to_numy))
 
 def encode_force_2d(encoder, c, numx, numy, dt, save_interval=1):
     "Encode calcium concentration matrix c into force"
