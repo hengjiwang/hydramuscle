@@ -17,7 +17,7 @@ from hydra.model.layer import Layer
 class Shell:
     """ Two-layer body shell """
 
-    def __init__(self, ectoderm, endoderm, sparsity=0.1, gc=1000, gip3=5):
+    def __init__(self, ectoderm, endoderm, seed=1112, sparsity=0.1, gc=1000, gip3=5):
 
         self.ectoderm = ectoderm
         self.endoderm = endoderm
@@ -32,6 +32,7 @@ class Shell:
         self._save_interval = self.ectoderm._save_interval
 
         # Init cross-layer gap junctions
+        np.random.seed(seed)
         self.cross_layer_pattern = np.random.uniform(0, 1, size=self._num2)
         self.cross_layer_pattern = (self.cross_layer_pattern < sparsity).astype(float)
         self.gc = self.cross_layer_pattern * gc

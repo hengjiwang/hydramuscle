@@ -8,7 +8,7 @@ from hydra.model.smc import SMC
 from hydra.model.layer import Layer
 from hydra.model.shell import Shell
 
-def run_shell(numx, numy, gip3x, gip3y, gcx, gcy, sparsity, gc, gip3,
+def run_shell(numx, numy, seed, gip3x, gip3y, gcx, gcy, sparsity, gc, gip3,
               save_interval, save_dir, randomnum, **kargs):
     
     # Check the existence of the saving directory
@@ -39,7 +39,7 @@ def run_shell(numx, numy, gip3x, gip3y, gcx, gcy, sparsity, gc, gip3,
     #                           stim_times=stims_slow3, randomnum=randomnum)
 
     # Build shell
-    shell = Shell(ectoderm, endoderm, sparsity, gc, gip3)
+    shell = Shell(ectoderm, endoderm, seed, sparsity, gc, gip3)
 
     # Run the model
     sol = shell.run()
@@ -69,6 +69,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='manual to this script')
     parser.add_argument('--numx', type=int, default=200)
     parser.add_argument('--numy', type=int, default=200)
+    parser.add_argument('--seed', type=int, default=896)
     parser.add_argument('--gip3x', type=float, default=5)
     parser.add_argument('--gip3y', type=float, default=40)
     parser.add_argument('--gcx', type=float, default=1000)
@@ -88,7 +89,7 @@ if __name__ == "__main__":
     parser.add_argument('--k_deg', type=float, default=0.15)
     args = parser.parse_args()
 
-    run_shell(args.numx, args.numy, args.gip3x, args.gip3y,
+    run_shell(args.numx, args.numy, args.seed, args.gip3x, args.gip3y,
               args.gcx, args.gcy, args.sparsity, args.gc, args.gip3,
               args.save_interval, args.save_dir, args.randomnum,
               T=args.T, dt=args.dt, k_ipr=args.k_ipr, s0=args.s0,

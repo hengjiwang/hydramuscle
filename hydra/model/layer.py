@@ -59,7 +59,7 @@ class Layer(PopBase):
         "Set the stimulation pattern"
         indices = helper.generate_indices(self._numy, xmin, xmax, ymin, ymax)
         # indices += random.sample(list(range(self._num2)), randomnum)
-        indices += helper.generate_random_indices(self._numx, self._numy, randomnum, neighborsize=5)
+        indices += helper.generate_random_indices(self._numx, self._numy, randomnum, neighborsize=2)
         if pathway == "fast":
             self._stims_v_map[tuple(indices)] = stim_times
         elif pathway == "slow":

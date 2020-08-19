@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.linalg as LA
 import pandas as pd
 import matplotlib.pyplot as plt
 try:
@@ -42,7 +43,9 @@ def generate_random_indices(numx, numy, randomnum, neighborsize):
     for _ in range(randomnum):
 
         # Middle point
+        # np.random.seed(1)
         indx = np.random.randint(0, numx)
+        # np.random.seed(2)
         indy = np.random.randint(0, numy)
 
         # Neighboring points
@@ -58,7 +61,7 @@ def generate_random_indices(numx, numy, randomnum, neighborsize):
 
 
 
-def track_wavefront(data, thres):
+def track_wavefront(data, thres, pathway='slow'):
     "Track the wavefront of trace data"
 
     ntime = len(data)
@@ -66,11 +69,27 @@ def track_wavefront(data, thres):
 
     wavefront = np.zeros(ntime)
 
-    for j in range(ntime):
-        for k in range(numcell-1, -1, -1):
-            if data[j][k] > thres:
-                wavefront[j] = k
-                break
+    if pathway == 'slow':
+
+        for j in range(ntime):
+
+            if j < int(15/0.02):
+                wavefront[j] = 0
+                continue
+            
+            for k in range(numcell-1, -1, -1):
+                if 5 < k < 30 and data[j][k] > thres and data[j][k] - data[j][k+20] > 0.1:
+                    wavefront[j] = k if (0 < k - wavefront[j-1] < 4 or wavefront[j-1] == 0) else wavefront[j-1]
+                    break
+    
+    elif pathway == 'fast':
+
+        for j in range(ntime):
+            for k in range(numcell-1, -1, -1):
+                if data[j][k] > thres:
+                    wavefront[j] = k
+                    break
+
 
     return wavefront
 
@@ -183,4 +202,110 @@ def save_video(filename, savepath, numx=200, numy=200, flip=True, dpi=50, fps=20
         videoWriter.write(frame)
     videoWriter.release()
     cv2.destroyAllWindows()
+    
+def length_of_model(coordspath, totaltime=300, loc='x', display=True):
+    "Extract the length trace of model from the coordinates of sidepoints"
+    # Get number of points and time steps
+    count = 0
+    ntime = 0
+    with open(coordspath, 'r') as fp:
+        while True:
+            count += 1
+            line = fp.readline()
+            if not line:
+                break
+            if count == 7:
+                npoints = len(line.split())
+            if count >= 6:
+                ntime += 1
+
+    ntime = ntime // 3
+
+    # Reformat coordinates
+    mat = np.zeros((ntime, npoints, 3))
+
+    count = 0
+    itime = -1
+    with open(coordspath, 'r') as fp:
+        while True:
+            count += 1
+            line = fp.readline()
+            if not line:
+                break
+                
+            if count < 6:
+                pass
+            elif count % 3 == 0:
+                itime += 1
+                coords = line.split()[1:]
+                coords = [float(x) for x in coords]
+                mat[itime, :, 0] = coords
+            elif count % 3 == 1:
+                coords = line.split()
+                coords = [float(x) for x in coords]
+                mat[itime, :, 1] = coords
+            else:
+                coords = line.split()
+                coords = [float(x) for x in coords]
+                mat[itime, :, 2] = coords
+
+    # Change the unit from m to mm
+    mat *= 1000
+
+    # Divide positive and negative points
+    mat_pos = np.zeros((ntime, npoints//2, 3))
+    mat_neg = np.zeros((ntime, npoints//2, 3))
+
+    ipos = 0
+    ineg = 0
+
+    division = 1 if loc == 'x' else 0 if loc == 'y' else None
+
+    for j in range(len(mat[0])):
+        if mat[division][j][0] < 0:
+            mat_neg[:, ineg, :] = mat[:, j, :]
+            ineg += 1
+        else:
+            mat_pos[:, ipos, :] = mat[:, j, :]
+            ipos += 1
+
+    # Sort the points from bottom to top
+    z_original = mat_pos[0, :, 2]
+    argsort = np.argsort(z_original)
+    mat_pos_sorted = mat_pos[:, argsort, :]
+
+    z_original = mat_neg[0, :, 2]
+    argsort = np.argsort(z_original)
+    mat_neg_sorted = mat_neg[:, argsort, :]
+
+    # Get the middle points
+    mat_mid = (mat_pos_sorted + mat_neg_sorted) / 2
+
+    # Calculate the length
+    lengths = []
+
+    for j in range(len(mat_mid)):
+        points = mat_mid[j]
+        length = 0
+        for k in range(len(points)-1):
+            diffvec = points[k+1] - points[k]
+            dist = LA.norm(diffvec)
+            length += dist
+        lengths.append(length)
+
+    if display:
+        plt.figure(figsize=(int(totaltime/30),3))
+        plt.plot(np.arange(0, totaltime+0.1, 0.1), lengths, color='b', linewidth=2)
+        plt.xlabel('time(s)')
+        plt.ylabel('length(mm)')
+        plt.show()
+
+    return lengths
+
+def normalize(seq):
+    "Normalize a sequence"
+    minval = min(seq)
+    maxval = max(seq)
+    return [(x - minval) / (maxval - minval) for x in seq]
+
     
