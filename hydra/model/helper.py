@@ -7,6 +7,7 @@ try:
 except:
     import cv2
 from tqdm import tqdm
+import scipy.ndimage
 
 def sig(v, vstar, sstar):
     "Sigmoidal function"
@@ -308,4 +309,21 @@ def normalize(seq):
     maxval = max(seq)
     return [(x - minval) / (maxval - minval) for x in seq]
 
+def filter_abnormal(seq, size=50, thres=0.2):
+    "Filter out abnormal points in seq"
     
+    res = []
+    seq_smooth = scipy.ndimage.filters.median_filter(seq, size=size)
+    
+    maxval = max(seq)
+    minval = min(seq)
+    
+    for j in range(len(seq)):
+        val = seq[j]
+        val_smooth = seq_smooth[j]
+        if abs(val - val_smooth) > thres * (maxval - minval):
+            res.append(val_smooth)
+        else:
+            res.append(val)
+            
+    return res

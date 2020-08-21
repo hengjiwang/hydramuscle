@@ -16,7 +16,7 @@ class ForceEncoderEndo(object):
     k4 = 0.05 # 3.6124
     k5 = k2
     k6 = 0
-    k7 = 0.015 # 0.03 # 0.003 # 0.001
+    k7 = 0.01 # 0.03 # 0.003 # 0.001
 
     # General parameters
     nm = 4 # 4.7135

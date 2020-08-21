@@ -3,39 +3,40 @@
 close all; clear all; clc;
 
 %%
-v1 = VideoReader('./data/ecto_calcium_389459.avi');
+v1 = VideoReader('./data/ca_658838.avi');
 % v2 = VideoReader('./data/ecto_force_389459.avi');
 % v3 = VideoReader('./data/endo_force_389459.avi');
-w = VideoWriter('./data/motion_ca_389459.avi');
+w = VideoWriter('./data/motion_ca_658838.avi');
 w.FrameRate = 20;
 open(w);
 
-[X,Y,Z] = cylinder(ones(1,5),100);
+% [X,Y,Z] = cylinder(ones(1,5),100);
 
-motionFolder = './data/motion_389459/';
+motionFolder = './data/motion_658838/';
 motionFiles = dir(fullfile(motionFolder, '*.png'));
 
 %% 
 
-nx = 1263;
-ny = 1142;
+nx = 2108;
+ny = 1332;
 
-for j = 1:100
-    
+for j = 1:250
+     
     disp(j);
     
     % Create 3d image of calcium frame
-    calcium = read(v1, 1000 + (j-1)*20);
-    calcium = flipdim(calcium, 1);
+    calcium = read(v1, (j-1)*10 + 1);
+%     calcium = flipdim(calcium, 1);
+    im_ca = calcium;
     figure('visible','off');
-    warp(X,Y,Z, calcium);
-    view([180 17])
-    set(gcf, 'position', [0, 0, nx, nx])
-    F = getframe(gcf);
-    [im_ca, Map] = frame2im(F);
-    im_ca = imresize(im_ca, [ny nx]);
-    clf;
-    close;
+%     warp(X,Y,Z, calcium);
+%     view([180 17])
+%     set(gcf, 'position', [0, 0, nx, nx])
+%     F = getframe(gcf);
+%     [im_ca, Map] = frame2im(F);
+    im_ca = imresize(im_ca, [ny ny+1]);
+%     clf;
+%     close;
     
 %     % Create 3d image of ecto stress
 %     ectoForce = read(v2, 1000 + (j-1)*20);
@@ -65,6 +66,7 @@ for j = 1:100
     
     % Read motion frame
     im_mo = imread([motionFolder, motionFiles(j).name]);
+    im_mo = imcrop(im_mo, [300, 0, ny, ny]);
     
     % Combine figures
     figure('visible','off');
@@ -72,6 +74,8 @@ for j = 1:100
     montage({im_mo, im_ca});
     F = getframe(gcf);
     [im_all, Map] = frame2im(F);
+    
+%     imshow(im_all);
     
     % Write frame
     writeVideo(w, im_all);
