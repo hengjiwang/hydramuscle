@@ -11,17 +11,17 @@ from scipy.integrate import odeint
 class ForceEncoderEndo(object):
 
     # Attachment & Detachment rates
-    k2 = 0.25 # 0.1399
+    k2 = 0.15 # 0.1399
     k3 = 0.4 # 14.4496
     k4 = 0.05 # 3.6124
     k5 = k2
     k6 = 0
-    k7 = 0.01 # 0.03 # 0.003 # 0.001
+    k7 = 0.015 # 0.03 # 0.003 # 0.001
 
     # General parameters
     nm = 4 # 4.7135
     c_half = 0.15 # 0.4640758
-    K = 1
+    K = 0.3 # 1
 
     # Initial variables
     m0 = 1

@@ -26,32 +26,22 @@ def run_shell(numx, numy, seed, gip3x, gip3y, gcx=1000, gcy=1000, sparsity=0.002
                      gcx=gcx, gcy=gcy, save_interval=save_interval)
     
     # Define stimulation times
-    # stims_fast = [0, 4.4, 7.1, 9.3, 11.2, 13.2, 15.7, 18.4, 21.2, 24.7]
-    # stims_slow1 = [14]
-    # stims_slow2 = []
     init1 = 100
-    init2 = 223
-    # stims_fast = [0, 4.4, 7.1, 9.3, 11.2, 13.2, 15.7, 18.4, 21.2, 24.7,
-    #               init1, init1 + 5.2, init1 + 8.2, init1 + 10.6, init1 + 12.8, init1 + 15, init1 + 17.3, init1 + 19.4, init1 + 21.9, init1 + 25.1, init1 + 29.5, init1 + 34.3,
-    #               init2, init2 + 5.7, init2 + 8.8, init2 + 11.6, init2 + 13.8, init2 + 16.1, init2 + 18.3, init2 + 21, init2 + 24.2, init2 + 29, init2 + 35.4]
-    # stims_fast = [0, 4.4, 7.1, 9.3, 11.2, 13.2, 15.7, 18.4, 21.2, 24.7,
-    #             init1, init1 + 4.75, init1 + 7.75, init1 + 9.25, init1 + 13.75, init1 + 17.5, init1 + 21.5, init1 + 24.5, init1 + 30,
-    #             init2, init2 + 4.25, init2 + 7, init2 + 8.75, init2 + 11.5, init2 + 13.25, init2 + 17, init2 + 18.75, init2 + 22.75, init2 + 27, init2 + 29.25]
-    # stims_fast = [0, 4.4, 7.1, 9.3, 11.2, 13.2, 15.7, 18.4, 21.2, 24.7,
-    #         init1, init1 + 4.75, init1 + 9.25, init1 + 13.75, init1 + 17.5, init1 + 21.5, init1 + 24.5, init1 + 30,
-    #         init2, init2 + 4.25, init2 + 8.75, init2 + 13.25, init2 + 17, init2 + 22.75, init2 + 29.25]
-    # stims_fast = [0, 4.4, 7.1, 9.3, 11.2, 13.2, 15.7, 18.4, 21.2, 24.7,
+    init2 = 208
+    # stims_fast = [0.0, 9.25, 14.5, 18.25, 21.5, 24.5, 28.0, 31.5, 35.25, 40.5,
     #               init1+0.0, init1+9.25, init1+14.5, init1+18.25, init1+21.5, init1+24.5, init1+28.0, init1+31.5, init1+35.25, init1+40.5,
     #               init2+0.0, init2+7.75, init2+15.25, init2+19.75, init2+23.0, init2+27.25, init2+30.5, init2+34.25, init2+38.25, init2+43.5]
-    stims_fast = [0, 4.4, 7.1, 9.3, 11.2, 13.2, 15.7, 18.4, 21.2, 24.7,
-                  100.0, 109.5, 115.5, 118.5, 122.25, 125.75, 129.0, 132.5, 136.0, 143.25,
-                  208.0, 209.75, 217.75, 223.75, 227.25, 230.25, 233.75, 237.5, 242.0, 249.75,
-                  339.75, 347.25, 352.5, 356.25, 359.75, 363.0, 366.25, 370.0, 375.25,
-                  462.25, 471.5, 476.75, 480.5, 483.75, 486.75, 490.25, 493.75, 497.5, 502.75]
-    stims_slow1 = []
-    stims_slow2 = []
-    # stims_slow1 = [15]
-    # stims_slow2 = []
+    stims_fast = [0.0, 9.5, 15.5, 18.5, 22.25, 25.75, 29.0, 32.5, 36.0, 43.25,
+                100.0, 109.5, 115.5, 118.5, 122.25, 125.75, 129.0, 132.5, 136.0, 143.25,
+                208.0, 209.75, 217.75, 223.75, 227.25, 230.25, 233.75, 237.5, 242.0, 249.75,
+                339.75, 347.25, 352.5, 356.25, 359.75, 363.0, 366.25, 370.0, 375.25,
+                462.25, 471.5, 476.75, 480.5, 483.75, 486.75, 490.25, 493.75, 497.5, 502.75]
+
+    init3 = 339.75
+    init4 = 462.25
+
+    stims_slow1 = [init1+15, init3+15]
+    stims_slow2 = [init2+15, init4+15]
 
     # Set stimulation patterns
     if pathway == "Both":
@@ -62,6 +52,7 @@ def run_shell(numx, numy, seed, gip3x, gip3y, gcx=1000, gcy=1000, sparsity=0.002
                                   stim_times=stims_slow2)
         ectoderm.set_stim_pattern("slow", xmin=numx-2, xmax=numx, ymin=0, ymax=4,
                                   stim_times=stims_slow2)
+
     elif pathway == "Fast":
         ectoderm.set_stim_pattern("fast", xmin=0, xmax=numx, ymin=0, ymax=1, stim_times=stims_fast)
     elif pathway == "Slow":

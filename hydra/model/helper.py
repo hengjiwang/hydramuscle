@@ -204,7 +204,7 @@ def save_video(filename, savepath, numx=200, numy=200, flip=True, dpi=50, fps=20
     videoWriter.release()
     cv2.destroyAllWindows()
     
-def length_of_model(coordspath, totaltime=300, loc='x', display=True):
+def length_of_model(coordspath, totaltime=300, loc='x', display=True, ret_midpts=False):
     "Extract the length trace of model from the coordinates of sidepoints"
     # Get number of points and time steps
     count = 0
@@ -300,8 +300,11 @@ def length_of_model(coordspath, totaltime=300, loc='x', display=True):
         plt.xlabel('time(s)')
         plt.ylabel('length(mm)')
         plt.show()
-
-    return lengths
+    
+    if ret_midpts:
+        return lengths, mat_mid
+    else:
+        return lengths
 
 def normalize(seq):
     "Normalize a sequence"

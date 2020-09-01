@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from hydra.model.fluo_encoder import FluoEncoder
 import hydra.model.helper as helper
+from matplotlib.ticker import FuncFormatter
 
 def plot_single_spike(model, sol, tmin1, tmax1, tmin2, tmax2, full_cell=False, 
                       fontsize=30, textsize=50, save_fig=True, 
@@ -159,7 +160,7 @@ def plot_multiple_spikes(model, sol, force_ecto, force_endo, tmin1, tmax1, tmin2
     ax3.plot(model.time[index_min:index_max], fluo[index_min:index_max],
              linewidth=5, color="green")
     ax3.tick_params(axis='y', labelsize=fontsize, labelcolor='green')
-    ax3.set_ylim(0, 1)
+    ax3.set_ylim(0, 1.1)
     ax3.set_ylabel("Fluorescence(a.u.)", fontsize=fontsize, color='green')
 
     # Plot membrane potential
@@ -176,13 +177,17 @@ def plot_multiple_spikes(model, sol, force_ecto, force_endo, tmin1, tmax1, tmin2
 
     ax3 = plt.subplot2grid((1, 3), (0, 2), colspan=1)
     ax3.plot(model.time[index_min:index_max], force_ecto[index_min:index_max],
-             linewidth=5, color="darkgreen", label=r"Ectoderm")
+             linewidth=4, color="darkgreen", label=r"Ectoderm")
     ax3.plot(model.time[index_min:index_max], force_endo[index_min:index_max],
-             linewidth=5, color="r", label=r"Endoderm")
+             linewidth=4, color="r", label=r"Endoderm")
     ax3.legend(fontsize=fontsize, loc='upper right')
     ax3.tick_params(labelsize=fontsize)
     ax3.set_xlabel("time(s)", fontsize=fontsize)
-    ax3.set_ylabel("Active force(a.u.)", fontsize=fontsize)
+    # def formatnum(x, pos):
+    #     return '$%.1f$x$10^{5}$' % (x/100000)
+    # formatter = FuncFormatter(formatnum)
+    # ax3.yaxis.set_major_formatter(formatter)
+    ax3.set_ylabel("Active stress(N/mm$^2$)", fontsize=fontsize)
     ax3.text(-0.005, 1.05, 'C', size=textsize, weight="bold", transform=ax3.transAxes)
     # ax3.bar(index_min, 0.0005, width=5, bottom=-0.015, align='edge', color='k')
 
@@ -329,7 +334,7 @@ def plot_fastwave_stills(data, times, dt, endtime,
         # ax.set_yticks([0, 50, 100, 150, 200])
         ax.tick_params(labelsize=15, labelcolor='k')
         if j == 0:
-            ax.text(-0.45, 1.05, 'A', size=30, weight="bold", transform=ax.transAxes)
+            ax.text(-0.45, 1.05, 'D', size=30, weight="bold", transform=ax.transAxes)
         ax.patch.set_edgecolor('g')  
         ax.patch.set_alpha(1)
         ax.patch.set_linewidth('15')
@@ -347,7 +352,7 @@ def plot_fastwave_stills(data, times, dt, endtime,
     ax2.set_xlabel("time (ms)", fontsize=15)
     ax2.set_ylabel(r"[Ca$^{2+}$] ($\mu$M)", fontsize=15)
     ax2.tick_params(labelsize=15, labelcolor='k')
-    ax2.text(-0.1, 1.05, 'B', size=30, weight="bold", transform=ax2.transAxes)
+    ax2.text(-0.1, 1.05, 'E', size=30, weight="bold", transform=ax2.transAxes)
 
     ax3 = fig.add_subplot(2, 2, 4)
 
@@ -370,7 +375,7 @@ def plot_fastwave_stills(data, times, dt, endtime,
     ax3.set_xlabel("time (ms)", fontsize=15)
     ax3.set_ylabel("Wave front #", fontsize=15)
     ax3.tick_params(labelsize=15, labelcolor='k')
-    ax3.text(-0.1, 1.05, 'C', size=30, weight="bold", transform=ax3.transAxes)
+    ax3.text(-0.1, 1.05, 'F', size=30, weight="bold", transform=ax3.transAxes)
 
     # plt.tight_layout()
     if save_fig:
