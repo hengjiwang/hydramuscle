@@ -40,8 +40,8 @@ def run_shell(numx, numy, seed, gip3x, gip3y, gcx=1000, gcy=1000, sparsity=0.002
     init3 = 339.75
     init4 = 462.25
 
-    stims_slow1 = [init1+15, init3+15]
-    stims_slow2 = [init2+15, init4+15]
+    stims_slow1 = [init1+30, init3+30]
+    stims_slow2 = [init2+30, init4+30]
 
     # Set stimulation patterns
     if pathway == "Both":

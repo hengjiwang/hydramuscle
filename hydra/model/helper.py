@@ -74,7 +74,7 @@ def track_wavefront(data, thres, pathway='slow'):
 
         for j in range(ntime):
 
-            if j < int(15/0.02):
+            if j < int(30/0.02):
                 wavefront[j] = 0
                 continue
             
@@ -271,11 +271,14 @@ def length_of_model(coordspath, totaltime=300, loc='x', display=True, ret_midpts
             ipos += 1
 
     # Sort the points from bottom to top
-    z_original = mat_pos[0, :, 2]
+    
+#     z_original = mat_pos[0, :, 2]
+    z_original = mat_pos[0, :, 2]**2 + mat_pos[0, :, 1]**2 + mat_pos[0, :, 0]**2
     argsort = np.argsort(z_original)
     mat_pos_sorted = mat_pos[:, argsort, :]
 
-    z_original = mat_neg[0, :, 2]
+#     z_original = mat_neg[0, :, 2]
+    z_original = mat_neg[0, :, 2]**2 + mat_neg[0, :, 1]**2 + mat_neg[0, :, 0]**2
     argsort = np.argsort(z_original)
     mat_neg_sorted = mat_neg[:, argsort, :]
 

@@ -251,39 +251,39 @@ def plot_slowwave_stills(data, times, dt,
                          save_fig=True, save_path="../results/figures/simulate-slow-wave.png"):
     "Plot the stills of the slow wave"
     fig = plt.figure(figsize=(10, 8))
-    plt.subplots_adjust(hspace=0.3)
+    plt.subplots_adjust(hspace=0.1)
 
-    for j in range(len(times)):
-        ax = fig.add_subplot(2, len(times), j+1)
-        im = ax.imshow(np.flip(data[int(times[j]/dt)].T, 0), cmap='hot', vmin=0, vmax=1)
-        ax.text(2, 10, str(times[j]) + 's', color='white', fontsize=20)
-        # ax.set_xticks([0, 50, 100, 150, 200])
-        # ax.set_yticks([0, 50, 100, 150, 200])
-        ax.tick_params(labelsize=15, labelcolor='k')
-        ax.patch.set_edgecolor('g')
-        ax.patch.set_alpha(1)  
-        ax.patch.set_linewidth('15')
+    # for j in range(len(times)):
+    #     ax = fig.add_subplot(2, len(times), j+1)
+    #     im = ax.imshow(np.flip(data[int(times[j]/dt)].T, 0), cmap='hot', vmin=0, vmax=1)
+    #     ax.text(2, 10, str(times[j]) + 's', color='white', fontsize=20)
+    #     # ax.set_xticks([0, 50, 100, 150, 200])
+    #     # ax.set_yticks([0, 50, 100, 150, 200])
+    #     ax.tick_params(labelsize=15, labelcolor='k')
+    #     ax.patch.set_edgecolor('g')
+    #     ax.patch.set_alpha(1)  
+    #     ax.patch.set_linewidth('15')
 
-        if j == 0:
-            ax.text(-0.45, 1.05, 'A', size=30, weight="bold", transform=ax.transAxes)
+    #     if j == 0:
+    #         ax.text(-0.45, 1.05, 'A', size=30, weight="bold", transform=ax.transAxes)
 
-    cax = fig.add_axes([0.92, 0.565, 0.01, 0.285])
-    cb = plt.colorbar(im, cax=cax)
-    font = {'size':15}
-    cb.ax.tick_params(labelsize=15)
-    cb.set_label(r"[Ca$^{2+}$] ($\mu$M)", fontdict=font)
+    # cax = fig.add_axes([0.92, 0.565, 0.01, 0.285])
+    # cb = plt.colorbar(im, cax=cax)
+    # font = {'size':15}
+    # cb.ax.tick_params(labelsize=15)
+    # cb.set_label(r"[Ca$^{2+}$] ($\mu$M)", fontdict=font)
 
     ax2 = fig.add_subplot(2, 2, 3)
-    time_axis = np.arange(0, 60, dt)
-    ax2.plot(time_axis, data[0:int(60/dt), 15, ::1], linewidth=1.5)
+    time_axis = np.arange(20, 80, dt)
+    ax2.plot(time_axis, data[int(20/dt):int(80/dt), 15, ::1], linewidth=1.5)
     ax2.set_xlabel("time (s)", fontsize=15)
     ax2.set_ylabel(r"[Ca$^{2+}$] ($\mu$M)", fontsize=15)
     ax2.tick_params(labelsize=15, labelcolor='k')
-    ax2.text(-0.1, 1.0, 'B', size=30, weight="bold", transform=ax2.transAxes)
+    # ax2.text(-0.1, 1.0, 'B', size=30, weight="bold", transform=ax2.transAxes)
 
     ax3 = fig.add_subplot(2, 2, 4)
 
-    center_col = data[:int(60/dt), 15, :]
+    center_col = data[:, 15, :]
     wavefront = helper.track_wavefront(center_col, 0.1)
 
     # print(list(wavefront))
@@ -291,13 +291,15 @@ def plot_slowwave_stills(data, times, dt,
     startp = np.where(wavefront == 6)[0][0]*dt
     endp = np.where(wavefront == max(wavefront))[0][0]*dt
 
+    wavefront = wavefront[int(20/dt):int(80/dt)]
+
     ax3.axvline(startp, linestyle='--', color='r')
     ax3.axvline(endp, linestyle='--', color='r')
 
     ax3.text(startp, 0, str(startp), size=15, color='r')
     ax3.text(endp, 0, str(endp), size=15, color='r')
 
-    time_axis = np.arange(0, 60, dt)
+    time_axis = np.arange(20, 80, dt)
     ax3.plot(time_axis, wavefront, 'b', linewidth=3)
     ax3.grid()
     ax3.set_xlabel("time (s)", fontsize=15)
@@ -311,7 +313,7 @@ def plot_slowwave_stills(data, times, dt,
     # ax3.text(endp*dt, -3, str(round(endp*dt,1)), size=15, color='r')
 
 
-    ax3.text(-0.1, 1.0, 'C', size=30, weight="bold", transform=ax3.transAxes)
+    # ax3.text(-0.1, 1.0, 'C', size=30, weight="bold", transform=ax3.transAxes)
     # ax3.text(-6.3, max(wavefront)-2, str(int(max(wavefront))), size=15, color='g')
     
 
@@ -324,27 +326,27 @@ def plot_fastwave_stills(data, times, dt, endtime,
                          save_fig=True, save_path="../results/figures/simulate-fast-wave.png"):
     "Plot the stills of the slow wave"
     fig = plt.figure(figsize=(10, 8))
-    plt.subplots_adjust(hspace=0.3)
+    plt.subplots_adjust(hspace=0.1)
 
-    for j in range(len(times)):
-        ax = fig.add_subplot(2, len(times), j+1)
-        im = ax.imshow(np.flip(data[int(times[j]/dt)].T, 0), cmap='hot', vmin=0, vmax=1)
-        ax.text(2, 5, str(int(times[j]*1000)) + 'ms', color='white', fontsize=20)
-        # ax.set_xticks([0, 50, 100, 150, 200])
-        # ax.set_yticks([0, 50, 100, 150, 200])
-        ax.tick_params(labelsize=15, labelcolor='k')
-        if j == 0:
-            ax.text(-0.45, 1.05, 'D', size=30, weight="bold", transform=ax.transAxes)
-        ax.patch.set_edgecolor('g')  
-        ax.patch.set_alpha(1)
-        ax.patch.set_linewidth('15')
+    # for j in range(len(times)):
+    #     ax = fig.add_subplot(2, len(times), j+1)
+    #     im = ax.imshow(np.flip(data[int(times[j]/dt)].T, 0), cmap='hot', vmin=0, vmax=1)
+    #     ax.text(2, 5, str(int(times[j]*1000)) + 'ms', color='white', fontsize=20)
+    #     ax.set_xticks([])
+    #     ax.set_yticks([])
+    #     ax.tick_params(labelsize=15, labelcolor='k')
+    #     # if j == 0:
+    #     #     ax.text(-0.45, 1.05, 'D', size=30, weight="bold", transform=ax.transAxes)
+    #     ax.patch.set_edgecolor('g')  
+    #     ax.patch.set_alpha(1)
+    #     ax.patch.set_linewidth('15')
     
 
-    cax = fig.add_axes([0.92, 0.55, 0.01, 0.33])
-    cb = plt.colorbar(im, cax=cax)
-    font = {'size':15}
-    cb.ax.tick_params(labelsize=15)
-    cb.set_label(r"[Ca$^{2+}$] ($\mu$M)", fontdict=font)
+    # cax = fig.add_axes([0.92, 0.55, 0.01, 0.33])
+    # cb = plt.colorbar(im, cax=cax)
+    # font = {'size':15}
+    # cb.ax.tick_params(labelsize=15)
+    # cb.set_label(r"[Ca$^{2+}$] ($\mu$M)", fontdict=font)
 
     ax2 = fig.add_subplot(2, 2, 3)
     time_axis = np.arange(0, endtime*1000, dt*1000)
@@ -352,7 +354,7 @@ def plot_fastwave_stills(data, times, dt, endtime,
     ax2.set_xlabel("time (ms)", fontsize=15)
     ax2.set_ylabel(r"[Ca$^{2+}$] ($\mu$M)", fontsize=15)
     ax2.tick_params(labelsize=15, labelcolor='k')
-    ax2.text(-0.1, 1.05, 'E', size=30, weight="bold", transform=ax2.transAxes)
+    # ax2.text(-0.1, 1.05, 'E', size=30, weight="bold", transform=ax2.transAxes)
 
     ax3 = fig.add_subplot(2, 2, 4)
 
@@ -375,7 +377,7 @@ def plot_fastwave_stills(data, times, dt, endtime,
     ax3.set_xlabel("time (ms)", fontsize=15)
     ax3.set_ylabel("Wave front #", fontsize=15)
     ax3.tick_params(labelsize=15, labelcolor='k')
-    ax3.text(-0.1, 1.05, 'F', size=30, weight="bold", transform=ax3.transAxes)
+    # ax3.text(-0.1, 1.05, 'F', size=30, weight="bold", transform=ax3.transAxes)
 
     # plt.tight_layout()
     if save_fig:
