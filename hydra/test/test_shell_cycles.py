@@ -123,11 +123,3 @@ if __name__ == "__main__":
               args.pathway, args.save_interval, args.save_dir,
               T=args.T, dt=args.dt, k_ipr=args.k_ipr, s0=args.s0,
               d=args.d, v_delta=args.v_delta, k_deg=args.k_deg)
-
-
-
-
-    
-
-
-    

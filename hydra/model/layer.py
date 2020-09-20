@@ -55,11 +55,11 @@ class Layer(PopBase):
         self._Lip3 = (self._gip3x * scipy.sparse.kron(Dx, Iy) +
                       self._gip3y * scipy.sparse.kron(Ix, Dy))
 
-    def set_stim_pattern(self, pathway, xmin, xmax, ymin, ymax, stim_times, randomnum=0):
+    def set_stim_pattern(self, pathway, xmin, xmax, ymin, ymax, stim_times, randomnum=0, neighborsize=2):
         "Set the stimulation pattern"
         indices = helper.generate_indices(self._numy, xmin, xmax, ymin, ymax)
         # indices += random.sample(list(range(self._num2)), randomnum)
-        indices += helper.generate_random_indices(self._numx, self._numy, randomnum, neighborsize=2)
+        indices += helper.generate_random_indices(self._numx, self._numy, randomnum, neighborsize=neighborsize)
         if pathway == "fast":
             self._stims_v_map[tuple(indices)] = stim_times
         elif pathway == "slow":
