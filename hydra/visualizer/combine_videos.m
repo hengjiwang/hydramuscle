@@ -71,7 +71,7 @@ for j = 1:250
     % Combine figures
     figure('visible','off');
 %     montage({im_mo, im_ca, im_ec, im_en});
-    montage({im_mo, im_ca});
+    montage({im_ca, im_mo});
     F = getframe(gcf);
     [im_all, Map] = frame2im(F);
     

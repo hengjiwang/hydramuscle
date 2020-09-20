@@ -77,6 +77,7 @@ def plot_slow_transient(model, sol, tmin, tmax, full_cell=False, fontsize=30, te
 
     ax1 = plt.subplot2grid((1, 2), (0, 0), colspan=1)
     ax1.plot(model.time[index_min:index_max], c[index_min:index_max], linewidth=5, color="k")
+    ax1.tick_params(axis='x', labelsize=fontsize, labelcolor='k')
     ax1.tick_params(axis='y', labelsize=fontsize, labelcolor='k')
     ax1.set_xlabel("time(s)", fontsize=fontsize)
     ax1.set_ylabel(r"[Ca$^{2+}$](uM)", fontsize=fontsize)
