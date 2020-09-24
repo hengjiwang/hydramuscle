@@ -1,7 +1,2 @@
 #!/bin/sh
-# python test_fast_wave_neurons.py --T=15 --numx=30 --numy=60 --gip3x=0.1 --gip3y=2 --gip3=0.1 --gcx=0 --gcy=0 --v_delta=0.03 --save_interval=5 --sparsity=0 --seed=1112 --density=0.1 --total_prop_time=0.05 & \
-# python test_fast_wave_neurons.py --T=15 --numx=30 --numy=60 --gip3x=0.1 --gip3y=2 --gip3=0.1 --gcx=10 --gcy=10 --v_delta=0.03 --save_interval=5 --sparsity=0 --seed=1112 --density=0.1 --total_prop_time=0.05 & \
-# python test_fast_wave_neurons.py --T=15 --numx=30 --numy=60 --gip3x=0.1 --gip3y=2 --gip3=0.1 --gcx=50 --gcy=50 --v_delta=0.03 --save_interval=5 --sparsity=0 --seed=1112 --density=0.1 --total_prop_time=0.05 & \
-# python test_fast_wave_neurons.py --T=15 --numx=30 --numy=60 --gip3x=0.1 --gip3y=2 --gip3=0.1 --gcx=100 --gcy=100 --v_delta=0.03 --save_interval=5 --sparsity=0 --seed=1112 --density=0.1 --total_prop_time=0.05 & \
-# python test_fast_wave_neurons.py --T=15 --numx=30 --numy=60 --gip3x=0.1 --gip3y=2 --gip3=0.1 --gcx=200 --gcy=200 --v_delta=0.03 --save_interval=5 --sparsity=0 --seed=1112 --density=0.1 --total_prop_time=0.05 & \
-python test_fast_wave_neurons.py --T=15 --numx=30 --numy=60 --gip3x=0.1 --gip3y=2 --gip3=0.1 --gcx=0 --gcy=0 --v_delta=0.03 --save_interval=5 --sparsity=0 --seed=1112 --density=0.1 --total_prop_time=0.05 & \
+python test_shell_cycles.py --T=50 --numx=30 --numy=60 --gip3x=0.1 --gip3y=2 --gip3=0.1 --v_delta=0 --save_interval=100 --sparsity=0.02 --k_deg=0.02 --k_ipr=0.2 --seed=1112 

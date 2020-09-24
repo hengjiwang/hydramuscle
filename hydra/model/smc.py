@@ -24,8 +24,6 @@ class SMC(SlowCell, FastCell):
         self.alpha = 1e9 / (2 * self._F * self._d)
         self._active_v_beta = 1
 
-        # print(self.alpha)
-
 
     def i_in(self, ip):
         return self.alpha * (self._ica0) + self._ipmca0 + self._v_inr * ip**2 / (self._kr**2 + ip**2) - self._in_ip0

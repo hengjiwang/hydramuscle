@@ -26,7 +26,7 @@ def run_shell(numx, numy, seed, gip3x, gip3y, gcx=1000, gcy=1000, sparsity=0.002
                      gcx=gcx, gcy=gcy, save_interval=save_interval)
 
     # Define stimulation times
-    stims_fast = [0.0, 5.0, 10.0]
+    stims_fast = [0.0, 4.4, 7.1, 9.3, 11.2, 13.2, 15.7, 18.4, 21.2, 24.7]
 
     # Set stimulation patterns
     # ectoderm.set_stim_pattern("fast", xmin=0, xmax=-1, ymin=0, ymax=-1,
@@ -37,8 +37,8 @@ def run_shell(numx, numy, seed, gip3x, gip3y, gcx=1000, gcy=1000, sparsity=0.002
         for col in range(numx):
             isneuron = bool(random.random() < density)
             if isneuron:
-                ectoderm.set_stim_pattern("fast", xmin=col, xmax=col+1,
-                                          ymin=row, ymax=row+1,
+                ectoderm.set_stim_pattern("fast", xmin=col, xmax=min(col+1, numx),
+                                          ymin=row, ymax=min(row+1, numy),
                                           stim_times=[x+row*delay for x in stims_fast])
 
 

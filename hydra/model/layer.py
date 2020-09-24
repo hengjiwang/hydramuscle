@@ -20,7 +20,8 @@ class Layer(PopBase):
                  gcy=1000,
                  numx=200,
                  numy=200,
-                 save_interval=100):
+                 save_interval=100,
+                 active_v_beta=1):
 
         PopBase.__init__(self, cell, save_interval)
         self._numx = numx
@@ -30,6 +31,7 @@ class Layer(PopBase):
         self._gcy = gcy
         self._gip3x = gip3x
         self._gip3y = gip3y
+        self.active_v_beta = active_v_beta
 
         self._set_conn_mat()
 
@@ -91,7 +93,7 @@ class Layer(PopBase):
 
         # Add stimulation
         for indices in self._stims_ip_map:
-            dipdt[list(indices)] += (self.cell.i_plcb(self.cell.stim_slow(t, self._stims_ip_map[indices])) -
+            dipdt[list(indices)] += (self.cell.i_plcb(self.cell.stim_slow(t, self._stims_ip_map[indices], active_v_beta=self.active_v_beta)) -
                                      self.cell.i_plcb(self.cell.v_beta))
 
         for indices in self._stims_v_map:

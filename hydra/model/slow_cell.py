@@ -48,8 +48,6 @@ class SlowCell(CellBase):
     def i_serca(self, c):
         "SERCA [uM/s]"
         return self._k_serca * c
-        # return self._v_serca * c**2 / (c**2 + self._kserca**2)
-        # return self._v_serca * c / (c + self._kserca)
 
     def i_leak(self, c, s):
         k_leak = (self.i_serca(self.c0) - self.i_ipr(self.c0, self.s0, self.ip0, self.r0)) / (self.s0 - self.c0)
@@ -58,8 +56,6 @@ class SlowCell(CellBase):
     def i_pmca(self, c):
         "Additional eflux [uM/s]"
         return self._k_pmca * c
-        # return self._v_pmca * c**2 / (c**2 + self._kpmca**2)
-        # return self._v_pmca * c / (c + self._kpmca)
 
     def i_in(self, ip):
         "Calcium entry rate [uM/s]"
@@ -73,11 +69,11 @@ class SlowCell(CellBase):
     # IP3 terms
     def i_plcb(self, v_beta):
         "Agonist-controlled PLC-beta activity [uM/s]"
-        return v_beta # * 1 / ((1 + self._kg)*(self._kg/(1+self._kg) + self._a0)) * self._a0
+        return v_beta
 
     def i_plcd(self, c, ip):
         "PLC-delta activity [uM/s]"
-        return self._v_delta * c**2 / (self._kca**2 + c**2) * ip**4 / (0.05**4 + ip**4)
+        return self._v_delta * c**2 / (self._kca**2 + c**2) # * ip**4 / (0.05**4 + ip**4)
 
     def i_deg(self, ip):
         "IP3 degradion [uM/s]"
