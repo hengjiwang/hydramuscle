@@ -32,13 +32,13 @@ class SMC(SlowCell, FastCell):
         "Right-hand side formulation"
         c, s, r, ip, v, m, h, n = y
 
-        i_ipr, i_leak, i_serca, i_in, i_pmca, v_r, i_plcd, i_deg = self.calc_slow_terms(c, s, r, ip)
+        i_ipr, i_leak, i_serca, i_in, i_pmca, v_r, i_deg = self.calc_slow_terms(c, s, r, ip)
         _, i_ca, i_k, i_bk, dmdt, dhdt, dndt = self.calc_fast_terms(c, v, m, h, n)
 
         dcdt = i_ipr + i_leak - i_serca + i_in - i_pmca - self.alpha * i_ca
         dsdt = self.beta * (i_serca - i_ipr - i_leak)
         drdt = v_r
-        dipdt = self.i_plcb(self.stim_slow(t, stims_slow, self._active_v_beta)) + i_plcd - i_deg
+        dipdt = self.i_plcb(self.stim_slow(t, stims_slow, self._active_v_beta)) - i_deg
 
         dvdt = - 1 / self.c_m * (i_ca + i_k + i_bk - 0.001 * self.stim_fast(t, stims_fast, dur=0.01))
 
@@ -62,7 +62,7 @@ class SMC(SlowCell, FastCell):
         return sol_
 
 if __name__ == '__main__':
-    model = SMC(T=100, dt=0.0002, k_ipr=0.08, s0=60, d=10e-4, v_delta=0.04, k_deg=0.4)
+    model = SMC(T=100, dt=0.0002, k_ipr=0.08, s0=60, d=10e-4, k_deg=0.4)
 
     ### One Fast Spike ###
     # sol = model.run(stims_fast = [0], stims_slow = [-100])

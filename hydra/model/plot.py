@@ -88,7 +88,7 @@ def plot_slow_transient(model, sol, tmin, tmax, full_cell=False, fontsize=30, te
              linewidth=5, color="r", linestyle="--")
     ax3.tick_params(axis='y', labelsize=fontsize, labelcolor='r')
     ax3.set_ylim(0, 10)
-    ax3.set_ylabel(r"[IP$_3$]", fontsize=fontsize, color='r')
+    ax3.set_ylabel(r"[IP$_3$](uM)", fontsize=fontsize, color='r')
     # ax3.text(-0.01, 1.05, 'B', size=40, weight="bold", transform=ax3.transAxes)
 
     ax2 = plt.subplot2grid((1, 2), (0, 1), colspan=1)
@@ -151,7 +151,7 @@ def plot_multiple_spikes(model, sol, force_ecto, force_endo, tmin1, tmax1, tmin2
 
     # Plot [Ca2+] and fluoresence in one subplot
     ax1 = plt.subplot2grid((1, 3), (0, 1), colspan=1)
-    ax1.plot(model.time[index_min:index_max], c[index_min:index_max], linewidth=3, color="k")
+    ax1.plot(model.time[index_min:index_max], c[index_min:index_max], linewidth=2, color="k")
     ax1.tick_params(labelsize=fontsize)
     ax1.set_xlabel("time(s)", fontsize=fontsize)
     ax1.set_ylabel(r"[Ca$^{2+}$](uM)", fontsize=fontsize)
@@ -159,14 +159,14 @@ def plot_multiple_spikes(model, sol, force_ecto, force_endo, tmin1, tmax1, tmin2
 
     ax3 = ax1.twinx()
     ax3.plot(model.time[index_min:index_max], fluo[index_min:index_max],
-             linewidth=5, color="green")
+             linewidth=3, color="green")
     ax3.tick_params(axis='y', labelsize=fontsize, labelcolor='green')
     ax3.set_ylim(0, 1.1)
     ax3.set_ylabel("Fluorescence(a.u.)", fontsize=fontsize, color='green')
 
     # Plot membrane potential
     ax2 = plt.subplot2grid((1, 3), (0, 0), colspan=1)
-    ax2.plot(model.time[index_min:index_max], v[index_min:index_max], linewidth=5, color="k")
+    ax2.plot(model.time[index_min:index_max], v[index_min:index_max], linewidth=2, color="k")
     ax2.tick_params(labelsize=fontsize)
     ax2.set_xlabel("time(s)", fontsize=fontsize)
     ax2.set_ylabel("Membrane voltage(mV)", fontsize=fontsize)
@@ -178,9 +178,9 @@ def plot_multiple_spikes(model, sol, force_ecto, force_endo, tmin1, tmax1, tmin2
 
     ax3 = plt.subplot2grid((1, 3), (0, 2), colspan=1)
     ax3.plot(model.time[index_min:index_max], force_ecto[index_min:index_max],
-             linewidth=4, color="darkgreen", label=r"Ectoderm")
+             linewidth=2, color="darkgreen", label=r"Ectoderm")
     ax3.plot(model.time[index_min:index_max], force_endo[index_min:index_max],
-             linewidth=4, color="r", label=r"Endoderm")
+             linewidth=2, color="r", label=r"Endoderm")
     ax3.legend(fontsize=fontsize, loc='upper right')
     ax3.tick_params(labelsize=fontsize)
     ax3.set_xlabel("time(s)", fontsize=fontsize)
@@ -275,8 +275,8 @@ def plot_slowwave_stills(data, times, dt,
     # cb.set_label(r"[Ca$^{2+}$] ($\mu$M)", fontdict=font)
 
     ax2 = fig.add_subplot(2, 2, 3)
-    time_axis = np.arange(20, 80, dt)
-    ax2.plot(time_axis, data[int(20/dt):int(80/dt), 15, ::1], linewidth=1.5)
+    time_axis = np.arange(10, 80, dt)
+    ax2.plot(time_axis, data[int(10/dt):int(80/dt), 15, ::1], linewidth=1.5)
     ax2.set_xlabel("time (s)", fontsize=15)
     ax2.set_ylabel(r"[Ca$^{2+}$] ($\mu$M)", fontsize=15)
     ax2.tick_params(labelsize=15, labelcolor='k')
@@ -287,12 +287,11 @@ def plot_slowwave_stills(data, times, dt,
     center_col = data[:, 15, :]
     wavefront = helper.track_wavefront(center_col, 0.1)
 
-    # print(list(wavefront))
-
     startp = np.where(wavefront == 6)[0][0]*dt
+
     endp = np.where(wavefront == max(wavefront))[0][0]*dt
 
-    wavefront = wavefront[int(20/dt):int(80/dt)]
+    wavefront = wavefront[int(10/dt):int(80/dt)]
 
     ax3.axvline(startp, linestyle='--', color='r')
     ax3.axvline(endp, linestyle='--', color='r')
@@ -300,7 +299,7 @@ def plot_slowwave_stills(data, times, dt,
     ax3.text(startp, 0, str(startp), size=15, color='r')
     ax3.text(endp, 0, str(endp), size=15, color='r')
 
-    time_axis = np.arange(20, 80, dt)
+    time_axis = np.arange(10, 80, dt)
     ax3.plot(time_axis, wavefront, 'b', linewidth=3)
     ax3.grid()
     ax3.set_xlabel("time (s)", fontsize=15)

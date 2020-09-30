@@ -27,27 +27,24 @@ def run_shell(numx, numy, seed, gip3x, gip3y, gcx=1000, gcy=1000, sparsity=0.002
     
     # Define stimulation times
     init1 = 100
-    init2 = 184.3
-    # stims_fast = [0.0, 9.25, 14.5, 18.25, 21.5, 24.5, 28.0, 31.5, 35.25, 40.5,
-    #               init1+0.0, init1+9.25, init1+14.5, init1+18.25, init1+21.5, init1+24.5, init1+28.0, init1+31.5, init1+35.25, init1+40.5,
-    #               init2+0.0, init2+7.75, init2+15.25, init2+19.75, init2+23.0, init2+27.25, init2+30.5, init2+34.25, init2+38.25, init2+43.5]
-    # stims_fast = [0.0, 9.5, 15.5, 18.5, 22.25, 25.75, 29.0, 32.5, 36.0, 43.25,
-    #             100.0, 109.5, 115.5, 118.5, 122.25, 125.75, 129.0, 132.5, 136.0, 143.25,
-    #             208.0, 209.75, 217.75, 223.75, 227.25, 230.25, 233.75, 237.5, 242.0, 249.75,
-    #             339.75, 347.25, 352.5, 356.25, 359.75, 363.0, 366.25, 370.0, 375.25,
-    #             462.25, 471.5, 476.75, 480.5, 483.75, 486.75, 490.25, 493.75, 497.5, 502.75]
+    init2 = 208 # 184.3
+    init3 = 339.75 # 284.7
+    init4 = 462.25 # 376.4
+
+    stims_fast = [0.0, 9.5, 15.5, 18.5, 22.25, 25.75, 29.0, 32.5, 36.0, 43.25,
+                100.0, 109.5, 115.5, 118.5, 122.25, 125.75, 129.0, 132.5, 136.0, 143.25,
+                208.0, 209.75, 217.75, 223.75, 227.25, 230.25, 233.75, 237.5, 242.0, 249.75,
+                339.75, 347.25, 352.5, 356.25, 359.75, 363.0, 366.25, 370.0, 375.25,
+                462.25, 471.5, 476.75, 480.5, 483.75, 486.75, 490.25, 493.75, 497.5, 502.75]
     # stims_fast = [0.0, 4.4, 7.1, 9.3, 11.2, 13.2, 15.7, 18.4, 21.2, 24.7,
     #              100.0, 104.4, 107.1, 109.3, 111.2, 113.2, 115.7, 118.4, 121.2, 124.7,
     #              184.3, 188.0, 189.3, 190.4, 193.4, 195.0, 197.1, 199.4, 201.6, 204.8, 208.9, 215.8, 219.3, 222.2, 224.7, 227.6, 232.1,
     #              284.7, 289.9, 292.9, 295.3, 297.5, 299.7, 302.0, 304.1, 306.6, 309.8, 314.2, 319.0,
     #              376.4, 382.1, 385.2, 388.0, 390.2, 392.5, 394.7, 397.4, 400.6, 405.4, 411.8]
 
-    stims_fast = []
+    # stims_fast = []
 
-    init3 = 284.7
-    init4 = 376.4
-
-    stims_slow1 = [20, init1+20, init3+20]
+    stims_slow1 = [init1+20, init3+20]
     stims_slow2 = [init2+20, init4+20]
 
     # Set stimulation patterns
@@ -118,7 +115,7 @@ if __name__ == "__main__":
     parser.add_argument('--k_ipr', type=float, default=0.2)
     parser.add_argument('--s0', type=float, default=100)
     parser.add_argument('--d', type=float, default=20e-4)
-    parser.add_argument('--v_delta', type=float, default=0.04)
+    # parser.add_argument('--v_delta', type=float, default=0.04)
     parser.add_argument('--k_deg', type=float, default=0.15)
     args = parser.parse_args()
 
@@ -127,4 +124,4 @@ if __name__ == "__main__":
               args.pathway, args.save_interval, args.active_v_beta, 
               args.save_dir,
               T=args.T, dt=args.dt, k_ipr=args.k_ipr, s0=args.s0,
-              d=args.d, v_delta=args.v_delta, k_deg=args.k_deg)
+              d=args.d, k_deg=args.k_deg)

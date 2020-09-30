@@ -81,14 +81,14 @@ class Layer(PopBase):
                                    y[7*num2:8*num2])
 
         # Calculate terms
-        i_ipr, i_leak, i_serca, i_in, i_pmca, v_r, i_plcd, i_deg = self.cell.calc_slow_terms(c, s, r, ip)
+        i_ipr, i_leak, i_serca, i_in, i_pmca, v_r, i_deg = self.cell.calc_slow_terms(c, s, r, ip)
         _, i_ca, i_k, i_bk, dmdt, dhdt, dndt = self.cell.calc_fast_terms(c, v, m, h, n)
 
         # Update dynamical variables
         dcdt = i_ipr + i_leak - i_serca + i_in - i_pmca - self.cell.alpha * i_ca
         dsdt = self.cell.beta * (i_serca - i_ipr - i_leak)
         drdt = v_r
-        dipdt = self.cell.i_plcb(self.cell.v_beta) + i_plcd - i_deg + self._Lip3.dot(ip)
+        dipdt = self.cell.i_plcb(self.cell.v_beta) - i_deg + self._Lip3.dot(ip)
         dvdt = - 1 / self.cell.c_m * (i_ca + i_k + i_bk) + self._Lc.dot(v)
 
         # Add stimulation

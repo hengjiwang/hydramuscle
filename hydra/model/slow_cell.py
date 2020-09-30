@@ -14,20 +14,13 @@ class SlowCell(CellBase):
         self._k_ipr = 0.08
         self._ka = 0.2
         self._kip = 0.3
-        self._k_serca = 0.3 # 0.2 # 0.3 # 0.5
-        # self._v_serca = 0.2
-        # self._kserca = 0.3 # 0.1
+        self._k_serca = 0.3 # 0.5
         self._v_in = 0.025
         self._v_inr = 0.2
         self._kr = 1
-        self._k_pmca = 0.8 # 1.0 # 1.5 # 0.8
-        # self._v_pmca = 0.9
-        # self._kpmca = 0.1
+        self._k_pmca = 0.8
         self._k_r = 4
         self._ki = 0.2
-        # self._kg = 0.1 # unknown
-        # self._a0 = 1 # 1e-3 - 10
-        self._v_delta = 0.04 # 0 - 0.05
         self.v_beta = None
         self._kca = 0.3
         self._k_deg = 0.2 # 0.08
@@ -71,9 +64,9 @@ class SlowCell(CellBase):
         "Agonist-controlled PLC-beta activity [uM/s]"
         return v_beta
 
-    def i_plcd(self, c, ip):
-        "PLC-delta activity [uM/s]"
-        return self._v_delta * c**2 / (self._kca**2 + c**2) # * ip**4 / (0.05**4 + ip**4)
+    # def i_plcd(self, c, ip):
+    #     "PLC-delta activity [uM/s]"
+    #     return self._v_delta * c**2 / (self._kca**2 + c**2) # * ip**4 / (0.05**4 + ip**4)
 
     def i_deg(self, ip):
         "IP3 degradion [uM/s]"
@@ -98,19 +91,19 @@ class SlowCell(CellBase):
                 self.i_in(ip),
                 self.i_pmca(c),
                 self.v_r(c, r),
-                self.i_plcd(c, ip),
+                # self.i_plcd(c, ip),
                 self.i_deg(ip))
 
 
     def _rhs(self, y, t, stims_slow):
         "Right-hand side equations"
         c, s, r, ip = y
-        i_ipr, i_leak, i_serca, i_in, i_pmca, v_r, i_plcd, i_deg = self.calc_slow_terms(c, s, r, ip)
+        i_ipr, i_leak, i_serca, i_in, i_pmca, v_r, i_deg = self.calc_slow_terms(c, s, r, ip)
 
         dcdt = i_ipr + i_leak - i_serca + i_in - i_pmca
         dsdt = self.beta*(i_serca - i_ipr -i_leak)
         drdt = v_r
-        dipdt = self.i_plcb(self.stim_slow(t, stims_slow)) + i_plcd - i_deg
+        dipdt = self.i_plcb(self.stim_slow(t, stims_slow)) - i_deg
 
         # printf(self.)
 
@@ -118,8 +111,7 @@ class SlowCell(CellBase):
 
     def init_slow_cell(self):
         "Reassign some parameters to make the resting state stationary"
-        self.v_beta = ((self.i_deg(self.ip0) -
-                        self.i_plcd(self.c0, self.ip0)))
+        self.v_beta = self.i_deg(self.ip0)
                         # (1 / ((1 + self._kg) *
                         #     (self._kg/(1 + self._kg) +
                         #     self._a0)) *

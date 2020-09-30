@@ -74,7 +74,7 @@ def track_wavefront(data, thres, pathway='slow'):
 
         for j in range(ntime):
 
-            if j < int(30/0.02):
+            if j < int(20/0.02):
                 wavefront[j] = 0
                 continue
             
