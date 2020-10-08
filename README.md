@@ -1,2 +1,1 @@
-# Neuromechanical Modeling of _Hydra_
-A complete mechanistic model of _Hydra_ from neural network activity to behaviors.
+Code for _Reverse engineering neural control of movement in Hydra through biomechanics_
