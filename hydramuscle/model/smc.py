@@ -50,7 +50,7 @@ class SMC(SlowCell, FastCell):
         if not dt:
             dt = self.dt
 
-        sol_ = utils.euler_odeint2(self._rhs, y0, T, dt, stims_fast=stims_fast, stims_slow=stims_slow)
+        sol_ = utils.euler_odeint(self._rhs, y0, T, dt, stims_fast=stims_fast, stims_slow=stims_slow)
 
         return sol_
 
