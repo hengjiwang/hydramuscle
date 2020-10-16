@@ -292,11 +292,12 @@ def plot_slowwave_stills(data, times, dt,
     center_col = data[:, 15, :]
     wavefront = utils.track_wavefront(center_col, 0.1)[:5000]
 
-    startp = np.where(wavefront == 6)[0][0] * dt
-
+    startp = np.where(wavefront == 3)[0][0] * dt
     endp = np.where(wavefront == max(wavefront))[0][0] * dt
 
     wavefront = wavefront[int(10 / dt):int(80 / dt)]
+
+    print(max(wavefront))
 
     ax3.axvline(startp, linestyle='--', color='r')
     ax3.axvline(endp, linestyle='--', color='r')

@@ -116,7 +116,7 @@ def track_wavefront(data, thres, pathway='slow'):
                 continue
 
             for k in range(numcell - 1, -1, -1):
-                if 5 < k < 30 and data[j][k] > thres and data[j][k] - data[j][k + 20] > 0.1:
+                if 2 <= k < 30 and data[j][k] > thres and data[j][k] - data[j][k + 20] > 0.1:
                     wavefront[j] = k if (0 < k - wavefront[j - 1] < 4 or wavefront[j - 1] == 0) else wavefront[j - 1]
                     break
 
