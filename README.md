@@ -1,1 +1,1 @@
-Code for _Reverse engineering neural control of movement in Hydra through biomechanics_
+Code for _From neuron to muscle to movement: a complete biomechanical model of *Hydra* contractile behaviors_
