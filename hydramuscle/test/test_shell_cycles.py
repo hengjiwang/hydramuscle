@@ -11,7 +11,7 @@ from hydramuscle.model.shell import Shell
 
 def run_shell(numx, numy, seed, gip3x, gip3y, gcx=1000, gcy=1000, sparsity=0.002, gc=1000, gip3=5, pathway="Both",
               save_interval=100, active_v_beta=1, save_dir="../results/data/calcium", **kargs):
-    
+
     # Check the existence of the saving directory
     if not save_dir.endswith('/'):
         save_dir += '/'
@@ -24,7 +24,7 @@ def run_shell(numx, numy, seed, gip3x, gip3y, gcx=1000, gcy=1000, sparsity=0.002
                      gcx=gcx, gcy=gcy, save_interval=save_interval, active_v_beta=active_v_beta)
     endoderm = Layer(smc, numx=numx, numy=numy, gip3x=gip3x, gip3y=gip3y,
                      gcx=gcx, gcy=gcy, save_interval=save_interval, active_v_beta=active_v_beta)
-    
+
     # Define stimulation times
     # init1 = 100
     # init2 = 208 # 184.3
@@ -41,13 +41,16 @@ def run_shell(numx, numy, seed, gip3x, gip3y, gcx=1000, gcy=1000, sparsity=0.002
     #              184.3, 188.0, 189.3, 190.4, 193.4, 195.0, 197.1, 199.4, 201.6, 204.8, 208.9, 215.8, 219.3, 222.2, 224.7, 227.6, 232.1,
     #              284.7, 289.9, 292.9, 295.3, 297.5, 299.7, 302.0, 304.1, 306.6, 309.8, 314.2, 319.0,
     #              376.4, 382.1, 385.2, 388.0, 390.2, 392.5, 394.7, 397.4, 400.6, 405.4, 411.8]
-    stims_fast = [0.0, 9.5, 15.5, 18.5, 22.25, 25.75, 29.0, 32.5, 36.0, 43.25]
+    stims_fast = [0.0, 5.2, 9.0, 12.1, 15.8, 19.6, 23.5, 27.0, 31.7,
+                  99.3, 105.6, 110.4, 115.3, 119.9, 124.8, 128.6, 132.9,
+                  249.5, 256.5, 262.0, 267.0, 271.5, 276.6, 283.2, 288.7, 293.4, 298.8, 305.6,
+                  433.5, 440.0, 456.0, 461.7, 466.5, 471.0, 477.3, 483.1, 489.8]
 
     # stims_fast = []
 
     # stims_slow1 = [20, init1+20, init3+20]
     # stims_slow2 = [init2+20, init4+20]
-    stims_slow1 = [20]
+    stims_slow1 = []
     stims_slow2 = []
 
     # Set stimulation patterns
@@ -123,8 +126,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     run_shell(args.numx, args.numy, args.seed, args.gip3x, args.gip3y,
-              args.gcx, args.gcy, args.sparsity, args.gc, args.gip3, 
-              args.pathway, args.save_interval, args.active_v_beta, 
+              args.gcx, args.gcy, args.sparsity, args.gc, args.gip3,
+              args.pathway, args.save_interval, args.active_v_beta,
               args.save_dir,
               T=args.T, dt=args.dt, k_ipr=args.k_ipr, s0=args.s0,
               d=args.d, k_deg=args.k_deg)
