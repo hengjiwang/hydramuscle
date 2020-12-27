@@ -9,8 +9,8 @@ Code for paper _From neuron to muscle to movement: a complete biomechanical mode
 - **hydramuscle/dataset/** : relevant data of the paper
   - **2020-09-28-23-41-19-017767.h5** : simulated calcium dynamics data (for Figure 8CDEF)
   - **DyWat_Ecto_80X_Snap12d_label.tif** : hydra photo for Figure 3B
-  - **coords_017767_rlx60_100-350.txt** : simulated length of the model (Figure 8G, 100s-350s)
-  - **coords_017767_rlx60_350-600.txt** : simulated length of the model (Figure 8G, 350s-600s)
+  - **coords_017767_rlx60_100-350.txt** : simulated length of the model (for Figure 8G, 100s-350s)
+  - **coords_017767_rlx60_350-600.txt** : simulated length of the model (for Figure 8G, 350s-600s)
   - **dual_channel_cycles.mov** : dual-channel imaging video for Figure 7
   - **lengths_Pre_Bisect_40x_4fps_ex3.csv** : measured length of a real hydra (Figure 8G)
-  - **neural_gcamp_video.avi** : neural GCaMP imaging video for extracting stimulation times (Figure 8A)
+  - **neural_gcamp_video.avi** : neural GCaMP imaging video for extracting stimulation times (for Figure 8AB)
