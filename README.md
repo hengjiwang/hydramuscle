@@ -1,4 +1,4 @@
-Code for paper _From neuron to muscle to movement: a complete biomechanical model of *Hydra* contractile behaviors_
+Code for paper [_From neuron to muscle to movement: a complete biomechanical model of *Hydra* contractile behaviors_](https://www.biorxiv.org/content/10.1101/2020.12.14.422784v1)
 
 - **hydramuscle/model/** : biophysical model for simulating calcium dynamics
 - **hydramuscle/notebooks/** : jupyter notebooks for saving data and generating figures
