@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.sparse import spdiags
 import scipy
+from collections import defaultdict
 
 from hydramuscle.model.base_pop import BasePop
 import hydramuscle.utils.utils as utils
@@ -62,6 +63,11 @@ class Layer(BasePop):
             self._stims_v_map[tuple(indices)] = stim_times
         elif pathway == "slow":
             self._stims_ip_map[tuple(indices)] = stim_times
+
+    def reset_stim_pattern(self):
+        self._stims_v_map = defaultdict(list)
+        self._stims_ip_map = defaultdict(list)
+        return
 
     def calc_derivs(self, y, t):
         "Calculate the derivatives based on the current-state variables"
@@ -129,9 +135,12 @@ class Layer(BasePop):
         y0 = np.reshape(y0, len(inits)*self._num2)
 
         # Begin counting time
-        sol_ = utils.euler_odeint2(self._rhs, y0, self.T, self.dt,
-                            save_interval=self._save_interval,
-                            layer_num=1)
+        # sol_ = utils.euler_odeint2(self._rhs, y0, self.T, self.dt,
+        #                     numx=self._numx, numy=self._numy,
+        #                     save_interval=self._save_interval,
+        #                     layer_num=1)
+        sol_ = utils.euler_odeint(self._rhs, y0, self.T, self.dt,
+                                  save_interval=self._save_interval)
 
         return sol_
 
