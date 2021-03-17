@@ -12,7 +12,7 @@ def run_layer(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000, pathway="Both",
 
     # Check the existence of the saving directory
     if not save_dir.endswith('/'):
-        save_dir += '/'  
+        save_dir += '/'
     if not os.path.isdir(save_dir):
         raise FileExistsError("Target directory " + save_dir + " does not exist. ")
 
@@ -39,10 +39,12 @@ def run_layer(numx, numy, gip3x, gip3y, gcx=1000, gcy=1000, pathway="Both",
         layer.set_stim_pattern("slow", xmin=numx-10, xmax=numx, ymin=0, ymax=10,
                                stim_times=stims_slow2)
     elif pathway == "Fast":
-        layer.set_stim_pattern("fast", xmin=0, xmax=numx, ymin=0, ymax=1, stim_times=stims_fast)
+        layer.set_stim_pattern("fast", xmin=0, xmax=numx, ymin=0, ymax=1, stim_times=[0])
     elif pathway == "Slow":
-        layer.set_stim_pattern("slow", xmin=90, xmax=110, ymin=0, ymax=10,
-                               stim_times=stims_slow1)
+        # layer.set_stim_pattern("slow", xmin=13, xmax=17, ymin=0, ymax=4,
+                            #    stim_times=[0])
+        layer.set_stim_pattern("slow", xmin=0, xmax=-1, ymin=0, ymax=-1,
+                               stim_times=[0], randomnum=1, neighborsize=2)
 
     # Run the model
     sol = layer.run()
@@ -85,11 +87,11 @@ if __name__ == "__main__":
     parser.add_argument('--k_ipr', type=float, default=0.2)
     parser.add_argument('--s0', type=float, default=100)
     parser.add_argument('--d', type=float, default=20e-4)
-    parser.add_argument('--v_delta', type=float, default=0.04)
+    # parser.add_argument('--v_delta', type=float, default=0.04)
     parser.add_argument('--k_deg', type=float, default=0.15)
     args = parser.parse_args()
 
     run_layer(args.numx, args.numy, args.gip3x, args.gip3y,
               args.gcx, args.gcy, args.pathway, args.save_interval, args.save_dir,
               T=args.T, dt=args.dt, k_ipr=args.k_ipr, s0=args.s0,
-              d=args.d, v_delta=args.v_delta, k_deg=args.k_deg)
+              d=args.d, k_deg=args.k_deg)
