@@ -115,7 +115,7 @@ class Layer(BasePop):
 
         return dydt
 
-    def run(self):
+    def run(self, save_all=False):
         "Run the model"
         self.cell.init_fast_cell()
         self.cell.init_slow_cell()
@@ -135,12 +135,14 @@ class Layer(BasePop):
         y0 = np.reshape(y0, len(inits)*self._num2)
 
         # Begin counting time
-        sol_ = utils.euler_odeint2(self._rhs, y0, self.T, self.dt,
-                            numx=self._numx, numy=self._numy,
-                            save_interval=self._save_interval,
-                            layer_num=1)
-        # sol_ = utils.euler_odeint(self._rhs, y0, self.T, self.dt,
-        #                           save_interval=self._save_interval)
+        if not save_all:
+            sol_ = utils.euler_odeint2(self._rhs, y0, self.T, self.dt,
+                                numx=self._numx, numy=self._numy,
+                                save_interval=self._save_interval,
+                                layer_num=1)
+        else:
+            sol_ = utils.euler_odeint(self._rhs, y0, self.T, self.dt,
+                                      save_interval=self._save_interval)
 
         return sol_
 

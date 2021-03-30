@@ -128,3 +128,4 @@ dmypy.json
 save/
 results/
 data/
+*.icloud
