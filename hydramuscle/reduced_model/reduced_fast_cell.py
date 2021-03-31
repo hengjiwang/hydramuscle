@@ -20,7 +20,7 @@ class ReducedFastCell:
         self.v_train = [self.v]
         self.neighbors = neighbors
 
-    def step(self, stim):
+    def step(self, stim=False):
 
         # Check whether the cell is directly stimulated or stimulated by neighbors
         condition = stim
