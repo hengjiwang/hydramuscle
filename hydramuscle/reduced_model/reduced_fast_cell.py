@@ -7,6 +7,7 @@ class ReducedFastCell:
         self.dt = dt
         self.t = 0 # s
         self.c0 = 0.05 # uM
+        self.v0 = 0
         self.tau_stim = 0.05 # s
         self.tau_inc = 0.075 # uM/s
         self.tau_dec = 0.5 # s
@@ -14,16 +15,21 @@ class ReducedFastCell:
         self.last_stim = -100 # s
         self.c = self.c0
         self.c_train = [self.c]
+        self.v = self.v0
+        self.v_train = [self.v]
 
     def step(self, stim):
         if stim and self.t - self.last_stim > self.tau_ref:
-            self.c += self.dt / self.tau_inc
+            self.v = 1
             self.last_stim = self.t
         elif self.t - self.last_stim <= self.tau_stim:
-            self.c += self.dt / self.tau_inc
+            self.v = 1
+        else:
+            self.v = 0
 
-        self.c -= self.dt * (self.c - self.c0) / self.tau_dec
+        self.c += self.dt * (self.v / self.tau_inc - (self.c - self.c0) / self.tau_dec)
         self.c_train.append(self.c)
+        self.v_train.append(self.v)
         self.t += self.dt
 
 if __name__ == '__main__':
