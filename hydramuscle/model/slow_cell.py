@@ -1,7 +1,9 @@
+import sys
+sys.path.append('../..')
+
 from scipy.integrate import odeint
 from hydramuscle.model.base_cell import BaseCell
 import hydramuscle.utils.plot as plot
-
 
 class SlowCell(BaseCell):
 
@@ -128,7 +130,7 @@ class SlowCell(BaseCell):
 
 if __name__ == "__main__":
     model = SlowCell(100)
-    sol = model.run(stims_slow=[10])
+    sol = model.run(stims_slow=[10, 20])
 
     # Plot the results
     plot.plot_slow_transient(model, sol, 0, 100)

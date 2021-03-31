@@ -1,4 +1,5 @@
 import sys, os
+sys.path.append('../..')
 
 import numpy as np
 
@@ -35,7 +36,7 @@ class FastCell(BaseCell):
         self._g_ca = 0.0005  # [S/cm^2]
         self._e_ca = 51
 
-        # BK parameters
+        # K channel parameters
         self._g_k = 0.0025
         self._e_k = -75
 
@@ -130,9 +131,9 @@ class FastCell(BaseCell):
 
 
 if __name__ == '__main__':
-    model = FastCell(100, 0.0002)
+    model = FastCell(0.2, 0.0002)
     # sol = model.run([1,3,5,7,9,11,13,15])
-    sol = model.run([0, 5.2, 8.2, 10.6, 12.8, 15, 17.3, 19.4, 21.9, 25.1, 29.5, 34.3])
+    sol = model.run([0, 0.1])
 
     # Plot the results
     plot.plot_single_spike(model, sol, 0, 100, 0, 0.05)
