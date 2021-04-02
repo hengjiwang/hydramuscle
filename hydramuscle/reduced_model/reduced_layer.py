@@ -1,5 +1,5 @@
 import numpy as np
-from reduced_fast_cell import ReducedFastCell
+from hydramuscle.reduced_model.reduced_fast_cell import ReducedFastCell
 
 class ReducedLayer:
 
@@ -7,15 +7,19 @@ class ReducedLayer:
         self.dt = dt
         self.numx = numx
         self.numy = numy
-        self.layer = np.array([[ReducedFastCell(dt)] * numy for _ in range(numx)])
         self.set_conn_pattern()
 
     def set_conn_pattern(self):
+
+        # Initiate layer
+        self.layer = np.array([[None] * self.numy for _ in range(self.numx)])
+        for x in range(self.numx):
+            for y in range(self.numy):
+                self.layer[x, y] = ReducedFastCell(self.dt)
+
         # Set connections
         for x in range(self.numx):
             for y in range(self.numy):
-
-                cell = self.layer[x, y]
 
                 for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
                     x2 = x + dx
@@ -27,12 +31,15 @@ class ReducedLayer:
                         x2 = self.numx - 1
 
                     if 0 <= y2 < self.numy:
-                        cell.neighbors.append(self.layer[x2, y2])
+                        self.layer[x, y].neighbors.append(self.layer[x2, y2])
+
+                # print(len(self.layer[0,0].neighbors))
 
     def step(self, stim_pattern=set()):
 
         # Step directly stimulated cells
-        for cell in stim_pattern:
+        for (x, y) in stim_pattern:
+            cell = self.layer[x, y]
             cell.step(stim=True)
 
         # Step other cells

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 class ReducedFastCell:
 
-    def __init__(self, dt=0.001, neighbors=[]):
+    def __init__(self, dt=0.001):
         self.dt = dt
         self.t = 0
         self.c0 = 0.05 # uM
@@ -18,10 +18,9 @@ class ReducedFastCell:
         self.c_train = [self.c]
         self.v = 0
         self.v_train = [self.v]
-        self.neighbors = neighbors
+        self.neighbors = []
 
     def step(self, stim=False):
-
         # Check whether the cell is directly stimulated or stimulated by neighbors
         condition = stim
         if not condition and self.t >= self.tau_del:
