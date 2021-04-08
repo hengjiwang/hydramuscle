@@ -11,36 +11,36 @@ class ReducedFastCell:
         self.r_stim = 1 # uM/s
         self.tau_inc = 0.075 # uM/s
         self.tau_dec = 0.5 # s
-        self.tau_ref = 0.1 # s
-        self.tau_del = 0.01 # s
-        self.last_stim = -100 # s
         self.c = self.c0
         self.c_train = [self.c]
-        self.v = 0
+
+        self.v0 = 0
+        self.v_th = 0.1
+        self.v_pk = 1.0
+        self.v = self.v0
+        self.c_m = 1
+        self.r_m = 1
+        self.tau_ref = 0.1 # s
+        self.last_spike = -100 # s
         self.v_train = [self.v]
-        self.neighbors = []
 
-    def step(self, stim=False):
-        # Check whether the cell is directly stimulated or stimulated by neighbors
-        condition = stim
-        if not condition and self.t >= self.tau_del:
-            for neighbor in self.neighbors:
-                if neighbor.v_train[int((self.t - self.tau_del) / self.dt)]:
-                    condition = True
-                    break
-
-        # Check if the calcium elevation should be triggered
-        if condition and self.t - self.last_stim > self.tau_ref:
-            self.v = 1
-            self.c += self.dt / self.tau_inc
-            self.last_stim = self.t
-        elif self.t - self.last_stim <= self.tau_stim:
-            self.v = 0
-            self.c += self.dt / self.tau_inc
-        else:
-            self.v = 0
-
+    def step(self, i_stim=0):
         # Update attributes
+
+        if self.t - self.last_spike < self.tau_ref:
+            # Cell is in refractory period
+            self.v = self.v0
+        else:
+            self.v += self.dt / self.c_m * (i_stim - self.v / self.r_m)
+            if self.v >= self.v_th:
+                # Reach the threshold -- fire
+                self.v = self.v_pk
+                self.last_spike = self.t
+
+        if self.t - self.last_spike < self.tau_stim:
+            # Spike triggers calcium increasing
+            self.c += self.dt / self.tau_inc
+
         self.c -= self.dt * (self.c - self.c0) / self.tau_dec
         self.c_train.append(self.c)
         self.v_train.append(self.v)
@@ -49,11 +49,11 @@ class ReducedFastCell:
 if __name__ == '__main__':
     model = ReducedFastCell()
     for t in np.arange(0, 2, 0.001):
-        if t == 0.0 or t == 1.0:
-            model.step(1)
+        if 0 <= t <= 0.01 or 1 <= t <= 1.1:
+            model.step(10)
         else:
             model.step(0)
 
     plt.figure()
-    plt.plot(np.arange(0, 2.001, 0.001), model.c_train)
+    plt.plot(np.arange(0, 2.001, 0.001), model.v_train)
     plt.show()

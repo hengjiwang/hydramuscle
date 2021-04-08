@@ -3,11 +3,14 @@ from hydramuscle.reduced_model.reduced_fast_cell import ReducedFastCell
 
 class ReducedLayer:
 
-    def __init__(self, dt=0.001, numx=30, numy=60):
+    def __init__(self, dt=0.001, numx=30, numy=60, gc=100, stim_amp=10):
         self.dt = dt
         self.numx = numx
         self.numy = numy
+        self.gc = gc
+        self.stim_amp = stim_amp
         self.set_conn_pattern()
+        self.v_last = np.zeros((self.numx, self.numy)) + self.layer[0,0].v0
 
     def set_conn_pattern(self):
 
@@ -17,11 +20,19 @@ class ReducedLayer:
             for y in range(self.numy):
                 self.layer[x, y] = ReducedFastCell(self.dt)
 
-        # Set connections
+    def step(self, stim_pattern=set()):
+        # Update cells
         for x in range(self.numx):
             for y in range(self.numy):
 
-                for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+                i_stim = 0
+
+                if (x, y) in stim_pattern:
+                    i_stim += self.stim_amp
+
+                # Couple neighbors
+                for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+
                     x2 = x + dx
                     y2 = y + dy
 
@@ -30,24 +41,17 @@ class ReducedLayer:
                     elif x2 == -1:
                         x2 = self.numx - 1
 
-                    if 0 <= y2 < self.numy:
-                        self.layer[x, y].neighbors.append(self.layer[x2, y2])
+                    if 0 <= y2 <= self.numy - 1:
+                        i_stim += self.gc * (self.v_last[x2, y2] - self.v_last[x, y])
 
-                # print(len(self.layer[0,0].neighbors))
+                self.layer[x, y].step(i_stim)
 
-    def step(self, stim_pattern=set()):
-
-        # Step directly stimulated cells
-        for (x, y) in stim_pattern:
-            cell = self.layer[x, y]
-            cell.step(stim=True)
-
-        # Step other cells
+        # Update v_last
         for x in range(self.numx):
             for y in range(self.numy):
-                if (x, y) not in stim_pattern:
-                    cell = self.layer[x, y]
-                    cell.step()
+                self.v_last[x, y] = self.layer[x, y].v
+
+
 
 
 
