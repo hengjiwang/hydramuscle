@@ -18,7 +18,8 @@ class Layer(BasePop):
                  numx=200,
                  numy=200,
                  save_interval=100,
-                 active_v_beta=1):
+                 active_v_beta=1,
+                 stim_strength_fast=0.02):
 
         BasePop.__init__(self, cell, save_interval)
         self._numx = numx
@@ -29,6 +30,7 @@ class Layer(BasePop):
         self._gip3x = gip3x
         self._gip3y = gip3y
         self.active_v_beta = active_v_beta
+        self.stim_strength_fast = stim_strength_fast
 
         self._set_conn_mat()
 
@@ -99,8 +101,8 @@ class Layer(BasePop):
                                      self.cell.i_plcb(self.cell.v_beta))
 
         for indices in self._stims_v_map:
-            dvdt[list(indices)] += (1 / self.cell.c_m * 0.02 *
-                                  self.cell.stim_fast(t, self._stims_v_map[indices], 0.01))
+            dvdt[list(indices)] += (1 / self.cell.c_m * self.stim_strength_fast *
+                                  self.cell.stim_fast(t, self._stims_v_map[indices], dur=0.01))
 
         return (dcdt, dsdt, drdt, dipdt, dvdt, dmdt, dhdt, dndt)
 
