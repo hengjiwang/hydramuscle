@@ -1,0 +1,6 @@
+*
+!.gitignore
+!frames
+!sweep_stim_strength_fast
+!sweep_stim_strength_slow
+!wave_dynamics
