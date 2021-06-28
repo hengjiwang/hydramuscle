@@ -18,9 +18,9 @@ class SMC(SlowCell, FastCell):
         self.alpha = 1e9 / (2 * self._F * self._d)
         self._active_v_beta = 1
 
-    def i_in(self, ip):
-        return self.alpha * (self._ica0) + self._ipmca0 + self._v_inr * ip ** 2 / (
-                    self._kr ** 2 + ip ** 2) - self._in_ip0
+    # def i_in(self, ip):
+    #     return self.alpha * (self._ica0) + self._ipmca0 + self._v_inr * ip ** 2 / (
+    #                 self._kr ** 2 + ip ** 2) - self._in_ip0
 
     def _rhs(self, y, t, stims_fast, stims_slow):
         "Right-hand side formulation"
@@ -29,7 +29,7 @@ class SMC(SlowCell, FastCell):
         i_ipr, i_leak, i_serca, i_in, i_pmca, v_r, i_deg = self.calc_slow_terms(c, s, r, ip)
         _, i_ca, i_k, i_bk, dmdt, dhdt, dndt = self.calc_fast_terms(c, v, m, h, n)
 
-        dcdt = i_ipr + i_leak - i_serca + i_in - i_pmca - self.alpha * i_ca
+        dcdt = i_ipr + i_leak - i_serca + i_in - i_pmca - self.alpha * (i_ca - self._ica0)
         dsdt = self.beta * (i_serca - i_ipr - i_leak)
         drdt = v_r
         dipdt = self.i_plcb(self.stim_slow(t, stims_slow, self._active_v_beta)) - i_deg
@@ -45,6 +45,8 @@ class SMC(SlowCell, FastCell):
 
         y0 = [self.c0, self.s0, self.r0, self.ip0, self.v0, self.m0, self.h0, self.n0]
 
+        # print(y0)
+
         if not T:
             T = self.T
         if not dt:
@@ -56,13 +58,14 @@ class SMC(SlowCell, FastCell):
 
 
 if __name__ == '__main__':
-    model = SMC(T=100, dt=0.0002, k_ipr=0.08, s0=60, d=10e-4, k_deg=0.4)
+    # model = SMC(T=100, dt=0.0002, k_ipr=0.08, s0=100, d=10e-4, k_deg=0.4)
+    model = SMC(T=100, dt=0.0002, k_ipr=0.2, s0=100, k_deg=0.05)
 
     ### One Fast Spike ###
     # sol = model.run(stims_fast = [0], stims_slow = [-100])
     # plot.plot_single_spike(model, sol, 0, 100, 0, 0.05, full_cell=True)
 
-    sol = model.run(stims_fast=[0, 5.2, 8.2, 10.6, 12.8, 15, 17.3, 19.4, 21.9, 25.1, 29.5, 34.3], stims_slow=[-100])
+    sol = model.run(stims_fast=[], stims_slow=[0])
     plot.plot_single_spike(model, sol, 0, 200, 0, 0.05, full_cell=True)
 
     ### One Slow Transient ###

@@ -89,7 +89,7 @@ class Layer(BasePop):
         _, i_ca, i_k, i_bk, dmdt, dhdt, dndt = self.cell.calc_fast_terms(c, v, m, h, n)
 
         # Update dynamical variables
-        dcdt = i_ipr + i_leak - i_serca + i_in - i_pmca - self.cell.alpha * i_ca
+        dcdt = i_ipr + i_leak - i_serca + i_in - i_pmca - self.cell.alpha * (i_ca - self.cell._ica0)
         dsdt = self.cell.beta * (i_serca - i_ipr - i_leak)
         drdt = v_r
         dipdt = self.cell.i_plcb(self.cell.v_beta) - i_deg + self._Lip3.dot(ip)
@@ -99,11 +99,13 @@ class Layer(BasePop):
         for indices in self._stims_ip_map:
             dipdt[list(indices)] += (self.cell.i_plcb(self.cell.stim_slow(t, self._stims_ip_map[indices], active_v_beta=self.active_v_beta)) -
                                      self.cell.i_plcb(self.cell.v_beta))
+            # print(dipdt[list(indices)])
 
         for indices in self._stims_v_map:
             dvdt[list(indices)] += (1 / self.cell.c_m * self.stim_strength_fast *
                                   self.cell.stim_fast(t, self._stims_v_map[indices], dur=0.01))
 
+        # print(max(c))
         return (dcdt, dsdt, drdt, dipdt, dvdt, dmdt, dhdt, dndt)
 
 
@@ -132,6 +134,8 @@ class Layer(BasePop):
                  self.cell.m0,
                  self.cell.h0,
                  self.cell.n0]
+
+        # print(inits)
 
         y0 = np.array([x*base_mat for x in inits])
         y0 = np.reshape(y0, len(inits)*self._num2)

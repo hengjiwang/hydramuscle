@@ -6,6 +6,7 @@ import numpy as np
 from hydramuscle.model.base_cell import BaseCell
 import hydramuscle.utils.utils as utils
 import hydramuscle.utils.plot as plot
+from scipy.optimize import fsolve, root
 
 
 class FastCell(BaseCell):
@@ -22,18 +23,18 @@ class FastCell(BaseCell):
 
         self.alpha = 1e9 / (2 * self._F * self._d)
 
-        self.v0 = -50  # (-40 to -60)
-        self.m0 = 0
-        self.h0 = 0
-        self.n0 = 0
-        self._ica0 = 0
-        self._ik0 = 0
+        self.v0 = None  # (-40 to -60)
+        self.m0 = None
+        self.h0 = None
+        self.n0 = None
+        self._ica0 = None
+        self._ik0 = None
 
         # Calcium leak
         self._tau_ex = 0.1  # [s]
 
         # Ca channel parameters
-        self._g_ca = 0.0005  # [S/cm^2]
+        self._g_ca = 0.0005 # 0.0005  # [S/cm^2]
         self._e_ca = 51
 
         # K channel parameters
@@ -41,7 +42,7 @@ class FastCell(BaseCell):
         self._e_k = -75
 
         # Background parameters
-        self._g_bk = 0
+        self._g_bk = 3.631722974909694e-05
         self._e_bk = -55
 
     # Ca channel terms (Diderichsen 2006)
@@ -113,12 +114,34 @@ class FastCell(BaseCell):
 
     def init_fast_cell(self):
         "Reassign some parameters to make the resting state stationary"
-        self.m0 = self._m_inf(self.v0)
-        self.h0 = self._h_inf(self.v0)
-        self.n0 = self._n_inf(self.v0)
-        self._ica0 = self.i_ca(self.v0, self.m0, self.h0)
-        self._ik0 = self.i_k(self.v0, self.n0)
-        self._g_bk = - (self._ica0 + self._ik0) / (self.v0 - self._e_bk)
+
+        # self.v0 = -50
+
+        # self.m0 = self._m_inf(self.v0)
+        # self.h0 = self._h_inf(self.v0)
+        # self.n0 = self._n_inf(self.v0)
+        # self._ica0 = self.i_ca(self.v0, self.m0, self.h0)
+        # self._ik0 = self.i_k(self.v0, self.n0)
+        # # self._g_bk = - (self._ica0 + self._ik0) / (self.v0 - self._e_bk)
+        # self.v0 = - (self._ica0 + self._ik0) / self._g_bk + self._e_bk
+
+        def func(i):
+            m, h, n, ica, ik, v = i[0], i[1], i[2], i[3], i[4], i[5]
+            return [
+                m - self._m_inf(v),
+                h - self._h_inf(v),
+                n - self._n_inf(v),
+                ica - self.i_ca(v, m, h),
+                ik - self.i_k(v, n),
+                v + (ica + ik) / self._g_bk - self._e_bk
+            ]
+
+        res = root(func, [0, 1, 0, 0, 0, -50], tol=1e-20)
+        self.m0, self.h0, self.n0, self._ica0, self._ik0, self.v0 = res.x
+
+        # print(self.m0, self.h0, self.n0, self._ica0, self._ik0, self.v0)
+        # print(self._ica0 - self.i_ca(self.v0, self.m0, self.h0))
+
 
     def run(self, stims_fast):
         "Run the model"
@@ -131,10 +154,10 @@ class FastCell(BaseCell):
 
 
 if __name__ == '__main__':
-    model = FastCell(0.2, 0.0002)
+    model = FastCell(1, 0.0002)
     # sol = model.run([1,3,5,7,9,11,13,15])
-    sol = model.run([0, 0.1])
+    sol = model.run([])
 
     # Plot the results
-    plot.plot_single_spike(model, sol, 0, 100, 0, 0.05)
+    plot.plot_single_spike(model, sol, 0, 100, 0, 0.05, save_fig=False)
 

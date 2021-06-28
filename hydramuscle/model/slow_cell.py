@@ -4,17 +4,18 @@ sys.path.append('../..')
 from scipy.integrate import odeint
 from hydramuscle.model.base_cell import BaseCell
 import hydramuscle.utils.plot as plot
+from scipy.optimize import fsolve, root
 
 class SlowCell(BaseCell):
 
     def __init__(self, T=60, dt=0.001):
         super().__init__(T, dt)
-        self._k_leak = 0.0004
-        self._k_ipr = 0.08
+        self._k_leak = 0.00024529278484290956
+        self._k_ipr = .2# 0.08
         self._ka = 0.2
         self._kip = 0.3
         self._k_serca = 0.3 # 0.5
-        self._v_in = 0.025
+        self._v_in = 0.03998000199980003
         self._v_inr = 0.2
         self._kr = 1
         self._k_pmca = 0.8
@@ -22,12 +23,13 @@ class SlowCell(BaseCell):
         self._ki = 0.2
         self.v_beta = None
         self._kca = 0.3
-        self._k_deg = 0.2 # 0.08
+        self._k_deg = .05 # 0.2 # 0.08
         self.beta = 20
 
-        self.s0 = 60
-        self.r0 = 0.9411764705882353
-        self.ip0 = 0.01
+        self.c0 = None
+        self.s0 = 100 # 60
+        self.r0 = None # 0.9411764705882353
+        self.ip0 = None # 0.01
 
         self._in_ip0 = None
         self._ipmca0 = None
@@ -42,8 +44,9 @@ class SlowCell(BaseCell):
         return self._k_serca * c
 
     def i_leak(self, c, s):
-        k_leak = (self.i_serca(self.c0) - self.i_ipr(self.c0, self.s0, self.ip0, self.r0)) / (self.s0 - self.c0)
-        return k_leak * (s - c)
+        # k_leak = (self.i_serca(self.c0) - self.i_ipr(self.c0, self.s0, self.ip0, self.r0)) / (self.s0 - self.c0)
+        # print(k_leak)
+        return self._k_leak * (s - c)
 
     def i_pmca(self, c):
         "Additional eflux [uM/s]"
@@ -51,7 +54,9 @@ class SlowCell(BaseCell):
 
     def i_in(self, ip):
         "Calcium entry rate [uM/s]"
-        return self.i_pmca(self.c0) + self._v_inr * ip**2 / (self._kr**2 + ip**2) - self._v_inr * self.ip0**2 / (self._kr**2 + self.ip0**2)
+        # print(self.i_pmca(self.c0) - self._v_inr * self.ip0**2 / (self._kr**2 + self.ip0**2))
+        # return self.i_pmca(self.c0) + self._v_inr * ip**2 / (self._kr**2 + ip**2) - self._v_inr * self.ip0**2 / (self._kr**2 + self.ip0**2)
+        return self._v_in + self._v_inr * ip**2 / (self._kr**2 + ip**2)
 
     # IP3R terms
     def v_r(self, c, r):
@@ -110,15 +115,32 @@ class SlowCell(BaseCell):
 
     def init_slow_cell(self):
         "Reassign some parameters to make the resting state stationary"
-        self.v_beta = self.i_deg(self.ip0)
+        # self.v_beta = self.i_deg(self.ip0)
                         # (1 / ((1 + self._kg) *
                         #     (self._kg/(1 + self._kg) +
                         #     self._a0)) *
                         # self._a0))
+
+        # print(self.v_beta)
+
+        def func(i):
+            c, r, ip, v_beta  = i[0], i[1], i[2], i[3]
+            return [
+                self.i_ipr(c, self.s0, ip, r) + self.i_leak(c, self.s0) - self.i_serca(c),
+                self.i_in(ip) - self.i_pmca(c),
+                self.v_r(c, r),
+                v_beta - self.i_deg(ip)
+            ]
+
+        res = root(func, [.05, 1, .01, 0], tol=1e-20)
+        self.c0, self.r0, self.ip0, self.v_beta = res.x
+
         self._in_ip0 = self._v_inr * self.ip0**2 / (self._kr**2 + self.ip0**2)
         self._ipmca0 = self.i_pmca(self.c0)
 
-        # print(self.v_beta)
+        # print(self._ipmca0)
+
+        # print(self.c0, self.r0, self.ip0, self.v_beta)
 
     def run(self, stims_slow=[10]):
         "Run the model"
@@ -130,7 +152,7 @@ class SlowCell(BaseCell):
 
 if __name__ == "__main__":
     model = SlowCell(100)
-    sol = model.run(stims_slow=[10, 20])
+    sol = model.run(stims_slow=[])
 
     # Plot the results
     plot.plot_slow_transient(model, sol, 0, 100)

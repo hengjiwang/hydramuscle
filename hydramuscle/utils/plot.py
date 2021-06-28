@@ -25,7 +25,7 @@ def plot_single_spike(model, sol, tmin1, tmax1, tmin2, tmax2, full_cell=False,
         h = sol[:, 6]
         n = sol[:, 7]
 
-    plt.figure(figsize=(18, 5), tight_layout=True)
+    plt.figure(figsize=(30, 10), tight_layout=True)
 
     ax1 = plt.subplot2grid((1, 3), (0, 1), colspan=1)
     ax1.plot(model.time[index_min:index_max] * 1000, c[index_min:index_max], linewidth=5, color="k")
