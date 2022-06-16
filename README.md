@@ -1,5 +1,5 @@
 Code for paper [_From neuron to muscle to movement: a complete biomechanical model of *Hydra* contractile behaviors_](https://www.biorxiv.org/content/10.1101/2020.12.14.422784v1)
-<!-- 
+
 - **hydramuscle/model/** : biophysical model for simulating calcium dynamics
 - **hydramuscle/notebooks/** : jupyter notebooks for saving data and generating figures
 - **hydramuscle/test/** : codes for running the biophysical model under different conditions
@@ -13,4 +13,4 @@ Code for paper [_From neuron to muscle to movement: a complete biomechanical mod
   - **coords_017767_rlx60_350-600.txt** : simulated length of the model (for Figure 8G, 350s-600s)
   - **dual_channel_cycles.mov** : dual-channel imaging video for Figure 7
   - **lengths_Pre_Bisect_40x_4fps_ex3.csv** : measured length of a real hydra (Figure 8G)
-  - **neural_gcamp_video.avi** : neural GCaMP imaging video for extracting stimulation times (for Figure 8AB) -->
+  - **neural_gcamp_video.avi** : neural GCaMP imaging video for extracting stimulation times (for Figure 8AB)
